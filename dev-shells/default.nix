@@ -10,5 +10,11 @@ inputs.self.library.defaultSystems (
 
       inherit (inputs.self.checks.${system}.pre-commit-check) shellHook;
     };
+
+    pythonShell = pkgs.mkShell {
+      packages = [
+        (pkgs.python3.withPackages (ps: [ ps.svg-py ]))
+      ];
+    };
   }
 )
