@@ -35,6 +35,12 @@ def get_normal(point1, point2):
     return [coordinate / modulus for coordinate in normal]
 
 
+def get_vector_normalized(point1, point2):
+    difference = [y - x for x, y in zip(point1, point2)]
+    modulus = math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
+    return [coordinate / modulus for coordinate in difference]
+
+
 def get_length(point1, point2):
     difference = [x - y for x, y in zip(point1, point2)]
     return math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
@@ -106,10 +112,33 @@ def make_dimension_line(point1, point2, side, text, offset):
     ]
 
 
-def make_dimension_angle(points, flip, large, text, side):
+def make_dimension_angle(points, flip, large, text, side, ratio):
     points = points if not flip else points[4:] + points[2:4] + points[:2]
-    mid_point_1 = [statistics.mean(args) for args in zip(points[:2], points[2:4])]
-    mid_point_2 = [statistics.mean(args) for args in zip(points[2:4], points[4:])]
+    # ratio = ratio if not flip else 1 - ratio
+
+    length1 = get_length(points[:2], points[2:4])
+    length2 = get_length(points[4:], points[2:4])
+    shorter_length = min(length1, length2)
+
+    mid_point_1 = [
+        reference + vector * shorter_length * ratio
+        for reference, vector in zip(
+            points[2:4], get_vector_normalized(points[2:4], points[:2])
+        )
+    ]
+    mid_point_2 = [
+        reference + vector * shorter_length * ratio
+        for reference, vector in zip(
+            points[2:4], get_vector_normalized(points[2:4], points[4:])
+        )
+    ]
+
+    # mid_point_1 = [
+    #     ratio * p2 + (1 - ratio) * p1 for p1, p2 in zip(points[:2], points[2:4])
+    # ]
+    # mid_point_2 = [
+    #     ratio * p1 + (1 - ratio) * p2 for p1, p2 in zip(points[2:4], points[4:])
+    # ]
 
     arc_radius = min(
         get_length(points[:2], points[2:4]) / 2,
@@ -341,6 +370,7 @@ def draw() -> svg.SVG:
         large=False,
         text="60°",
         side="right",
+        ratio=1 / 2,
     )
 
     dim_angle_long_leg_bottom_left = make_dimension_angle(
@@ -349,6 +379,7 @@ def draw() -> svg.SVG:
         large=False,
         text="120°",
         side="left",
+        ratio=1 / 2,
     )
 
     dim_angle_head_left = make_dimension_angle(
@@ -357,14 +388,16 @@ def draw() -> svg.SVG:
         large=False,
         text="120°",
         side="left",
+        ratio=1 / 2,
     )
 
     dim_angle_blah = make_dimension_angle(
         points=lambda_points[12:18],
-        flip=False,
-        large=True,
+        flip=True,
+        large=False,
         text="120°",
         side="left",
+        ratio=1 / 2,
     )
 
     lambdas = [
