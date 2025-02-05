@@ -1,4 +1,5 @@
 import math
+import statistics
 from dataclasses import dataclass
 
 import svg
@@ -91,7 +92,7 @@ def make_dimension_line(point1, point2, side, text, offset):
             d=[svg.M(*point1_text), svg.L(*point2_text)],
         ),
         svg.Text(
-            font_size="3rem",
+            font_size="2rem",
             elements=[
                 svg.TextPath(
                     href=f"#dimension_path_{input_hash}",
@@ -120,7 +121,9 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
         radius * thickness * coordinate for coordinate in (cosd(300), sind(300))
     ]
 
-    gap_vector = [radius * gap * coordinate for coordinate in (cosd(300), sind(300))]
+    gap_vector = [
+        2 * radius * gap * coordinate for coordinate in (cosd(300), sind(300))
+    ]
 
     points = [
         (x - y + z for x, y, z in zip(hex_top_left, vector_60, gap_vector)),
@@ -141,7 +144,7 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
 class Parameters:
     radius = 512
     thickness = 1 / 4
-    gap = 1 / 8
+    gap = 1 / 16
 
 
 def draw() -> svg.SVG:
@@ -151,6 +154,11 @@ def draw() -> svg.SVG:
         radius=parameters.radius,
         thickness=parameters.thickness,
         gap=0,
+    )
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
     )
 
     dimension_arrows = svg.Defs(
@@ -226,13 +234,54 @@ def draw() -> svg.SVG:
         ),
     )
     dim_main_diagonal = make_dimension_line(
-        point2=hexagon_points[2:4],
-        point1=hexagon_points[8:10],
-        side="left",
+        point1=hexagon_points[2:4],
+        point2=hexagon_points[8:10],
+        side="right",
         text="1",
         offset=1 / 2,
     )
-    dim_lambda = make_dimension_line(
+    dim_lambda_long_edge = make_dimension_line(
+        point1=lambda_points[4:6],
+        point2=lambda_points[2:4],
+        side="right",
+        text="9 / 8",
+        offset=7 / 16,
+    )
+    dim_gap_diagonal = make_dimension_line(
+        point1=[
+            statistics.mean(args)
+            for args in zip(lambda_points_gap[4:6], lambda_points_gap[6:8])
+        ],
+        point2=[
+            statistics.mean(args)
+            for args in zip(lambda_points_gap[0:2], lambda_points_gap[2:4])
+        ],
+        side="right",
+        text="15 / 16",
+        offset=15 / 32,
+    )
+    dim_lambda_left_top = make_dimension_line(
+        point1=lambda_points[0:20],
+        point2=lambda_points[16:18],
+        side="left",
+        text="3 / 8",
+        offset=6 / 16,
+    )
+    dim_lambda_short_leg_bottom = make_dimension_line(
+        point1=lambda_points[12:14],
+        point2=lambda_points[10:12],
+        side="left",
+        text="1 / 8",
+        offset=8 / 16,
+    )
+    dim_lambda_legs_inner_left = make_dimension_line(
+        point1=lambda_points[8:10],
+        point2=lambda_points[10:12],
+        side="right",
+        text="1 / 4",
+        offset=4 / 16,
+    )
+    dim_lambda_head = make_dimension_line(
         point2=lambda_points[0:2],
         point1=lambda_points[2:4],
         side="right",
@@ -242,9 +291,9 @@ def draw() -> svg.SVG:
 
     pink_background = svg.Rect(
         x=-900,
-        y=-900,
-        width=1500,
-        height=1700,
+        y=-1100,
+        width=2100,
+        height=1900,
         fill="purple",
         fill_opacity="0.2",
     )
@@ -252,9 +301,9 @@ def draw() -> svg.SVG:
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
             min_x=-900,
-            min_y=-900,
-            width=1500,
-            height=1700,
+            min_y=-1100,
+            width=2100,
+            height=1900,
         ),
         elements=[
             dimension_arrows,
@@ -265,8 +314,13 @@ def draw() -> svg.SVG:
             lambda_no_gap,
             lambda_with_gap,
         ]
+        + dim_gap_diagonal
         + dim_main_diagonal
-        + dim_lambda,
+        + dim_lambda_long_edge
+        + dim_lambda_left_top
+        + dim_lambda_legs_inner_left
+        + dim_lambda_short_leg_bottom
+        + dim_lambda_head,
     )
 
 
