@@ -25,6 +25,86 @@ def sind(angle) -> float:
     return math.sin(math.radians(angle))
 
 
+def get_normal(point1, point2):
+    normal = (
+        -(point2[1] - point1[1]),
+        point2[0] - point1[0],
+    )
+    modulus = math.sqrt(math.pow(normal[0], 2) + math.pow(normal[1], 2))
+    return [coordinate / modulus for coordinate in normal]
+
+
+def get_length(point1, point2):
+    difference = [x - y for x, y in zip(point1, point2)]
+    return math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
+
+
+def elementwise_binop(op, *args):
+    return [op(*argz) for argz in zip(*args)]
+
+
+def make_dimension_line(point1, point2, side, text, offset):
+    normal = get_normal(point1, point2)
+    distance = offset * get_length(point1, point2)
+
+    point1_end = [elem + 1.25 * distance * norm for elem, norm in zip(point1, normal)]
+    point2_end = [elem + 1.25 * distance * norm for elem, norm in zip(point2, normal)]
+    point1_dim = [elem + 1.20 * distance * norm for elem, norm in zip(point1, normal)]
+    point2_dim = [elem + 1.20 * distance * norm for elem, norm in zip(point2, normal)]
+
+    text_offset = 1.19 if side == "left" else 1.21
+    point1_text = [
+        elem + text_offset * distance * norm for elem, norm in zip(point1, normal)
+    ]
+    point2_text = [
+        elem + text_offset * distance * norm for elem, norm in zip(point2, normal)
+    ]
+
+    input_hash = hash((tuple(point1), tuple(point2), side, text, offset))
+
+    return [
+        svg.Line(
+            x1=point1[0],
+            y1=point1[1],
+            x2=point1_end[0],
+            y2=point1_end[1],
+            stroke="red",
+        ),
+        svg.Line(
+            x1=point2[0],
+            y1=point2[1],
+            x2=point2_end[0],
+            y2=point2_end[1],
+            stroke="red",
+        ),
+        svg.Line(
+            x1=point1_dim[0],
+            y1=point1_dim[1],
+            x2=point2_dim[0],
+            y2=point2_dim[1],
+            stroke="red",
+            marker_start="url(#head)",
+            marker_end="url(#head)",
+        ),
+        svg.Path(
+            id=f"dimension_path_{input_hash}",
+            d=[svg.M(*point1_text), svg.L(*point2_text)],
+        ),
+        svg.Text(
+            font_size="3rem",
+            elements=[
+                svg.TextPath(
+                    href=f"#dimension_path_{input_hash}",
+                    text=text,
+                    startOffset="50%",
+                    text_anchor="middle",
+                    side=side,
+                ),
+            ],
+        ),
+    ]
+
+
 def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[Number]:
     hexagon_points = make_hexagon_points(radius)
     hex_top_left = hexagon_points[4:6]
@@ -53,6 +133,7 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
         (x - y for x, y in zip(hex_bottom_left, vector_300)),
         (-x for x in vector_0),
     ]
+    points = [(x, -y) for x, y in points]
     return [coord for point in points for coord in point]
 
 
@@ -65,13 +146,61 @@ class Parameters:
 
 def draw() -> svg.SVG:
     parameters = Parameters()
+    hexagon_points = make_hexagon_points(radius=parameters.radius)
+    lambda_points = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+
+    lambda_no_gap = (
+        svg.Polygon(
+            points=make_lambda_points(
+                radius=parameters.radius,
+                thickness=parameters.thickness,
+                gap=0,
+            ),
+            stroke="green",
+            stroke_width=2,
+            fill="transparent",
+            # transform="scale(1, -1)",
+            stroke_dasharray=4,
+        ),
+    )
+    lambda_with_gap = (
+        svg.Polygon(
+            points=make_lambda_points(
+                radius=parameters.radius,
+                thickness=parameters.thickness,
+                gap=parameters.gap,
+            ),
+            stroke="green",
+            stroke_width=2,
+            fill="transparent",
+            # transform="scale(1, -1)",
+        ),
+    )
+    dim_main_diagonal = make_dimension_line(
+        point2=hexagon_points[2:4],
+        point1=hexagon_points[8:10],
+        side="left",
+        text="1",
+        offset=1 / 2,
+    )
+    dim_lambda = make_dimension_line(
+        point2=lambda_points[0:2],
+        point1=lambda_points[2:4],
+        side="right",
+        text="1 / 4",
+        offset=1 / 2,
+    )
 
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
-            min_x=-600,
-            min_y=-600,
-            width=1200,
-            height=1200,
+            min_x=-900,
+            min_y=-900,
+            width=1500,
+            height=1700,
         ),
         elements=[
             svg.Defs(
@@ -94,10 +223,10 @@ def draw() -> svg.SVG:
             ),
             # delete later
             svg.Rect(
-                x=-600,
-                y=-600,
-                width=1200,
-                height=1200,
+                x=-900,
+                y=-900,
+                width=1500,
+                height=1700,
                 fill="purple",
                 fill_opacity="0.2",
             ),
@@ -124,18 +253,13 @@ def draw() -> svg.SVG:
                 stroke_dasharray=4,
                 fill="transparent",
             ),
-            svg.Polygon(
-                points=make_lambda_points(
-                    radius=parameters.radius,
-                    thickness=parameters.thickness,
-                    gap=parameters.gap,
-                ),
-                stroke="green",
-                stroke_width=2,
-                fill="transparent",
-                transform="scale(1, -1)",
-            ),
-        ],
+        ]
+        + [
+            lambda_no_gap,
+            lambda_with_gap,
+        ]
+        + dim_main_diagonal
+        + dim_lambda,
     )
 
 
