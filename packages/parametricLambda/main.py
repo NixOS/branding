@@ -153,6 +153,51 @@ def draw() -> svg.SVG:
         gap=0,
     )
 
+    dimension_arrows = svg.Defs(
+        elements=[
+            svg.Marker(
+                id="head",
+                orient="auto-start-reverse",
+                markerWidth=20,
+                markerHeight=20,
+                refX=20,
+                refY=5,
+                elements=[
+                    svg.Path(
+                        d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
+                        fill="red",
+                    )
+                ],
+            )
+        ]
+    )
+
+    construction_lines = [
+        svg.Circle(
+            cx=0,
+            cy=0,
+            r=parameters.radius,
+            stroke="blue",
+            stroke_width=1,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+        svg.Polygon(
+            points=make_hexagon_points(radius=parameters.radius),
+            stroke="blue",
+            stroke_width=1,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+        svg.Polyline(
+            points=make_diagonal_line(radius=parameters.radius),
+            stroke="blue",
+            stroke_width=1,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+    ]
+
     lambda_no_gap = (
         svg.Polygon(
             points=make_lambda_points(
@@ -195,6 +240,15 @@ def draw() -> svg.SVG:
         offset=1 / 2,
     )
 
+    pink_background = svg.Rect(
+        x=-900,
+        y=-900,
+        width=1500,
+        height=1700,
+        fill="purple",
+        fill_opacity="0.2",
+    )
+
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
             min_x=-900,
@@ -203,57 +257,10 @@ def draw() -> svg.SVG:
             height=1700,
         ),
         elements=[
-            svg.Defs(
-                elements=[
-                    svg.Marker(
-                        id="head",
-                        orient="auto-start-reverse",
-                        markerWidth=20,
-                        markerHeight=20,
-                        refX=20,
-                        refY=5,
-                        elements=[
-                            svg.Path(
-                                d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
-                                fill="red",
-                            )
-                        ],
-                    )
-                ]
-            ),
-            # delete later
-            svg.Rect(
-                x=-900,
-                y=-900,
-                width=1500,
-                height=1700,
-                fill="purple",
-                fill_opacity="0.2",
-            ),
-            svg.Circle(
-                cx=0,
-                cy=0,
-                r=parameters.radius,
-                stroke="blue",
-                stroke_width=1,
-                stroke_dasharray=4,
-                fill="transparent",
-            ),
-            svg.Polygon(
-                points=make_hexagon_points(radius=parameters.radius),
-                stroke="blue",
-                stroke_width=1,
-                stroke_dasharray=4,
-                fill="transparent",
-            ),
-            svg.Polyline(
-                points=make_diagonal_line(radius=parameters.radius),
-                stroke="blue",
-                stroke_width=1,
-                stroke_dasharray=4,
-                fill="transparent",
-            ),
+            dimension_arrows,
+            pink_background,  # delete later
         ]
+        + construction_lines
         + [
             lambda_no_gap,
             lambda_with_gap,
