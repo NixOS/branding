@@ -106,6 +106,52 @@ def make_dimension_line(point1, point2, side, text, offset):
     ]
 
 
+def make_dimension_angle(points, flip, large, text, side):
+    points = points if not flip else points[4:] + points[2:4] + points[:2]
+    mid_point_1 = [statistics.mean(args) for args in zip(points[:2], points[2:4])]
+    mid_point_2 = [statistics.mean(args) for args in zip(points[2:4], points[4:])]
+
+    arc_radius = min(
+        get_length(points[:2], points[2:4]) / 2,
+        get_length(points[2:4], points[4:]) / 2,
+    )
+
+    input_hash = hash((tuple(points), flip, large, text, side))
+
+    return [
+        svg.Path(
+            id=f"dimension_angle_{input_hash}",
+            d=[
+                svg.M(*mid_point_1),
+                svg.Arc(
+                    arc_radius,
+                    arc_radius,
+                    0,
+                    large,
+                    True,
+                    *mid_point_2,
+                ),
+            ],
+            stroke="red",
+            fill="transparent",
+            marker_start="url(#head)",
+            marker_end="url(#head)",
+        ),
+        svg.Text(
+            font_size="2rem",
+            elements=[
+                svg.TextPath(
+                    href=f"#dimension_angle_{input_hash}",
+                    text=text,
+                    startOffset="50%",
+                    text_anchor="middle",
+                    side=side,
+                ),
+            ],
+        ),
+    ]
+
+
 def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[Number]:
     hexagon_points = make_hexagon_points(radius)
     hex_top_left = hexagon_points[4:6]
@@ -289,6 +335,60 @@ def draw() -> svg.SVG:
         offset=1 / 2,
     )
 
+    dim_angle_inner_legs = make_dimension_angle(
+        points=lambda_points[6:12],
+        flip=False,
+        large=False,
+        text="60°",
+        side="right",
+    )
+
+    dim_angle_long_leg_bottom_left = make_dimension_angle(
+        points=lambda_points[4:10],
+        flip=True,
+        large=False,
+        text="120°",
+        side="left",
+    )
+
+    dim_angle_head_left = make_dimension_angle(
+        points=lambda_points_gap[16:] + lambda_points_gap[:4],
+        flip=True,
+        large=False,
+        text="120°",
+        side="left",
+    )
+
+    dim_angle_blah = make_dimension_angle(
+        points=lambda_points[12:18],
+        flip=False,
+        large=True,
+        text="120°",
+        side="left",
+    )
+
+    lambdas = [
+        lambda_no_gap,
+        lambda_with_gap,
+    ]
+
+    dim_lengths = [
+        dim_gap_diagonal,
+        dim_main_diagonal,
+        dim_lambda_long_edge,
+        dim_lambda_left_top,
+        dim_lambda_legs_inner_left,
+        dim_lambda_short_leg_bottom,
+        dim_lambda_head,
+    ]
+
+    dim_angles = [
+        dim_angle_inner_legs,
+        dim_angle_long_leg_bottom_left,
+        dim_angle_head_left,
+        dim_angle_blah,
+    ]
+
     pink_background = svg.Rect(
         x=-900,
         y=-1100,
@@ -310,17 +410,9 @@ def draw() -> svg.SVG:
             pink_background,  # delete later
         ]
         + construction_lines
-        + [
-            lambda_no_gap,
-            lambda_with_gap,
-        ]
-        + dim_gap_diagonal
-        + dim_main_diagonal
-        + dim_lambda_long_edge
-        + dim_lambda_left_top
-        + dim_lambda_legs_inner_left
-        + dim_lambda_short_leg_bottom
-        + dim_lambda_head,
+        + lambdas
+        + dim_lengths
+        + dim_angles,
     )
 
 
