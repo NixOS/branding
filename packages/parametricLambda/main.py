@@ -139,13 +139,6 @@ def make_dimension_angle(points, flip, large, text, side, ratio):
         )
     ]
 
-    # mid_point_1 = [
-    #     ratio * p2 + (1 - ratio) * p1 for p1, p2 in zip(points[:2], points[2:4])
-    # ]
-    # mid_point_2 = [
-    #     ratio * p1 + (1 - ratio) * p2 for p1, p2 in zip(points[2:4], points[4:])
-    # ]
-
     arc_radius = min(
         get_length(points[:2], points[2:4]) / 2,
         get_length(points[2:4], points[4:]) / 2,
