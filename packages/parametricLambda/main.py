@@ -118,8 +118,8 @@ def make_dimension_line(point1, point2, side, offset, parameters, text=None):
             x2=point2_dim[0],
             y2=point2_dim[1],
             stroke="red",
-            marker_start="url(#head)",
-            marker_end="url(#head)",
+            marker_start="url(#dimension-arrow-head)",
+            marker_end="url(#dimension-arrow-head)",
         ),
         svg.Path(
             id=f"dimension_path_{input_hash}",
@@ -183,8 +183,8 @@ def make_dimension_angle(points, flip, large, side, ratio, text=None):
             ],
             stroke="red",
             fill="transparent",
-            marker_start="url(#head)",
-            marker_end="url(#head)",
+            marker_start="url(#dimension-arrow-head)",
+            marker_end="url(#dimension-arrow-head)",
         ),
         svg.Text(
             font_size="2rem",
@@ -259,7 +259,7 @@ def draw() -> svg.SVG:
     dimension_arrows = svg.Defs(
         elements=[
             svg.Marker(
-                id="head",
+                id="dimension-arrow-head",
                 orient="auto-start-reverse",
                 markerWidth=20,
                 markerHeight=20,
