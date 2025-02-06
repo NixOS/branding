@@ -1,6 +1,7 @@
 import fractions
 import math
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Self
 
@@ -98,27 +99,40 @@ class Point:
         return normal.normalize()
 
 
-@dataclass
-class Vector:
-    value: tuple[Number, Number]
+class Vector(Sequence):
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    def __getitem__(self, index):
+        return self.value[index]
+
+    def __len__(self):
+        return len(self.value)
+
+    def __repr__(self):
+        return f"Vector{self.value}"
+
+    def __str__(self):
+        return f"{self.value}"
 
     def __add__(self, other: Self) -> Self:
-        return Vector((s + o for s, o in zip(self.value, other.value)))
+        return Vector((s + o for s, o in zip(self, other)))
 
     def __neg__(self):
-        return Vector(tuple(-elem for elem in self.value))
+        return Vector(tuple(-elem for elem in self))
 
     def __sub__(self, other: Self) -> Self:
         return self + (-other)
 
     def __mul__(self, other: Self) -> Self:
-        return Vector(tuple(s * o for s, o in zip(self.value, other.value)))
+        return Vector(tuple(s * o for s, o in zip(self, other)))
 
     def __rmul__(self, other: Number) -> Self:
-        return Vector(tuple(other * elem for elem in self.value))
+        return Vector(tuple(other * elem for elem in self))
 
     def __truediv__(self, other: Number) -> Self:
-        return Vector(tuple(elem / other for elem in self.value))
+        return Vector(tuple(elem / other for elem in self))
 
     def _modulus_squared(self) -> Number:
         return self.dot(self)
@@ -127,13 +141,13 @@ class Vector:
         return math.sqrt(self._modulus_squared())
 
     def dot(self, other: Self) -> float:
-        return sum((self * other).value)
+        return sum((self * other))
 
     def normalize(self) -> Self:
         return self / self.length()
 
     def normal(self) -> Self:
-        return Vector((self.value[1], -self.value[0])).normalize()
+        return Vector((self[1], -self[0])).normalize()
 
 
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
@@ -569,6 +583,7 @@ if __name__ == "__main__":
     print(v1.normal())
     print(3 * v1)
     print(str(v1))
+    print(repr(v1))
 
     # print(make_hexagon_points(500))
     # print(make_lambda_points(r=500, thickness=0.5, gap=0))
