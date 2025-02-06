@@ -36,7 +36,7 @@ def get_normal(point1, point2):
     return [coordinate / modulus for coordinate in normal]
 
 
-def get_vector_normalized(point1, point2):
+def get_normalized(point1, point2):
     difference = [y - x for x, y in zip(point1, point2)]
     modulus = math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
     return [coordinate / modulus for coordinate in difference]
@@ -45,6 +45,28 @@ def get_vector_normalized(point1, point2):
 def get_length(point1, point2):
     difference = [x - y for x, y in zip(point1, point2)]
     return math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
+
+
+def get_vector_length(vector):
+    return math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2))
+
+
+def get_vector_normalized(vector):
+    modulus = math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2))
+    return [coordinate / modulus for coordinate in vector]
+
+
+def get_dot_product(vector1, vector2):
+    return sum([x * y for x, y in zip(vector1, vector2)])
+
+
+def get_angle(vector1, vector2):
+    return math.degrees(
+        math.acos(
+            get_dot_product(vector1, vector2)
+            / (get_vector_length(vector1) * get_vector_length(vector2))
+        )
+    )
 
 
 def elementwise_binop(op, *args):
@@ -118,33 +140,32 @@ def make_dimension_line(point1, point2, side, offset, parameters, text=None):
     ]
 
 
-def make_dimension_angle(points, flip, large, text, side, ratio):
+def make_dimension_angle(points, flip, large, side, ratio, text=None):
     points = points if not flip else points[4:] + points[2:4] + points[:2]
-    # ratio = ratio if not flip else 1 - ratio
 
-    length1 = get_length(points[:2], points[2:4])
-    length2 = get_length(points[4:], points[2:4])
+    reference = points[2:4]
+    vector1 = [point - reference for point, reference in zip(points[:2], reference)]
+    vector2 = [point - reference for point, reference in zip(points[4:], reference)]
+
+    length1 = get_vector_length(vector1)
+    length2 = get_vector_length(vector2)
     shorter_length = min(length1, length2)
 
     mid_point_1 = [
         reference + vector * shorter_length * ratio
-        for reference, vector in zip(
-            points[2:4], get_vector_normalized(points[2:4], points[:2])
-        )
+        for reference, vector in zip(reference, get_vector_normalized(vector1))
     ]
     mid_point_2 = [
         reference + vector * shorter_length * ratio
-        for reference, vector in zip(
-            points[2:4], get_vector_normalized(points[2:4], points[4:])
-        )
+        for reference, vector in zip(reference, get_vector_normalized(vector2))
     ]
 
-    arc_radius = min(
-        get_length(points[:2], points[2:4]) / 2,
-        get_length(points[2:4], points[4:]) / 2,
-    )
+    arc_radius = min(length1 / 2, length2 / 2)
 
-    input_hash = hash((tuple(points), flip, large, text, side))
+    input_hash = hash((tuple(points), flip, large, text, side, ratio))
+
+    if text is None:
+        text = f"{round(get_angle(vector1, vector2))}°"
 
     return [
         svg.Path(
@@ -367,7 +388,6 @@ def draw() -> svg.SVG:
         points=lambda_points[6:12],
         flip=False,
         large=False,
-        text="60°",
         side="right",
         ratio=1 / 2,
     )
@@ -376,7 +396,6 @@ def draw() -> svg.SVG:
         points=lambda_points[4:10],
         flip=True,
         large=False,
-        text="120°",
         side="left",
         ratio=1 / 2,
     )
@@ -385,7 +404,6 @@ def draw() -> svg.SVG:
         points=lambda_points_gap[16:] + lambda_points_gap[:4],
         flip=True,
         large=False,
-        text="120°",
         side="left",
         ratio=1 / 2,
     )
@@ -394,7 +412,6 @@ def draw() -> svg.SVG:
         points=lambda_points[12:18],
         flip=True,
         large=False,
-        text="120°",
         side="left",
         ratio=1 / 2,
     )
