@@ -334,7 +334,7 @@ def make_dimension_arrow_defs():
 
 
 def make_lambda_construction_lines(parameters):
-    [
+    return [
         svg.Line(
             x1=-10 * parameters.radius,
             x2=10 * parameters.radius,
@@ -454,7 +454,7 @@ def draw() -> svg.SVG:
         parameters=parameters,
     )
     dim_lambda_left_top = make_dimension_line(
-        point1=lambda_points[0:20],
+        point1=lambda_points[0:2],
         point2=lambda_points[16:18],
         side="left",
         offset=6 / 16,
