@@ -80,8 +80,13 @@ class Point:
     x: Number
     y: Number
 
-    def __add__(self, other: Self) -> Self:
-        return Point(x=self.x + other.x, y=self.y + other.y)
+    def __add__(self, other: Self | "Vector") -> Self:
+        if isinstance(other, Point):
+            return Point(x=self.x + other.x, y=self.y + other.y)
+        elif isinstance(other, Vector):
+            return Point(x=self.x + other[0], y=self.y + other[1])
+        else:
+            raise Exception(f"Not sure how to add {type(other)} to Point.")
 
     def __sub__(self, other: Self) -> Self:
         return Vector((self.x - other.x, self.y - other.y))
