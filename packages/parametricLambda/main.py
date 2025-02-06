@@ -235,28 +235,8 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
     return [coord for point in points for coord in point]
 
 
-@dataclass
-class Parameters:
-    radius = 512
-    thickness = 1 / 4
-    gap = 1 / 16
-
-
-def draw() -> svg.SVG:
-    parameters = Parameters()
-    hexagon_points = make_hexagon_points(radius=parameters.radius)
-    lambda_points = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=0,
-    )
-    lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
-    )
-
-    dimension_arrows = svg.Defs(
+def make_dimension_arrow_defs():
+    return svg.Defs(
         elements=[
             svg.Marker(
                 id="dimension-arrow-head",
@@ -275,7 +255,23 @@ def draw() -> svg.SVG:
         ]
     )
 
-    construction_lines = [
+
+def make_lambda_construction_lines(parameters):
+    [
+        svg.Line(
+            x1=-10 * parameters.radius,
+            x2=10 * parameters.radius,
+            y1=0,
+            y2=0,
+            stroke="black",
+        ),
+        svg.Line(
+            x1=0,
+            x2=0,
+            y1=-10 * parameters.radius,
+            y2=10 * parameters.radius,
+            stroke="black",
+        ),
         svg.Circle(
             cx=0,
             cy=0,
@@ -300,6 +296,31 @@ def draw() -> svg.SVG:
             fill="transparent",
         ),
     ]
+
+
+@dataclass
+class Parameters:
+    radius = 512
+    thickness = 1 / 4
+    gap = 1 / 16
+
+
+def draw() -> svg.SVG:
+    parameters = Parameters()
+    hexagon_points = make_hexagon_points(radius=parameters.radius)
+    lambda_points = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+
+    dimension_arrows = make_dimension_arrow_defs()
+    construction_lines = make_lambda_construction_lines(parameters=parameters)
 
     lambda_no_gap = (
         svg.Polygon(
