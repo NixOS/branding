@@ -2,6 +2,7 @@ import fractions
 import math
 import statistics
 from dataclasses import dataclass
+from typing import Self
 
 import svg
 from svg._types import Number
@@ -71,6 +72,68 @@ def get_angle(vector1, vector2):
 
 def elementwise_binop(op, *args):
     return [op(*argz) for argz in zip(*args)]
+
+
+@dataclass
+class Point:
+    x: Number
+    y: Number
+
+    def __add__(self, other: Self) -> Self:
+        return Point(x=self.x + other.x, y=self.y + other.y)
+
+    def __sub__(self, other: Self) -> Self:
+        return Vector((self.x - other.x, self.y - other.y))
+
+    def distance(self, other: Self) -> float:
+        return (self - other).length()
+
+    def normal(self, reference: Self):
+        normal = Vector(
+            (
+                +(self.y - reference.y),
+                -(self.x - reference.x),
+            )
+        )
+        return normal.normalize()
+
+
+@dataclass
+class Vector:
+    value: tuple[Number, Number]
+
+    def __add__(self, other: Self) -> Self:
+        return Vector((s + o for s, o in zip(self.value, other.value)))
+
+    def __neg__(self):
+        return Vector(tuple(-elem for elem in self.value))
+
+    def __sub__(self, other: Self) -> Self:
+        return self + (-other)
+
+    def __mul__(self, other: Self) -> Self:
+        return Vector(tuple(s * o for s, o in zip(self.value, other.value)))
+
+    def __rmul__(self, other: Number) -> Self:
+        return Vector(tuple(other * elem for elem in self.value))
+
+    def __truediv__(self, other: Number) -> Self:
+        return Vector(tuple(elem / other for elem in self.value))
+
+    def _modulus_squared(self) -> Number:
+        return self.dot(self)
+
+    def length(self) -> float:
+        return math.sqrt(self._modulus_squared())
+
+    def dot(self, other: Self) -> float:
+        return sum((self * other).value)
+
+    def normalize(self) -> Self:
+        return self / self.length()
+
+    def normal(self) -> Self:
+        return Vector((self.value[1], -self.value[0])).normalize()
 
 
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
@@ -487,6 +550,25 @@ def draw() -> svg.SVG:
 
 
 if __name__ == "__main__":
-    print(draw())
+    # print(draw())
+
+    p1 = Point(1, 2)
+    p2 = Point(3, 4)
+
+    print((p2 + p1).distance(p2))
+    print(p2 - p1)
+    print(p1 - p2)
+
+    v1 = -(p1 - p2)
+    print(v1)
+    print(v1.length())
+    print(v1.dot(v1))
+    print(v1.normalize())
+    print(Vector((1, 2)))
+    print(p1.normal(p2))
+    print(v1.normal())
+    print(3 * v1)
+    print(str(v1))
+
     # print(make_hexagon_points(500))
     # print(make_lambda_points(r=500, thickness=0.5, gap=0))
