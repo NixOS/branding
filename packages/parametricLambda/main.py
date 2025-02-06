@@ -1,3 +1,4 @@
+import fractions
 import math
 import statistics
 from dataclasses import dataclass
@@ -50,7 +51,7 @@ def elementwise_binop(op, *args):
     return [op(*argz) for argz in zip(*args)]
 
 
-def make_dimension_line(point1, point2, side, text, offset):
+def make_dimension_line(point1, point2, side, offset, parameters, text=None):
     normal = get_normal(point1, point2)
     distance = offset * get_length(point1, point2)
 
@@ -68,6 +69,11 @@ def make_dimension_line(point1, point2, side, text, offset):
     ]
 
     input_hash = hash((tuple(point1), tuple(point2), side, text, offset))
+
+    if text is None:
+        text = fractions.Fraction(
+            round(get_length(point1, point2)), 2 * parameters.radius
+        )
 
     return [
         svg.Line(
@@ -312,15 +318,15 @@ def draw() -> svg.SVG:
         point1=hexagon_points[2:4],
         point2=hexagon_points[8:10],
         side="right",
-        text="1",
         offset=1 / 2,
+        parameters=parameters,
     )
     dim_lambda_long_edge = make_dimension_line(
         point1=lambda_points[4:6],
         point2=lambda_points[2:4],
         side="right",
-        text="9/8",
         offset=7 / 16,
+        parameters=parameters,
     )
     dim_gap_diagonal = make_dimension_line(
         point1=[
@@ -332,36 +338,36 @@ def draw() -> svg.SVG:
             for args in zip(lambda_points_gap[0:2], lambda_points_gap[2:4])
         ],
         side="right",
-        text="15/16",
         offset=15 / 32,
+        parameters=parameters,
     )
     dim_lambda_left_top = make_dimension_line(
         point1=lambda_points[0:20],
         point2=lambda_points[16:18],
         side="left",
-        text="3/8",
         offset=6 / 16,
+        parameters=parameters,
     )
     dim_lambda_short_leg_bottom = make_dimension_line(
         point1=lambda_points[12:14],
         point2=lambda_points[10:12],
         side="left",
-        text="1/8",
         offset=8 / 16,
+        parameters=parameters,
     )
     dim_lambda_legs_inner_left = make_dimension_line(
         point1=lambda_points[8:10],
         point2=lambda_points[10:12],
         side="right",
-        text="1/4",
         offset=4 / 16,
+        parameters=parameters,
     )
     dim_lambda_head = make_dimension_line(
         point2=lambda_points[0:2],
         point1=lambda_points[2:4],
         side="right",
-        text="1/4",
         offset=1 / 2,
+        parameters=parameters,
     )
 
     dim_angle_inner_legs = make_dimension_angle(
