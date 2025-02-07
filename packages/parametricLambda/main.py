@@ -223,29 +223,33 @@ def make_dimension_line(point1, point2, side, offset, parameters, text=None):
     ]
 
 
-def make_dimension_angle(points, flip, large, side, ratio, text=None):
-    points = points if not flip else points[4:] + points[2:4] + points[:2]
+def make_dimension_angle(
+    point1,
+    point2,
+    reference,
+    flip,
+    large,
+    side,
+    ratio,
+    text=None,
+):
+    point1 = Point(*point1)
+    point2 = Point(*point2)
+    reference = Point(*reference)
 
-    reference = points[2:4]
-    vector1 = [point - reference for point, reference in zip(points[:2], reference)]
-    vector2 = [point - reference for point, reference in zip(points[4:], reference)]
+    if flip:
+        point1, point2 = point2, point1
 
-    length1 = get_vector_length(vector1)
-    length2 = get_vector_length(vector2)
-    shorter_length = min(length1, length2)
+    vector1 = point1 - reference
+    vector2 = point2 - reference
 
-    mid_point_1 = [
-        reference + vector * shorter_length * ratio
-        for reference, vector in zip(reference, get_vector_normalized(vector1))
-    ]
-    mid_point_2 = [
-        reference + vector * shorter_length * ratio
-        for reference, vector in zip(reference, get_vector_normalized(vector2))
-    ]
+    shorter_length = min(vector1.length(), vector2.length())
+    arc_radius = shorter_length / 2
 
-    arc_radius = min(length1 / 2, length2 / 2)
+    mid_point_1 = reference + shorter_length * ratio * vector1.normalize()
+    mid_point_2 = reference + shorter_length * ratio * vector2.normalize()
 
-    input_hash = hash((tuple(points), flip, large, text, side, ratio))
+    input_hash = hash((point1, point2, reference, flip, large, text, side, ratio))
 
     if text is None:
         text = f"{round(get_angle(vector1, vector2))}°"
@@ -254,14 +258,18 @@ def make_dimension_angle(points, flip, large, side, ratio, text=None):
         svg.Path(
             id=f"dimension_angle_{input_hash}",
             d=[
-                svg.M(*mid_point_1),
+                svg.M(
+                    mid_point_1.x,
+                    mid_point_1.y,
+                ),
                 svg.Arc(
                     arc_radius,
                     arc_radius,
                     0,
                     large,
                     True,
-                    *mid_point_2,
+                    mid_point_2.x,
+                    mid_point_2.y,
                 ),
             ],
             stroke="red",
@@ -489,7 +497,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_inner_legs = make_dimension_angle(
-        points=lambda_points[6:12],
+        point1=lambda_points[6:8],
+        point2=lambda_points[10:12],
+        reference=lambda_points[8:10],
         flip=False,
         large=False,
         side="right",
@@ -497,7 +507,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_long_leg_bottom_left = make_dimension_angle(
-        points=lambda_points[4:10],
+        point1=lambda_points[4:6],
+        point2=lambda_points[8:10],
+        reference=lambda_points[6:8],
         flip=True,
         large=False,
         side="left",
@@ -505,7 +517,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_head_left = make_dimension_angle(
-        points=lambda_points_gap[16:] + lambda_points_gap[:4],
+        point1=lambda_points[16:18],
+        point2=lambda_points[2:4],
+        reference=lambda_points[0:2],
         flip=True,
         large=False,
         side="left",
@@ -513,7 +527,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_blah = make_dimension_angle(
-        points=lambda_points[12:18],
+        point1=lambda_points[12:14],
+        point2=lambda_points[16:18],
+        reference=lambda_points[14:16],
         flip=True,
         large=False,
         side="left",
