@@ -337,24 +337,26 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
 
 
 def make_dimension_arrow_defs():
-    return svg.Defs(
-        elements=[
-            svg.Marker(
-                id="dimension-arrow-head",
-                orient="auto-start-reverse",
-                markerWidth=20,
-                markerHeight=20,
-                refX=20,
-                refY=5,
-                elements=[
-                    svg.Path(
-                        d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
-                        fill="red",
-                    )
-                ],
-            )
-        ]
-    )
+    return [
+        svg.Defs(
+            elements=[
+                svg.Marker(
+                    id="dimension-arrow-head",
+                    orient="auto-start-reverse",
+                    markerWidth=20,
+                    markerHeight=20,
+                    refX=20,
+                    refY=5,
+                    elements=[
+                        svg.Path(
+                            d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
+                            fill="red",
+                        )
+                    ],
+                )
+            ]
+        )
+    ]
 
 
 def make_lambda_construction_lines(parameters):
@@ -570,14 +572,16 @@ def draw(parameters) -> svg.SVG:
         dim_angle_blah,
     ]
 
-    pink_background = svg.Rect(
-        x=parameters.image_parameters.min_x,
-        y=parameters.image_parameters.min_y,
-        width=parameters.image_parameters.width,
-        height=parameters.image_parameters.height,
-        fill="purple",
-        fill_opacity="0.2",
-    )
+    pink_background = [
+        svg.Rect(
+            x=parameters.image_parameters.min_x,
+            y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+            fill="purple",
+            fill_opacity="0.2",
+        )
+    ]
 
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
@@ -586,14 +590,14 @@ def draw(parameters) -> svg.SVG:
             width=parameters.image_parameters.width,
             height=parameters.image_parameters.height,
         ),
-        elements=[
-            dimension_arrows,
-            pink_background,  # delete later
-        ]
-        + construction_lines
-        + lambdas
-        + dim_lengths
-        + dim_angles,
+        elements=(
+            dimension_arrows
+            + construction_lines
+            + lambdas
+            + dim_lengths
+            + dim_angles
+            + pink_background  # delete later
+        ),
     )
 
 
