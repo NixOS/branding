@@ -1,6 +1,5 @@
 import fractions
 import math
-import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Self
@@ -11,14 +10,22 @@ from svg._types import Number
 
 def make_hexagon_points(radius: Number) -> list[Number]:
     angles = [math.radians(angle) for angle in range(0, 360, 60)]
-    points = [(radius * math.cos(angle), radius * math.sin(angle)) for angle in angles]
-    return [coord for point in points for coord in point]
+    return Points(
+        [
+            Point(
+                (
+                    radius * math.cos(angle),
+                    radius * math.sin(angle),
+                )
+            )
+            for angle in angles
+        ]
+    )
 
 
 def make_diagonal_line(radius: Number) -> list[Number]:
     hexagon_points = make_hexagon_points(radius)
-    points = [hexagon_points[2:4], hexagon_points[8:10]]
-    return [coord for point in points for coord in point]
+    return Points([hexagon_points[1], hexagon_points[4]])
 
 
 def cosd(angle) -> float:
@@ -29,21 +36,51 @@ def sind(angle) -> float:
     return math.sin(math.radians(angle))
 
 
-@dataclass(frozen=True)
-class Point:
-    x: Number
-    y: Number
+class Point(Sequence):
+    def __init__(self, value):
+        self.value = value
+        super().__init__()
+
+    def __getitem__(self, index):
+        return self.value[index]
+
+    def __len__(self):
+        return len(self.value)
+
+    def __str__(self):
+        return f"{self.x, self.y}"
+
+    def __repr__(self):
+        return f"Point{self.value}"
 
     def __add__(self, other: Self | "Vector") -> Self:
         if isinstance(other, Point):
-            return Point(x=self.x + other.x, y=self.y + other.y)
+            return Point((self.x + other.x, self.y + other.y))
         elif isinstance(other, Vector):
-            return Point(x=self.x + other[0], y=self.y + other[1])
+            return Point((self.x + other[0], self.y + other[1]))
         else:
             raise Exception(f"Not sure how to add {type(other)} to Point.")
 
-    def __sub__(self, other: Self) -> Self:
-        return Vector((self.x - other.x, self.y - other.y))
+    def __sub__(self, other: Self | "Vector") -> Self:
+        if isinstance(other, Point):
+            return Vector((self.x - other.x, self.y - other.y))
+        elif isinstance(other, Vector):
+            return Point((self.x - other[0], self.y - other[1]))
+        else:
+            raise Exception(f"Not sure how to add {type(other)} to Point.")
+
+    def __truediv__(self, other: Number) -> Self:
+        return Point(tuple(elem / other for elem in self))
+
+    @property
+    def x(self):
+        """The x property."""
+        return self.value[0]
+
+    @property
+    def y(self):
+        """The y property."""
+        return self.value[1]
 
     def distance(self, other: Self) -> float:
         return (self - other).length()
@@ -56,6 +93,28 @@ class Point:
             )
         )
         return normal.normalize()
+
+
+class Points(Sequence):
+    def __init__(self, value: list[Point]):
+        self.value = value
+        super().__init__()
+
+    def __getitem__(self, index):
+        return self.value[index]
+
+    def __len__(self):
+        return len(self.value)
+
+    def __repr__(self):
+        return f"Points{self.value}"
+
+    def __str__(self):
+        return "[" + ", ".join(str(elem) for elem in self.value) + "]"
+
+    def to_list(self):
+        nested = [(elem.x, elem.y) for elem in self]
+        return [elem for point in nested for elem in point]
 
 
 class Vector(Sequence):
@@ -111,11 +170,11 @@ class Vector(Sequence):
     def angle_from(self, other: Self) -> float:
         return math.acos(self.dot(other) / (self.length() * other.length()))
 
+    def to_point(self) -> Point:
+        return Point(self.value)
+
 
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
-    point1 = Point(*point1)
-    point2 = Point(*point2)
-
     measured_line = point1 - point2
     normal = measured_line.normal()
     distance = offset * measured_line.length()
@@ -190,10 +249,6 @@ def make_dimension_angle(
     ratio,
     text=None,
 ):
-    point1 = Point(*point1)
-    point2 = Point(*point2)
-    reference = Point(*reference)
-
     if flip:
         point1, point2 = point2, point1
 
@@ -251,36 +306,31 @@ def make_dimension_angle(
 
 def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[Number]:
     hexagon_points = make_hexagon_points(radius)
-    hex_top_left = hexagon_points[4:6]
-    hex_bottom_left = hexagon_points[8:10]
-    hex_bottom_right = hexagon_points[10:12]
+    hex_top_left = hexagon_points[2]
+    hex_bottom_left = hexagon_points[4]
+    hex_bottom_right = hexagon_points[5]
 
-    vector_0 = [radius * thickness * coordinate for coordinate in (cosd(0), sind(0))]
-    vector_60 = [radius * thickness * coordinate for coordinate in (cosd(60), sind(60))]
-    vector_270 = [
-        radius * thickness * coordinate for coordinate in (cosd(270), sind(270))
-    ]
-    vector_300 = [
-        radius * thickness * coordinate for coordinate in (cosd(300), sind(300))
-    ]
-
-    gap_vector = [
-        2 * radius * gap * coordinate for coordinate in (cosd(300), sind(300))
-    ]
+    vector_0 = radius * thickness * Vector((cosd(0), sind(0)))
+    vector_60 = radius * thickness * Vector((cosd(60), sind(60)))
+    vector_270 = radius * thickness * Vector((cosd(270), sind(270)))
+    vector_300 = radius * thickness * Vector((cosd(300), sind(300)))
+    gap_vector = 2 * radius * gap * Vector((cosd(300), sind(300)))
 
     points = [
-        (x - y + z for x, y, z in zip(hex_top_left, vector_60, gap_vector)),
-        (x + y + z for x, y, z in zip(hex_top_left, vector_60, gap_vector)),
-        (x + y for x, y in zip(hex_bottom_right, vector_0)),
-        (x - y for x, y in zip(hex_bottom_right, vector_0)),
-        (x * math.sqrt(3) for x in vector_270),
-        (x + y for x, y in zip(hex_bottom_left, vector_0)),
+        (hex_top_left - vector_60 + gap_vector),
+        (hex_top_left + vector_60 + gap_vector),
+        (hex_bottom_right + vector_0),
+        (hex_bottom_right - vector_0),
+        (math.sqrt(3) * vector_270).to_point(),
+        (hex_bottom_left + vector_0),
         hex_bottom_left,
-        (x - y for x, y in zip(hex_bottom_left, vector_300)),
-        (-x for x in vector_0),
+        (hex_bottom_left - vector_300),
+        (-vector_0).to_point(),
     ]
-    points = [(x, -y) for x, y in points]
-    return [coord for point in points for coord in point]
+
+    # Need to negate the y-axis so the lambda is not upside down
+    points = Points([Point((point.x, -point.y)) for point in points])
+    return points
 
 
 def make_dimension_arrow_defs():
@@ -330,14 +380,14 @@ def make_lambda_construction_lines(parameters):
             fill="transparent",
         ),
         svg.Polygon(
-            points=make_hexagon_points(radius=parameters.radius),
+            points=make_hexagon_points(radius=parameters.radius).to_list(),
             stroke="blue",
             stroke_width=1,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polyline(
-            points=make_diagonal_line(radius=parameters.radius),
+            points=make_diagonal_line(radius=parameters.radius).to_list(),
             stroke="blue",
             stroke_width=1,
             stroke_dasharray=4,
@@ -372,91 +422,75 @@ def draw() -> svg.SVG:
 
     lambda_no_gap = (
         svg.Polygon(
-            points=make_lambda_points(
-                radius=parameters.radius,
-                thickness=parameters.thickness,
-                gap=0,
-            ),
+            points=lambda_points.to_list(),
             stroke="green",
             stroke_width=2,
             fill="transparent",
-            # transform="scale(1, -1)",
             stroke_dasharray=4,
         ),
     )
     lambda_with_gap = (
         svg.Polygon(
-            points=make_lambda_points(
-                radius=parameters.radius,
-                thickness=parameters.thickness,
-                gap=parameters.gap,
-            ),
+            points=lambda_points_gap.to_list(),
             stroke="green",
             stroke_width=2,
             fill="transparent",
-            # transform="scale(1, -1)",
         ),
     )
     dim_main_diagonal = make_dimension_line(
-        point1=hexagon_points[2:4],
-        point2=hexagon_points[8:10],
+        point1=hexagon_points[1],
+        point2=hexagon_points[4],
         side="right",
         offset=1 / 2,
         parameters=parameters,
     )
     dim_lambda_long_edge = make_dimension_line(
-        point1=lambda_points[4:6],
-        point2=lambda_points[2:4],
+        point1=lambda_points[2],
+        point2=lambda_points[1],
         side="right",
         offset=7 / 16,
         parameters=parameters,
     )
     dim_gap_diagonal = make_dimension_line(
-        point1=[
-            statistics.mean(args)
-            for args in zip(lambda_points_gap[4:6], lambda_points_gap[6:8])
-        ],
-        point2=[
-            statistics.mean(args)
-            for args in zip(lambda_points_gap[0:2], lambda_points_gap[2:4])
-        ],
+        point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
+        point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
         side="right",
         offset=15 / 32,
         parameters=parameters,
     )
     dim_lambda_left_top = make_dimension_line(
-        point1=lambda_points[0:2],
-        point2=lambda_points[16:18],
+        point1=lambda_points[0],
+        point2=lambda_points[8],
         side="left",
         offset=6 / 16,
         parameters=parameters,
     )
     dim_lambda_short_leg_bottom = make_dimension_line(
-        point1=lambda_points[12:14],
-        point2=lambda_points[10:12],
+        point1=lambda_points[6],
+        point2=lambda_points[5],
         side="left",
         offset=8 / 16,
         parameters=parameters,
     )
     dim_lambda_legs_inner_left = make_dimension_line(
-        point1=lambda_points[8:10],
-        point2=lambda_points[10:12],
+        point1=lambda_points[4],
+        point2=lambda_points[5],
         side="right",
         offset=4 / 16,
         parameters=parameters,
     )
     dim_lambda_head = make_dimension_line(
-        point2=lambda_points[0:2],
-        point1=lambda_points[2:4],
+        point2=lambda_points[0],
+        point1=lambda_points[1],
         side="right",
         offset=1 / 2,
         parameters=parameters,
     )
 
     dim_angle_inner_legs = make_dimension_angle(
-        point1=lambda_points[6:8],
-        point2=lambda_points[10:12],
-        reference=lambda_points[8:10],
+        point1=lambda_points[3],
+        point2=lambda_points[5],
+        reference=lambda_points[4],
         flip=False,
         large=False,
         side="right",
@@ -464,9 +498,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_long_leg_bottom_left = make_dimension_angle(
-        point1=lambda_points[4:6],
-        point2=lambda_points[8:10],
-        reference=lambda_points[6:8],
+        point1=lambda_points[2],
+        point2=lambda_points[4],
+        reference=lambda_points[3],
         flip=True,
         large=False,
         side="left",
@@ -474,9 +508,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_head_left = make_dimension_angle(
-        point1=lambda_points[16:18],
-        point2=lambda_points[2:4],
-        reference=lambda_points[0:2],
+        point1=lambda_points[8],
+        point2=lambda_points[1],
+        reference=lambda_points[0],
         flip=True,
         large=False,
         side="left",
@@ -484,9 +518,9 @@ def draw() -> svg.SVG:
     )
 
     dim_angle_blah = make_dimension_angle(
-        point1=lambda_points[12:14],
-        point2=lambda_points[16:18],
-        reference=lambda_points[14:16],
+        point1=lambda_points[6],
+        point2=lambda_points[8],
+        reference=lambda_points[7],
         flip=True,
         large=False,
         side="left",
