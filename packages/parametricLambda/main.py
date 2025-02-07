@@ -360,8 +360,8 @@ def make_dimension_arrow_defs():
 def make_lambda_construction_lines(parameters):
     return [
         svg.Line(
-            x1=-10 * parameters.radius,
-            x2=10 * parameters.radius,
+            x1=parameters.image_parameters.min_x,
+            x2=parameters.image_parameters.min_x + parameters.image_parameters.width,
             y1=0,
             y2=0,
             stroke="black",
@@ -369,8 +369,8 @@ def make_lambda_construction_lines(parameters):
         svg.Line(
             x1=0,
             x2=0,
-            y1=-10 * parameters.radius,
-            y2=10 * parameters.radius,
+            y1=parameters.image_parameters.min_y,
+            y2=parameters.image_parameters.min_y + parameters.image_parameters.height,
             stroke="black",
         ),
         svg.Circle(
@@ -407,6 +407,14 @@ class LineGroup:
 
 
 @dataclass
+class ImageParameters:
+    min_x = -1100
+    min_y = -1100
+    width = 2200
+    height = 2200
+
+
+@dataclass
 class Parameters:
     radius = 512
     thickness = 1 / 4
@@ -414,6 +422,7 @@ class Parameters:
     object_lines: LineGroup
     construction_lines: LineGroup
     dimension_lines: LineGroup
+    image_parameters: ImageParameters
 
 
 def draw(parameters) -> svg.SVG:
@@ -562,20 +571,20 @@ def draw(parameters) -> svg.SVG:
     ]
 
     pink_background = svg.Rect(
-        x=-900,
-        y=-1100,
-        width=2100,
-        height=1900,
+        x=parameters.image_parameters.min_x,
+        y=parameters.image_parameters.min_y,
+        width=parameters.image_parameters.width,
+        height=parameters.image_parameters.height,
         fill="purple",
         fill_opacity="0.2",
     )
 
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
-            min_x=-900,
-            min_y=-1100,
-            width=2100,
-            height=1900,
+            min_x=parameters.image_parameters.min_x,
+            min_y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
         ),
         elements=[
             dimension_arrows,
@@ -592,9 +601,11 @@ if __name__ == "__main__":
     object_lines = LineGroup("object", "green", 4)
     construction_lines = LineGroup("construction", "blue", 2)
     dimension_lines = LineGroup("dimension", "red", 1)
+    image_parameters = ImageParameters()
     parameters = Parameters(
         object_lines,
         construction_lines,
         dimension_lines,
+        image_parameters,
     )
     print(draw(parameters))
