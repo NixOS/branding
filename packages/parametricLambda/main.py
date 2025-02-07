@@ -401,6 +401,34 @@ def make_lambda_construction_lines(parameters):
     ]
 
 
+def make_lambda_polygons(parameters):
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+    return [
+        svg.Polygon(
+            points=lambda_points_no_gap.to_list(),
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
+            fill="transparent",
+            stroke_dasharray=4,
+        ),
+        svg.Polygon(
+            points=lambda_points_gap.to_list(),
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
+            fill="transparent",
+        ),
+    ]
+
+
 @dataclass
 class LineGroup:
     name: str
@@ -442,24 +470,8 @@ def draw(parameters) -> svg.SVG:
 
     dimension_arrows = make_dimension_arrow_defs()
     construction_lines = make_lambda_construction_lines(parameters=parameters)
+    lambda_polygons = make_lambda_polygons(parameters)
 
-    lambda_no_gap = (
-        svg.Polygon(
-            points=lambda_points.to_list(),
-            stroke=parameters.object_lines.stroke,
-            stroke_width=parameters.object_lines.stroke_width,
-            fill="transparent",
-            stroke_dasharray=4,
-        ),
-    )
-    lambda_with_gap = (
-        svg.Polygon(
-            points=lambda_points_gap.to_list(),
-            stroke=parameters.object_lines.stroke,
-            stroke_width=parameters.object_lines.stroke_width,
-            fill="transparent",
-        ),
-    )
     dim_main_diagonal = make_dimension_line(
         point1=hexagon_points[1],
         point2=hexagon_points[4],
@@ -550,10 +562,6 @@ def draw(parameters) -> svg.SVG:
         ratio=1 / 2,
     )
 
-    lambdas = [
-        lambda_no_gap,
-        lambda_with_gap,
-    ]
 
     dim_lengths = [
         dim_gap_diagonal,
@@ -593,7 +601,7 @@ def draw(parameters) -> svg.SVG:
         elements=(
             dimension_arrows
             + construction_lines
-            + lambdas
+            + lambda_polygons
             + dim_lengths
             + dim_angles
             + pink_background  # delete later
