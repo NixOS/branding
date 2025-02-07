@@ -199,21 +199,24 @@ def make_dimension_line(point1, point2, side, offset, parameters, text=None):
             y1=point1.y,
             x2=point1_end.x,
             y2=point1_end.y,
-            stroke="red",
+            stroke=parameters.dimension_lines.stroke,
+            stroke_width=parameters.dimension_lines.stroke_width,
         ),
         svg.Line(
             x1=point2.x,
             y1=point2.y,
             x2=point2_end.x,
             y2=point2_end.y,
-            stroke="red",
+            stroke=parameters.dimension_lines.stroke,
+            stroke_width=parameters.dimension_lines.stroke_width,
         ),
         svg.Line(
             x1=point1_dim.x,
             y1=point1_dim.y,
             x2=point2_dim.x,
             y2=point2_dim.y,
-            stroke="red",
+            stroke=parameters.dimension_lines.stroke,
+            stroke_width=parameters.dimension_lines.stroke_width,
             marker_start="url(#dimension-arrow-head)",
             marker_end="url(#dimension-arrow-head)",
         ),
@@ -374,22 +377,22 @@ def make_lambda_construction_lines(parameters):
             cx=0,
             cy=0,
             r=parameters.radius,
-            stroke="blue",
-            stroke_width=1,
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polygon(
             points=make_hexagon_points(radius=parameters.radius).to_list(),
-            stroke="blue",
-            stroke_width=1,
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polyline(
             points=make_diagonal_line(radius=parameters.radius).to_list(),
-            stroke="blue",
-            stroke_width=1,
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
@@ -397,14 +400,23 @@ def make_lambda_construction_lines(parameters):
 
 
 @dataclass
+class LineGroup:
+    name: str
+    stroke: str
+    stroke_width: int
+
+
+@dataclass
 class Parameters:
     radius = 512
     thickness = 1 / 4
     gap = 1 / 16
+    object_lines: LineGroup
+    construction_lines: LineGroup
+    dimension_lines: LineGroup
 
 
-def draw() -> svg.SVG:
-    parameters = Parameters()
+def draw(parameters) -> svg.SVG:
     hexagon_points = make_hexagon_points(radius=parameters.radius)
     lambda_points = make_lambda_points(
         radius=parameters.radius,
@@ -423,8 +435,8 @@ def draw() -> svg.SVG:
     lambda_no_gap = (
         svg.Polygon(
             points=lambda_points.to_list(),
-            stroke="green",
-            stroke_width=2,
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
             fill="transparent",
             stroke_dasharray=4,
         ),
@@ -432,8 +444,8 @@ def draw() -> svg.SVG:
     lambda_with_gap = (
         svg.Polygon(
             points=lambda_points_gap.to_list(),
-            stroke="green",
-            stroke_width=2,
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
             fill="transparent",
         ),
     )
@@ -577,4 +589,12 @@ def draw() -> svg.SVG:
 
 
 if __name__ == "__main__":
-    print(draw())
+    object_lines = LineGroup("object", "green", 4)
+    construction_lines = LineGroup("construction", "blue", 2)
+    dimension_lines = LineGroup("dimension", "red", 1)
+    parameters = Parameters(
+        object_lines,
+        construction_lines,
+        dimension_lines,
+    )
+    print(draw(parameters))
