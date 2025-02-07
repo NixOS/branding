@@ -569,26 +569,4 @@ def draw() -> svg.SVG:
 
 
 if __name__ == "__main__":
-    # print(draw())
-
-    p1 = Point(1, 2)
-    p2 = Point(3, 4)
-
-    print((p2 + p1).distance(p2))
-    print(p2 - p1)
-    print(p1 - p2)
-
-    v1 = -(p1 - p2)
-    print(v1)
-    print(v1.length())
-    print(v1.dot(v1))
-    print(v1.normalize())
-    print(Vector((1, 2)))
-    print(p1.normal(p2))
-    print(v1.normal())
-    print(3 * v1)
-    print(str(v1))
-    print(repr(v1))
-
-    # print(make_hexagon_points(500))
-    # print(make_lambda_points(r=500, thickness=0.5, gap=0))
+    print(draw())
