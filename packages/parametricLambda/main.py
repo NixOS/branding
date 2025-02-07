@@ -429,6 +429,132 @@ def make_lambda_polygons(parameters):
     ]
 
 
+def make_lambda_linear_dimensions(parameters):
+    hexagon_points = make_hexagon_points(radius=parameters.radius)
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+
+    dim_main_diagonal = make_dimension_line(
+        point1=hexagon_points[1],
+        point2=hexagon_points[4],
+        side="right",
+        offset=1 / 2,
+        parameters=parameters,
+    )
+    dim_lambda_long_edge = make_dimension_line(
+        point1=lambda_points_no_gap[2],
+        point2=lambda_points_no_gap[1],
+        side="right",
+        offset=7 / 16,
+        parameters=parameters,
+    )
+    dim_gap_diagonal = make_dimension_line(
+        point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
+        point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
+        side="right",
+        offset=15 / 32,
+        parameters=parameters,
+    )
+    dim_lambda_left_top = make_dimension_line(
+        point1=lambda_points_no_gap[0],
+        point2=lambda_points_no_gap[8],
+        side="left",
+        offset=6 / 16,
+        parameters=parameters,
+    )
+    dim_lambda_short_leg_bottom = make_dimension_line(
+        point1=lambda_points_no_gap[6],
+        point2=lambda_points_no_gap[5],
+        side="left",
+        offset=8 / 16,
+        parameters=parameters,
+    )
+    dim_lambda_legs_inner_left = make_dimension_line(
+        point1=lambda_points_no_gap[4],
+        point2=lambda_points_no_gap[5],
+        side="right",
+        offset=4 / 16,
+        parameters=parameters,
+    )
+    dim_lambda_head = make_dimension_line(
+        point2=lambda_points_no_gap[0],
+        point1=lambda_points_no_gap[1],
+        side="right",
+        offset=1 / 2,
+        parameters=parameters,
+    )
+
+    return [
+        dim_gap_diagonal,
+        dim_main_diagonal,
+        dim_lambda_long_edge,
+        dim_lambda_left_top,
+        dim_lambda_legs_inner_left,
+        dim_lambda_short_leg_bottom,
+        dim_lambda_head,
+    ]
+
+
+def make_lambda_angular_dimensions(parameters):
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+
+    dim_angle_inner_legs = make_dimension_angle(
+        point1=lambda_points_no_gap[3],
+        point2=lambda_points_no_gap[5],
+        reference=lambda_points_no_gap[4],
+        flip=False,
+        large=False,
+        side="right",
+        ratio=1 / 2,
+    )
+    dim_angle_long_leg_bottom_left = make_dimension_angle(
+        point1=lambda_points_no_gap[2],
+        point2=lambda_points_no_gap[4],
+        reference=lambda_points_no_gap[3],
+        flip=True,
+        large=False,
+        side="left",
+        ratio=1 / 2,
+    )
+    dim_angle_head_left = make_dimension_angle(
+        point1=lambda_points_no_gap[8],
+        point2=lambda_points_no_gap[1],
+        reference=lambda_points_no_gap[0],
+        flip=True,
+        large=False,
+        side="left",
+        ratio=1 / 2,
+    )
+    dim_angle_blah = make_dimension_angle(
+        point1=lambda_points_no_gap[6],
+        point2=lambda_points_no_gap[8],
+        reference=lambda_points_no_gap[7],
+        flip=True,
+        large=False,
+        side="left",
+        ratio=1 / 2,
+    )
+
+    return [
+        dim_angle_inner_legs,
+        dim_angle_long_leg_bottom_left,
+        dim_angle_head_left,
+        dim_angle_blah,
+    ]
+
+
 @dataclass
 class LineGroup:
     name: str
@@ -456,129 +582,11 @@ class Parameters:
 
 
 def draw(parameters) -> svg.SVG:
-    hexagon_points = make_hexagon_points(radius=parameters.radius)
-    lambda_points = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=0,
-    )
-    lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
-    )
-
     dimension_arrows = make_dimension_arrow_defs()
     construction_lines = make_lambda_construction_lines(parameters=parameters)
     lambda_polygons = make_lambda_polygons(parameters)
-
-    dim_main_diagonal = make_dimension_line(
-        point1=hexagon_points[1],
-        point2=hexagon_points[4],
-        side="right",
-        offset=1 / 2,
-        parameters=parameters,
-    )
-    dim_lambda_long_edge = make_dimension_line(
-        point1=lambda_points[2],
-        point2=lambda_points[1],
-        side="right",
-        offset=7 / 16,
-        parameters=parameters,
-    )
-    dim_gap_diagonal = make_dimension_line(
-        point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
-        point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
-        side="right",
-        offset=15 / 32,
-        parameters=parameters,
-    )
-    dim_lambda_left_top = make_dimension_line(
-        point1=lambda_points[0],
-        point2=lambda_points[8],
-        side="left",
-        offset=6 / 16,
-        parameters=parameters,
-    )
-    dim_lambda_short_leg_bottom = make_dimension_line(
-        point1=lambda_points[6],
-        point2=lambda_points[5],
-        side="left",
-        offset=8 / 16,
-        parameters=parameters,
-    )
-    dim_lambda_legs_inner_left = make_dimension_line(
-        point1=lambda_points[4],
-        point2=lambda_points[5],
-        side="right",
-        offset=4 / 16,
-        parameters=parameters,
-    )
-    dim_lambda_head = make_dimension_line(
-        point2=lambda_points[0],
-        point1=lambda_points[1],
-        side="right",
-        offset=1 / 2,
-        parameters=parameters,
-    )
-
-    dim_angle_inner_legs = make_dimension_angle(
-        point1=lambda_points[3],
-        point2=lambda_points[5],
-        reference=lambda_points[4],
-        flip=False,
-        large=False,
-        side="right",
-        ratio=1 / 2,
-    )
-
-    dim_angle_long_leg_bottom_left = make_dimension_angle(
-        point1=lambda_points[2],
-        point2=lambda_points[4],
-        reference=lambda_points[3],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
-
-    dim_angle_head_left = make_dimension_angle(
-        point1=lambda_points[8],
-        point2=lambda_points[1],
-        reference=lambda_points[0],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
-
-    dim_angle_blah = make_dimension_angle(
-        point1=lambda_points[6],
-        point2=lambda_points[8],
-        reference=lambda_points[7],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
-
-
-    dim_lengths = [
-        dim_gap_diagonal,
-        dim_main_diagonal,
-        dim_lambda_long_edge,
-        dim_lambda_left_top,
-        dim_lambda_legs_inner_left,
-        dim_lambda_short_leg_bottom,
-        dim_lambda_head,
-    ]
-
-    dim_angles = [
-        dim_angle_inner_legs,
-        dim_angle_long_leg_bottom_left,
-        dim_angle_head_left,
-        dim_angle_blah,
-    ]
+    lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
+    lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
 
     pink_background = [
         svg.Rect(
@@ -602,8 +610,8 @@ def draw(parameters) -> svg.SVG:
             dimension_arrows
             + construction_lines
             + lambda_polygons
-            + dim_lengths
-            + dim_angles
+            + lambda_linear_dimensions
+            + lambda_angular_dimensions
             + pink_background  # delete later
         ),
     )
