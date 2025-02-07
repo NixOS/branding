@@ -75,7 +75,7 @@ def elementwise_binop(op, *args):
     return [op(*argz) for argz in zip(*args)]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Point:
     x: Number
     y: Number
@@ -156,56 +156,57 @@ class Vector(Sequence):
 
 
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
-    normal = get_normal(point1, point2)
-    distance = offset * get_length(point1, point2)
+    point1 = Point(*point1)
+    point2 = Point(*point2)
 
-    point1_end = [elem + 1.25 * distance * norm for elem, norm in zip(point1, normal)]
-    point2_end = [elem + 1.25 * distance * norm for elem, norm in zip(point2, normal)]
-    point1_dim = [elem + 1.20 * distance * norm for elem, norm in zip(point1, normal)]
-    point2_dim = [elem + 1.20 * distance * norm for elem, norm in zip(point2, normal)]
+    measured_line = point1 - point2
+    normal = measured_line.normal()
+    distance = offset * measured_line.length()
+
+    point1_end = point1 + 1.25 * distance * normal
+    point2_end = point2 + 1.25 * distance * normal
+    point1_dim = point1 + 1.20 * distance * normal
+    point2_dim = point2 + 1.20 * distance * normal
 
     text_offset = 1.19 if side == "left" else 1.21
-    point1_text = [
-        elem + text_offset * distance * norm for elem, norm in zip(point1, normal)
-    ]
-    point2_text = [
-        elem + text_offset * distance * norm for elem, norm in zip(point2, normal)
-    ]
+    point1_text = point1 + text_offset * distance * normal
+    point2_text = point2 + text_offset * distance * normal
 
-    input_hash = hash((tuple(point1), tuple(point2), side, text, offset))
+    input_hash = hash((point1, point2, side, text, offset))
 
     if text is None:
-        text = fractions.Fraction(
-            round(get_length(point1, point2)), 2 * parameters.radius
-        )
+        text = fractions.Fraction(round(measured_line.length()), 2 * parameters.radius)
 
     return [
         svg.Line(
-            x1=point1[0],
-            y1=point1[1],
-            x2=point1_end[0],
-            y2=point1_end[1],
+            x1=point1.x,
+            y1=point1.y,
+            x2=point1_end.x,
+            y2=point1_end.y,
             stroke="red",
         ),
         svg.Line(
-            x1=point2[0],
-            y1=point2[1],
-            x2=point2_end[0],
-            y2=point2_end[1],
+            x1=point2.x,
+            y1=point2.y,
+            x2=point2_end.x,
+            y2=point2_end.y,
             stroke="red",
         ),
         svg.Line(
-            x1=point1_dim[0],
-            y1=point1_dim[1],
-            x2=point2_dim[0],
-            y2=point2_dim[1],
+            x1=point1_dim.x,
+            y1=point1_dim.y,
+            x2=point2_dim.x,
+            y2=point2_dim.y,
             stroke="red",
             marker_start="url(#dimension-arrow-head)",
             marker_end="url(#dimension-arrow-head)",
         ),
         svg.Path(
             id=f"dimension_path_{input_hash}",
-            d=[svg.M(*point1_text), svg.L(*point2_text)],
+            d=[
+                svg.M(point1_text.x, point1_text.y),
+                svg.L(point2_text.x, point2_text.y),
+            ],
         ),
         svg.Text(
             font_size="2rem",
