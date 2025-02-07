@@ -62,15 +62,6 @@ def get_dot_product(vector1, vector2):
     return sum([x * y for x, y in zip(vector1, vector2)])
 
 
-def get_angle(vector1, vector2):
-    return math.degrees(
-        math.acos(
-            get_dot_product(vector1, vector2)
-            / (get_vector_length(vector1) * get_vector_length(vector2))
-        )
-    )
-
-
 def elementwise_binop(op, *args):
     return [op(*argz) for argz in zip(*args)]
 
@@ -153,6 +144,9 @@ class Vector(Sequence):
 
     def normal(self) -> Self:
         return Vector((self[1], -self[0])).normalize()
+
+    def angle_from(self, other: Self) -> float:
+        return math.acos(self.dot(other) / (self.length() * other.length()))
 
 
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
@@ -252,7 +246,7 @@ def make_dimension_angle(
     input_hash = hash((point1, point2, reference, flip, large, text, side, ratio))
 
     if text is None:
-        text = f"{round(get_angle(vector1, vector2))}°"
+        text = f"{round(math.degrees(vector1.angle_from(vector2)))}°"
 
     return [
         svg.Path(
