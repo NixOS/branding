@@ -29,43 +29,6 @@ def sind(angle) -> float:
     return math.sin(math.radians(angle))
 
 
-def get_normal(point1, point2):
-    normal = (
-        -(point2[1] - point1[1]),
-        point2[0] - point1[0],
-    )
-    modulus = math.sqrt(math.pow(normal[0], 2) + math.pow(normal[1], 2))
-    return [coordinate / modulus for coordinate in normal]
-
-
-def get_normalized(point1, point2):
-    difference = [y - x for x, y in zip(point1, point2)]
-    modulus = math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
-    return [coordinate / modulus for coordinate in difference]
-
-
-def get_length(point1, point2):
-    difference = [x - y for x, y in zip(point1, point2)]
-    return math.sqrt(math.pow(difference[0], 2) + math.pow(difference[1], 2))
-
-
-def get_vector_length(vector):
-    return math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2))
-
-
-def get_vector_normalized(vector):
-    modulus = math.sqrt(math.pow(vector[0], 2) + math.pow(vector[1], 2))
-    return [coordinate / modulus for coordinate in vector]
-
-
-def get_dot_product(vector1, vector2):
-    return sum([x * y for x, y in zip(vector1, vector2)])
-
-
-def elementwise_binop(op, *args):
-    return [op(*argz) for argz in zip(*args)]
-
-
 @dataclass(frozen=True)
 class Point:
     x: Number
