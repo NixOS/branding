@@ -565,12 +565,11 @@ def make_lambda_angular_dimensions(parameters):
     ]
 
 
-def draw(parameters) -> svg.SVG:
+def draw_lambda_linear_dimensions(parameters) -> svg.SVG:
     dimension_arrows = make_dimension_arrow_defs(parameters)
     construction_lines = make_lambda_construction_lines(parameters=parameters)
     lambda_polygons = make_lambda_polygons(parameters)
     lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
-    # lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
 
     pink_background = [
         svg.Rect(
@@ -595,8 +594,41 @@ def draw(parameters) -> svg.SVG:
             + construction_lines
             + lambda_polygons
             + lambda_linear_dimensions
-            # + lambda_angular_dimensions
-            + pink_background  # delete later
+            + pink_background  # TODO: delete later
+        ),
+    )
+
+
+def draw_lambda_angular_dimensions(parameters) -> svg.SVG:
+    dimension_arrows = make_dimension_arrow_defs(parameters)
+    construction_lines = make_lambda_construction_lines(parameters=parameters)
+    lambda_polygons = make_lambda_polygons(parameters)
+    lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
+
+    pink_background = [
+        svg.Rect(
+            x=parameters.image_parameters.min_x,
+            y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+            fill="purple",
+            fill_opacity="0.2",
+        )
+    ]
+
+    return svg.SVG(
+        viewBox=svg.ViewBoxSpec(
+            min_x=parameters.image_parameters.min_x,
+            min_y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+        ),
+        elements=(
+            dimension_arrows
+            + construction_lines
+            + lambda_polygons
+            + lambda_angular_dimensions
+            + pink_background  # TODO: delete later
         ),
     )
 
@@ -612,4 +644,5 @@ if __name__ == "__main__":
         dimension_lines,
         image_parameters,
     )
-    print(draw(parameters))
+    # print(draw_lambda_linear_dimensions(parameters))
+    print(draw_lambda_angular_dimensions(parameters))
