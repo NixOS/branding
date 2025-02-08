@@ -250,6 +250,7 @@ def make_dimension_angle(
     large,
     side,
     ratio,
+    parameters,
     text=None,
 ):
     if flip:
@@ -287,7 +288,8 @@ def make_dimension_angle(
                     mid_point_2.y,
                 ),
             ],
-            stroke="red",
+            stroke=parameters.dimension_lines.stroke,
+            stroke_width=parameters.dimension_lines.stroke_width,
             fill="transparent",
             marker_start="url(#dimension-arrow-head)",
             marker_end="url(#dimension-arrow-head)",
@@ -568,6 +570,7 @@ def make_lambda_angular_dimensions(parameters):
             point1=lambda_points_no_gap[(index + 0) % 9],
             point2=lambda_points_no_gap[(index + 2) % 9],
             reference=lambda_points_no_gap[(index + 1) % 9],
+            parameters=parameters,
             **opts,
         )
         for index, opts in enumerate(options)
