@@ -549,51 +549,28 @@ def make_lambda_angular_dimensions(parameters):
     lambda_points_no_gap = make_lambda_points(
         radius=parameters.radius,
         thickness=parameters.thickness,
-        gap=0,
+        gap=parameters.gap,
     )
-
-    dim_angle_inner_legs = make_dimension_angle(
-        point1=lambda_points_no_gap[3],
-        point2=lambda_points_no_gap[5],
-        reference=lambda_points_no_gap[4],
-        flip=False,
-        large=False,
-        side="right",
-        ratio=1 / 2,
-    )
-    dim_angle_long_leg_bottom_left = make_dimension_angle(
-        point1=lambda_points_no_gap[2],
-        point2=lambda_points_no_gap[4],
-        reference=lambda_points_no_gap[3],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
-    dim_angle_head_left = make_dimension_angle(
-        point1=lambda_points_no_gap[8],
-        point2=lambda_points_no_gap[1],
-        reference=lambda_points_no_gap[0],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
-    dim_angle_blah = make_dimension_angle(
-        point1=lambda_points_no_gap[6],
-        point2=lambda_points_no_gap[8],
-        reference=lambda_points_no_gap[7],
-        flip=True,
-        large=False,
-        side="left",
-        ratio=1 / 2,
-    )
+    options = [
+        {"flip": True, "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
+        {"flip": True, "large": False, "side": "left", "ratio": 1 / 2, "text": "A"},
+        {"flip": True, "large": False, "side": "left", "ratio": 3 / 8, "text": "B"},
+        {"flip": False, "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
+        {"flip": True, "large": False, "side": "left", "ratio": 1 / 2, "text": "B"},
+        {"flip": True, "large": False, "side": "left", "ratio": 1 / 2, "text": "B"},
+        {"flip": True, "large": False, "side": "left", "ratio": 1 / 2, "text": "B"},
+        {"flip": False, "large": False, "side": "left", "ratio": 1 / 2, "text": "B"},
+        {"flip": True, "large": False, "side": "left", "ratio": 3 / 8, "text": "B"},
+    ]
 
     return [
-        dim_angle_inner_legs,
-        dim_angle_long_leg_bottom_left,
-        dim_angle_head_left,
-        dim_angle_blah,
+        make_dimension_angle(
+            point1=lambda_points_no_gap[(index + 0) % 9],
+            point2=lambda_points_no_gap[(index + 2) % 9],
+            reference=lambda_points_no_gap[(index + 1) % 9],
+            **opts,
+        )
+        for index, opts in enumerate(options)
     ]
 
 
@@ -627,8 +604,8 @@ def draw(parameters) -> svg.SVG:
     dimension_arrows = make_dimension_arrow_defs()
     construction_lines = make_lambda_construction_lines(parameters=parameters)
     lambda_polygons = make_lambda_polygons(parameters)
-    lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
-    # lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
+    # lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
+    lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
 
     pink_background = [
         svg.Rect(
@@ -652,8 +629,8 @@ def draw(parameters) -> svg.SVG:
             dimension_arrows
             + construction_lines
             + lambda_polygons
-            + lambda_linear_dimensions
-            # + lambda_angular_dimensions
+            # + lambda_linear_dimensions
+            + lambda_angular_dimensions
             + pink_background  # delete later
         ),
     )
