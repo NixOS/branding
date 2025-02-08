@@ -338,7 +338,7 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
     return points
 
 
-def make_dimension_arrow_defs():
+def make_dimension_arrow_defs(parameters):
     return [
         svg.Defs(
             elements=[
@@ -352,7 +352,7 @@ def make_dimension_arrow_defs():
                     elements=[
                         svg.Path(
                             d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
-                            fill="red",
+                            fill=parameters.dimension_lines.stroke,
                         )
                     ],
                 )
@@ -604,7 +604,7 @@ class Parameters:
 
 
 def draw(parameters) -> svg.SVG:
-    dimension_arrows = make_dimension_arrow_defs()
+    dimension_arrows = make_dimension_arrow_defs(parameters)
     construction_lines = make_lambda_construction_lines(parameters=parameters)
     lambda_polygons = make_lambda_polygons(parameters)
     # lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
