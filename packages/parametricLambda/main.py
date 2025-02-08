@@ -8,34 +8,6 @@ import svg
 from svg._types import Number
 
 
-def make_hexagon_points(radius: Number) -> list[Number]:
-    angles = [math.radians(angle) for angle in range(0, 360, 60)]
-    return Points(
-        [
-            Point(
-                (
-                    radius * math.cos(angle),
-                    radius * math.sin(angle),
-                )
-            )
-            for angle in angles
-        ]
-    )
-
-
-def make_diagonal_line(radius: Number) -> list[Number]:
-    hexagon_points = make_hexagon_points(radius)
-    return Points([hexagon_points[1], hexagon_points[4]])
-
-
-def cosd(angle) -> float:
-    return math.cos(math.radians(angle))
-
-
-def sind(angle) -> float:
-    return math.sin(math.radians(angle))
-
-
 class Point(Sequence):
     def __init__(self, value):
         self.value = value
@@ -174,6 +146,117 @@ class Vector(Sequence):
         return Point(self.value)
 
 
+@dataclass
+class LineGroup:
+    name: str
+    stroke: str
+    stroke_width: int
+
+
+@dataclass
+class ImageParameters:
+    min_x = -1100
+    min_y = -1100
+    width = 2200
+    height = 2200
+
+
+@dataclass
+class Parameters:
+    radius = 512
+    thickness = 1 / 4
+    gap = 1 / 16
+    object_lines: LineGroup
+    construction_lines: LineGroup
+    dimension_lines: LineGroup
+    image_parameters: ImageParameters
+
+
+def cosd(angle) -> float:
+    return math.cos(math.radians(angle))
+
+
+def sind(angle) -> float:
+    return math.sin(math.radians(angle))
+
+
+def make_hexagon_points(radius: Number) -> list[Number]:
+    angles = [math.radians(angle) for angle in range(0, 360, 60)]
+    return Points(
+        [
+            Point(
+                (
+                    radius * math.cos(angle),
+                    radius * math.sin(angle),
+                )
+            )
+            for angle in angles
+        ]
+    )
+
+
+def make_diagonal_line(radius: Number) -> list[Number]:
+    hexagon_points = make_hexagon_points(radius)
+    return Points([hexagon_points[1], hexagon_points[4]])
+
+
+def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[Number]:
+    hexagon_points = make_hexagon_points(radius)
+    hex_top_left = hexagon_points[2]
+    hex_bottom_left = hexagon_points[4]
+    hex_bottom_right = hexagon_points[5]
+
+    vector_0 = radius * thickness * Vector((cosd(0), sind(0)))
+    vector_60 = radius * thickness * Vector((cosd(60), sind(60)))
+    vector_270 = radius * thickness * Vector((cosd(270), sind(270)))
+    vector_300 = radius * thickness * Vector((cosd(300), sind(300)))
+    gap_vector = 2 * radius * gap * Vector((cosd(300), sind(300)))
+
+    points = [
+        (hex_top_left - vector_60 + gap_vector),
+        (hex_top_left + vector_60 + gap_vector),
+        (hex_bottom_right + vector_0),
+        (hex_bottom_right - vector_0),
+        (math.sqrt(3) * vector_270).to_point(),
+        (hex_bottom_left + vector_0),
+        hex_bottom_left,
+        (hex_bottom_left - vector_300),
+        (-vector_0).to_point(),
+    ]
+
+    # Need to negate the y-axis so the lambda is not upside down
+    points = Points([Point((point.x, -point.y)) for point in points])
+    return points
+
+
+def make_lambda_polygons(parameters):
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=0,
+    )
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+    return [
+        svg.Polygon(
+            points=lambda_points_no_gap.to_list(),
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
+            fill="transparent",
+            stroke_dasharray=4,
+        ),
+        svg.Polygon(
+            points=lambda_points_gap.to_list(),
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
+            fill="transparent",
+        ),
+    ]
+
+
 def make_dimension_line(point1, point2, side, offset, parameters, text=None):
     measured_line = point1 - point2
     normal = measured_line.normal()
@@ -309,35 +392,6 @@ def make_dimension_angle(
     ]
 
 
-def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[Number]:
-    hexagon_points = make_hexagon_points(radius)
-    hex_top_left = hexagon_points[2]
-    hex_bottom_left = hexagon_points[4]
-    hex_bottom_right = hexagon_points[5]
-
-    vector_0 = radius * thickness * Vector((cosd(0), sind(0)))
-    vector_60 = radius * thickness * Vector((cosd(60), sind(60)))
-    vector_270 = radius * thickness * Vector((cosd(270), sind(270)))
-    vector_300 = radius * thickness * Vector((cosd(300), sind(300)))
-    gap_vector = 2 * radius * gap * Vector((cosd(300), sind(300)))
-
-    points = [
-        (hex_top_left - vector_60 + gap_vector),
-        (hex_top_left + vector_60 + gap_vector),
-        (hex_bottom_right + vector_0),
-        (hex_bottom_right - vector_0),
-        (math.sqrt(3) * vector_270).to_point(),
-        (hex_bottom_left + vector_0),
-        hex_bottom_left,
-        (hex_bottom_left - vector_300),
-        (-vector_0).to_point(),
-    ]
-
-    # Need to negate the y-axis so the lambda is not upside down
-    points = Points([Point((point.x, -point.y)) for point in points])
-    return points
-
-
 def make_dimension_arrow_defs(parameters):
     return [
         svg.Defs(
@@ -398,34 +452,6 @@ def make_lambda_construction_lines(parameters):
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
-            fill="transparent",
-        ),
-    ]
-
-
-def make_lambda_polygons(parameters):
-    lambda_points_no_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=0,
-    )
-    lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
-    )
-    return [
-        svg.Polygon(
-            points=lambda_points_no_gap.to_list(),
-            stroke=parameters.object_lines.stroke,
-            stroke_width=parameters.object_lines.stroke_width,
-            fill="transparent",
-            stroke_dasharray=4,
-        ),
-        svg.Polygon(
-            points=lambda_points_gap.to_list(),
-            stroke=parameters.object_lines.stroke,
-            stroke_width=parameters.object_lines.stroke_width,
             fill="transparent",
         ),
     ]
@@ -575,32 +601,6 @@ def make_lambda_angular_dimensions(parameters):
         )
         for index, opts in enumerate(options)
     ]
-
-
-@dataclass
-class LineGroup:
-    name: str
-    stroke: str
-    stroke_width: int
-
-
-@dataclass
-class ImageParameters:
-    min_x = -1100
-    min_y = -1100
-    width = 2200
-    height = 2200
-
-
-@dataclass
-class Parameters:
-    radius = 512
-    thickness = 1 / 4
-    gap = 1 / 16
-    object_lines: LineGroup
-    construction_lines: LineGroup
-    dimension_lines: LineGroup
-    image_parameters: ImageParameters
 
 
 def draw(parameters) -> svg.SVG:
