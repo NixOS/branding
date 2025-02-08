@@ -257,7 +257,10 @@ def make_lambda_polygons(parameters):
     ]
 
 
-def make_dimension_line(point1, point2, side, offset, parameters, text=None):
+def make_dimension_line(point1, point2, flip, side, offset, parameters, text=None):
+    if flip:
+        point1, point2 = point2, point1
+
     measured_line = point1 - point2
     normal = measured_line.normal()
     distance = offset * measured_line.length()
@@ -271,7 +274,7 @@ def make_dimension_line(point1, point2, side, offset, parameters, text=None):
     point1_text = point1 + text_offset * distance * normal
     point2_text = point2 + text_offset * distance * normal
 
-    input_hash = hash((point1, point2, side, text, offset))
+    input_hash = hash((point1, point2, flip, side, offset, text))
 
     if text is None:
         text = fractions.Fraction(round(measured_line.length()), 2 * parameters.radius)
@@ -473,6 +476,7 @@ def make_lambda_linear_dimensions(parameters):
     dim_main_diagonal = make_dimension_line(
         point1=hexagon_points[1],
         point2=hexagon_points[4],
+        flip=False,
         side="right",
         offset=1 / 2,
         parameters=parameters,
@@ -481,95 +485,53 @@ def make_lambda_linear_dimensions(parameters):
     dim_gap_diagonal = make_dimension_line(
         point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
         point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
+        flip=False,
         side="right",
         offset=15 / 32,
         parameters=parameters,
     )
     dim_gap_long_edge = make_dimension_line(
-        point1=lambda_points_gap[2],
-        point2=lambda_points_gap[1],
+        point1=lambda_points_gap[1],
+        point2=lambda_points_gap[2],
+        flip=True,
         side="right",
         offset=7 / 16,
         parameters=parameters,
     )
-
-    dim_lambda_head = make_dimension_line(
-        point2=lambda_points_no_gap[0],
-        point1=lambda_points_no_gap[1],
-        side="right",
-        offset=1 / 4,
-        parameters=parameters,
-    )
-    dim_lambda_long_edge = make_dimension_line(
-        point1=lambda_points_no_gap[2],
-        point2=lambda_points_no_gap[1],
-        side="right",
-        offset=15 / 32,
-        parameters=parameters,
-    )
-    dim_lambda_long_leg_bottom = make_dimension_line(
-        point1=lambda_points_no_gap[3],
-        point2=lambda_points_no_gap[2],
-        side="left",
-        offset=1 / 4,
-        parameters=parameters,
-    )
-    dim_lambda_legs_inner_right = make_dimension_line(
-        point1=lambda_points_no_gap[3],
-        point2=lambda_points_no_gap[4],
-        side="right",
-        offset=1 / 4,
-        parameters=parameters,
-    )
-    dim_lambda_legs_inner_left = make_dimension_line(
-        point1=lambda_points_no_gap[4],
-        point2=lambda_points_no_gap[5],
-        side="right",
-        offset=1 / 4,
-        parameters=parameters,
-    )
-    dim_lambda_short_leg_bottom = make_dimension_line(
-        point1=lambda_points_no_gap[6],
-        point2=lambda_points_no_gap[5],
-        side="left",
-        offset=1 / 2,
-        parameters=parameters,
-    )
-    dim_lambda_short_leg_left = make_dimension_line(
-        point1=lambda_points_no_gap[7],
-        point2=lambda_points_no_gap[6],
-        side="left",
-        offset=1 / 2,
-        parameters=parameters,
-    )
-    dim_lambda_left_bottom = make_dimension_line(
-        point1=lambda_points_no_gap[7],
-        point2=lambda_points_no_gap[8],
+    dim_gap_left_top = make_dimension_line(
+        point1=lambda_points_gap[8],
+        point2=lambda_points_gap[0],
+        flip=False,
         side="right",
         offset=1 / 8,
         parameters=parameters,
     )
-    dim_lambda_left_top = make_dimension_line(
-        point1=lambda_points_no_gap[0],
-        point2=lambda_points_no_gap[8],
-        side="left",
-        offset=1 / 4,
-        parameters=parameters,
-    )
+
+    options = [
+        {"side": "right", "flip": True, "offset": 1 / 4},
+        {"side": "right", "flip": True, "offset": 15 / 32},
+        {"side": "left", "flip": True, "offset": 1 / 4},
+        {"side": "right", "flip": False, "offset": 1 / 4},
+        {"side": "right", "flip": False, "offset": 1 / 4},
+        {"side": "left", "flip": True, "offset": 1 / 2},
+        {"side": "left", "flip": True, "offset": 1 / 2},
+        {"side": "left", "flip": False, "offset": 1 / 8},
+        {"side": "left", "flip": True, "offset": 1 / 4},
+    ]
 
     return [
         dim_main_diagonal,
         dim_gap_diagonal,
         dim_gap_long_edge,
-        dim_lambda_head,
-        dim_lambda_long_edge,
-        dim_lambda_long_leg_bottom,
-        dim_lambda_legs_inner_left,
-        dim_lambda_legs_inner_right,
-        dim_lambda_short_leg_bottom,
-        dim_lambda_short_leg_left,
-        dim_lambda_left_bottom,
-        dim_lambda_left_top,
+        dim_gap_left_top,
+    ] + [
+        make_dimension_line(
+            point1=lambda_points_no_gap[(index + 0) % 9],
+            point2=lambda_points_no_gap[(index + 1) % 9],
+            parameters=parameters,
+            **opts,
+        )
+        for index, opts in enumerate(options)
     ]
 
 
@@ -607,8 +569,8 @@ def draw(parameters) -> svg.SVG:
     dimension_arrows = make_dimension_arrow_defs(parameters)
     construction_lines = make_lambda_construction_lines(parameters=parameters)
     lambda_polygons = make_lambda_polygons(parameters)
-    # lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
-    lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
+    lambda_linear_dimensions = make_lambda_linear_dimensions(parameters)
+    # lambda_angular_dimensions = make_lambda_angular_dimensions(parameters)
 
     pink_background = [
         svg.Rect(
@@ -632,8 +594,8 @@ def draw(parameters) -> svg.SVG:
             dimension_arrows
             + construction_lines
             + lambda_polygons
-            # + lambda_linear_dimensions
-            + lambda_angular_dimensions
+            + lambda_linear_dimensions
+            # + lambda_angular_dimensions
             + pink_background  # delete later
         ),
     )
