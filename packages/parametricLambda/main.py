@@ -155,10 +155,10 @@ class LineGroup:
 
 @dataclass
 class ImageParameters:
-    min_x = -1100
-    min_y = -1100
-    width = 2200
-    height = 2200
+    min_x: int = -1100
+    min_y: int = -1100
+    width: int = 2200
+    height: int = 2200
 
 
 @dataclass
@@ -254,6 +254,47 @@ def make_lambda_polygons(parameters):
             stroke_width=parameters.object_lines.stroke_width,
             fill="transparent",
         ),
+    ]
+
+
+def make_flake_points(parameters):
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+
+    translation = Vector(
+        1.25 * parameters.radius * cosd(120),
+        1.25 * parameters.radius * sind(120),
+    )
+
+
+def make_flake_polygons(parameters):
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.radius,
+        thickness=parameters.thickness,
+        gap=parameters.gap,
+    )
+    return [
+        svg.Polygon(
+            points=lambda_points_gap.to_list(),
+            stroke=parameters.object_lines.stroke,
+            stroke_width=parameters.object_lines.stroke_width,
+            fill="transparent",
+            transform=[
+                svg.Translate(
+                    1.25 * parameters.radius * cosd(120),
+                    1.25 * parameters.radius * sind(120),
+                ),
+                svg.Rotate(
+                    60 * (elem - 0),
+                    -1.25 * parameters.radius * cosd(120),
+                    -1.25 * parameters.radius * sind(120),
+                ),
+            ],
+        )
+        for elem in range(6)
     ]
 
 
@@ -633,6 +674,35 @@ def draw_lambda_angular_dimensions(parameters) -> svg.SVG:
     )
 
 
+def draw_flake(parameters) -> svg.SVG:
+    pink_background = [
+        svg.Rect(
+            x=parameters.image_parameters.min_x,
+            y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+            fill="purple",
+            fill_opacity="0.2",
+        )
+    ]
+    construction_lines = make_lambda_construction_lines(parameters=parameters)
+
+    return svg.SVG(
+        viewBox=svg.ViewBoxSpec(
+            min_x=parameters.image_parameters.min_x,
+            min_y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+        ),
+        elements=(
+            make_flake_polygons(parameters)
+            + construction_lines
+            # TODO: delete later
+            + pink_background
+        ),
+    )
+
+
 if __name__ == "__main__":
     object_lines = LineGroup("object", "green", 4)
     construction_lines = LineGroup("construction", "blue", 2)
@@ -645,4 +715,18 @@ if __name__ == "__main__":
         image_parameters,
     )
     # print(draw_lambda_linear_dimensions(parameters))
-    print(draw_lambda_angular_dimensions(parameters))
+    # print(draw_lambda_angular_dimensions(parameters))
+
+    image_parameters = ImageParameters(
+        min_x=-512 * 3,
+        min_y=-512 * 3,
+        width=512 * 6,
+        height=512 * 6,
+    )
+    parameters = Parameters(
+        object_lines,
+        construction_lines,
+        dimension_lines,
+        image_parameters,
+    )
+    # print(draw_flake(parameters))
