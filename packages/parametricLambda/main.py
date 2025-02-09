@@ -66,6 +66,19 @@ class Point(Sequence):
         )
         return normal.normalize()
 
+    def rotate(self, angle: Number):
+        rotation_matrix = Matrix(
+            (
+                Vector(
+                    (cosd(angle), sind(-angle)),
+                ),
+                Vector(
+                    (sind(angle), cosd(angle)),
+                ),
+            )
+        )
+        return Point(rotation_matrix @ self)
+
 
 class Points(Sequence):
     def __init__(self, value: list[Point]):
@@ -121,6 +134,12 @@ class Vector(Sequence):
     def __rmul__(self, other: Number) -> Self:
         return Vector(tuple(other * elem for elem in self))
 
+    def __matmul__(self, other: Self | Point) -> Self:
+        if isinstance(other, Point | Vector):
+            return [s * o for s, o in zip(self, other)]
+        else:
+            raise Exception(f"Not sure how to add {type(other)} to Point.")
+
     def __truediv__(self, other: Number) -> Self:
         return Vector(tuple(elem / other for elem in self))
 
@@ -144,6 +163,30 @@ class Vector(Sequence):
 
     def to_point(self) -> Point:
         return Point(self.value)
+
+
+class Matrix(Sequence):
+    def __init__(self, value: Sequence[Vector]):
+        self.value = value
+        super().__init__()
+
+    def __getitem__(self, index):
+        return self.value[index]
+
+    def __len__(self):
+        return len(self.value) * len(self.value[0])
+
+    def __str__(self):
+        return "(" + ",\n ".join(str(elem) for elem in self.value) + ")"
+
+    def transpose(self) -> Self:
+        return Matrix(tuple(zip(*self)))
+
+    def __matmul__(self, other: Point | Vector) -> Self:
+        if isinstance(other, Point | Vector):
+            return [sum(row @ other) for row in self]
+        else:
+            raise Exception(f"Not sure how to add {type(other)} to Point.")
 
 
 @dataclass
@@ -265,36 +308,31 @@ def make_flake_points(parameters):
     )
 
     translation = Vector(
-        1.25 * parameters.radius * cosd(120),
-        1.25 * parameters.radius * sind(120),
+        (
+            1.25 * parameters.radius * cosd(120),
+            1.25 * parameters.radius * sind(120),
+        )
     )
+
+    lambdas_translated = [point + translation for point in lambda_points_gap]
+    flake_points = [
+        Points([point.rotate(angle) for point in lambdas_translated])
+        for angle in range(0, 360, 60)
+    ]
+    return flake_points
 
 
 def make_flake_polygons(parameters):
-    lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
-    )
+    flake_points = make_flake_points(parameters)
+
     return [
         svg.Polygon(
-            points=lambda_points_gap.to_list(),
+            points=lambda_points.to_list(),
             stroke=parameters.object_lines.stroke,
             stroke_width=parameters.object_lines.stroke_width,
             fill="transparent",
-            transform=[
-                svg.Translate(
-                    1.25 * parameters.radius * cosd(120),
-                    1.25 * parameters.radius * sind(120),
-                ),
-                svg.Rotate(
-                    60 * (elem - 0),
-                    -1.25 * parameters.radius * cosd(120),
-                    -1.25 * parameters.radius * sind(120),
-                ),
-            ],
         )
-        for elem in range(6)
+        for lambda_points in flake_points
     ]
 
 
@@ -606,6 +644,20 @@ def make_lambda_angular_dimensions(parameters):
     ]
 
 
+def make_flake_linear_dimensions(parameters):
+    flake_points = make_flake_points(parameters)
+    dim_main_diagonal = make_dimension_line(
+        point1=flake_points[2][6],
+        point2=flake_points[5][6],
+        flip=True,
+        side="right",
+        offset=1 / 2,
+        parameters=parameters,
+    )
+
+    return [dim_main_diagonal]
+
+
 def draw_lambda_linear_dimensions(parameters) -> svg.SVG:
     dimension_arrows = make_dimension_arrow_defs(parameters)
     construction_lines = make_lambda_construction_lines(parameters=parameters)
@@ -686,6 +738,7 @@ def draw_flake(parameters) -> svg.SVG:
         )
     ]
     construction_lines = make_lambda_construction_lines(parameters=parameters)
+    linear_dimensions = make_flake_linear_dimensions(parameters)
 
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
@@ -697,6 +750,7 @@ def draw_flake(parameters) -> svg.SVG:
         elements=(
             make_flake_polygons(parameters)
             + construction_lines
+            + linear_dimensions
             # TODO: delete later
             + pink_background
         ),
@@ -718,10 +772,10 @@ if __name__ == "__main__":
     # print(draw_lambda_angular_dimensions(parameters))
 
     image_parameters = ImageParameters(
-        min_x=-512 * 3,
-        min_y=-512 * 3,
-        width=512 * 6,
-        height=512 * 6,
+        min_x=-512 * 4,
+        min_y=-512 * 4,
+        width=512 * 8,
+        height=512 * 8,
     )
     parameters = Parameters(
         object_lines,
@@ -729,4 +783,4 @@ if __name__ == "__main__":
         dimension_lines,
         image_parameters,
     )
-    # print(draw_flake(parameters))
+    print(draw_flake(parameters))
