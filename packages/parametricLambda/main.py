@@ -855,27 +855,27 @@ def draw_clean_flake(parameters) -> svg.SVG:
 
 
 if __name__ == "__main__":
-    # dimensions = Dimensions()
-    # snow_flake = SnowFlake()
-    # object_lines = LineGroup("object", "green", 4, "2rem")
-    # construction_lines = LineGroup("construction", "blue", 2, "2rem")
-    # dimension_lines = LineGroup("dimension", "red", 1, "2rem")
-    # image_parameters = ImageParameters(
-    #     min_x=-512 * 2,
-    #     min_y=-512 * 2,
-    #     width=512 * 4,
-    #     height=512 * 4,
-    # )
-    # parameters = Parameters(
-    #     construction_lines=construction_lines,
-    #     dimension_lines=dimension_lines,
-    #     dimensions=dimensions,
-    #     image_parameters=image_parameters,
-    #     object_lines=object_lines,
-    #     snow_flake=snow_flake,
-    # )
-    # print(draw_lambda_linear_dimensions(parameters))
-    # # print(draw_lambda_angular_dimensions(parameters))
+    dimensions = Dimensions()
+    snow_flake = SnowFlake()
+    object_lines = LineGroup("object", "green", 4, "2rem")
+    construction_lines = LineGroup("construction", "blue", 2, "2rem")
+    dimension_lines = LineGroup("dimension", "red", 1, "2rem")
+    image_parameters = ImageParameters(
+        min_x=-512 * 2,
+        min_y=-512 * 2,
+        width=512 * 4,
+        height=512 * 4,
+    )
+    parameters = Parameters(
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        dimensions=dimensions,
+        image_parameters=image_parameters,
+        object_lines=object_lines,
+        snow_flake=snow_flake,
+    )
+    print(draw_lambda_linear_dimensions(parameters))
+    # print(draw_lambda_angular_dimensions(parameters))
 
     # dimensions = Dimensions()
     # snow_flake = SnowFlake()
@@ -898,23 +898,23 @@ if __name__ == "__main__":
     # )
     # print(draw_flake(parameters))
 
-    dimensions = Dimensions()
-    snow_flake = SnowFlake()
-    object_lines = LineGroup("object", "green", 8, "4rem")
-    construction_lines = LineGroup("construction", "blue", 4, "4rem")
-    dimension_lines = LineGroup("dimension", "red", 2, "4rem")
-    image_parameters = ImageParameters(
-        min_x=-512 * 2.25,
-        min_y=-512 * 2.25,
-        width=512 * 4.5,
-        height=512 * 4.5,
-    )
-    parameters = Parameters(
-        construction_lines=construction_lines,
-        dimension_lines=dimension_lines,
-        dimensions=dimensions,
-        image_parameters=image_parameters,
-        object_lines=object_lines,
-        snow_flake=snow_flake,
-    )
-    print(draw_clean_flake(parameters))
+    # dimensions = Dimensions()
+    # snow_flake = SnowFlake()
+    # object_lines = LineGroup("object", "green", 8, "4rem")
+    # construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    # dimension_lines = LineGroup("dimension", "red", 2, "4rem")
+    # image_parameters = ImageParameters(
+    #     min_x=-512 * 2.25,
+    #     min_y=-512 * 2.25,
+    #     width=512 * 4.5,
+    #     height=512 * 4.5,
+    # )
+    # parameters = Parameters(
+    #     construction_lines=construction_lines,
+    #     dimension_lines=dimension_lines,
+    #     dimensions=dimensions,
+    #     image_parameters=image_parameters,
+    #     object_lines=object_lines,
+    #     snow_flake=snow_flake,
+    # )
+    # print(draw_clean_flake(parameters))
