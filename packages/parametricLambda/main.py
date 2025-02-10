@@ -644,9 +644,48 @@ def make_lambda_angular_dimensions(parameters):
     ]
 
 
+def make_flake_construction_lines(parameters):
+    return [
+        svg.Circle(
+            cx=0,
+            cy=0,
+            r=parameters.radius * 2.25,
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+        svg.Polygon(
+            points=make_hexagon_points(radius=parameters.radius * 2.25).to_list(),
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+        svg.Polyline(
+            points=make_diagonal_line(radius=parameters.radius * 2.25).to_list(),
+            stroke=parameters.construction_lines.stroke,
+            stroke_width=parameters.construction_lines.stroke_width,
+            stroke_dasharray=4,
+            fill="transparent",
+        ),
+    ]
+
+
 def make_flake_linear_dimensions(parameters):
     flake_points = make_flake_points(parameters)
-    dim_main_diagonal = make_dimension_line(
+    hexagon_points = make_hexagon_points(radius=parameters.radius)
+
+    lin_inner_hex_long_length = make_dimension_line(
+        point1=hexagon_points[1],
+        point2=hexagon_points[4],
+        flip=False,
+        side="right",
+        offset=1 / 16,
+        parameters=parameters,
+    )
+
+    lin_flake_long_length = make_dimension_line(
         point1=flake_points[2][6],
         point2=flake_points[5][6],
         flip=True,
@@ -655,7 +694,21 @@ def make_flake_linear_dimensions(parameters):
         parameters=parameters,
     )
 
-    return [dim_main_diagonal]
+    lin_flake_short_length = make_dimension_line(
+        point1=flake_points[1][6],
+        point2=flake_points[5][6],
+        flip=False,
+        side="left",
+        offset=5 / 16,
+        parameters=parameters,
+        text="9/8√3",
+    )
+
+    return [
+        lin_inner_hex_long_length,
+        lin_flake_long_length,
+        lin_flake_short_length,
+    ]
 
 
 def draw_lambda_linear_dimensions(parameters) -> svg.SVG:
@@ -737,7 +790,8 @@ def draw_flake(parameters) -> svg.SVG:
             fill_opacity="0.2",
         )
     ]
-    construction_lines = make_lambda_construction_lines(parameters=parameters)
+    lambda_construction_lines = make_lambda_construction_lines(parameters=parameters)
+    construction_lines = make_flake_construction_lines(parameters=parameters)
     linear_dimensions = make_flake_linear_dimensions(parameters)
 
     return svg.SVG(
@@ -749,6 +803,7 @@ def draw_flake(parameters) -> svg.SVG:
         ),
         elements=(
             make_flake_polygons(parameters)
+            + lambda_construction_lines
             + construction_lines
             + linear_dimensions
             # TODO: delete later
