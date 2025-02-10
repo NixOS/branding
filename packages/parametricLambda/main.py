@@ -2,6 +2,7 @@ import fractions
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Self
 
 import svg
@@ -856,17 +857,17 @@ def draw_clean_flake(parameters) -> svg.SVG:
     )
 
 
-if __name__ == "__main__":
+def write_dimensioned_lambda() -> None:
     dimensions = Dimensions()
     snow_flake = SnowFlake()
     object_lines = LineGroup("object", "green", 4, "2rem")
     construction_lines = LineGroup("construction", "blue", 2, "2rem")
     dimension_lines = LineGroup("dimension", "red", 1, "2rem")
     image_parameters = ImageParameters(
-        min_x=-512 * 2,
-        min_y=-512 * 2,
-        width=512 * 4,
-        height=512 * 4,
+        min_x=-dimensions.radius * 2,
+        min_y=-dimensions.radius * 2,
+        width=dimensions.radius * 4,
+        height=dimensions.radius * 4,
     )
     parameters = Parameters(
         construction_lines=construction_lines,
@@ -876,47 +877,61 @@ if __name__ == "__main__":
         object_lines=object_lines,
         snow_flake=snow_flake,
     )
-    print(draw_lambda_linear_dimensions(parameters))
-    # print(draw_lambda_angular_dimensions(parameters))
+    with open(Path("nixos-lambda-dimensioned-linear.svg"), "w") as file:
+        file.write(str(draw_lambda_linear_dimensions(parameters)))
+    with open(Path("nixos-lambda-dimensioned-angular.svg"), "w") as file:
+        file.write(str(draw_lambda_angular_dimensions(parameters)))
 
-    # dimensions = Dimensions()
-    # snow_flake = SnowFlake()
-    # object_lines = LineGroup("object", "green", 8, "4rem")
-    # construction_lines = LineGroup("construction", "blue", 4, "4rem")
-    # dimension_lines = LineGroup("dimension", "red", 2, "4rem")
-    # image_parameters = ImageParameters(
-    #     min_x=-512 * 4,
-    #     min_y=-512 * 4,
-    #     width=512 * 8,
-    #     height=512 * 8,
-    # )
-    # parameters = Parameters(
-    #     construction_lines=construction_lines,
-    #     dimension_lines=dimension_lines,
-    #     dimensions=dimensions,
-    #     image_parameters=image_parameters,
-    #     object_lines=object_lines,
-    #     snow_flake=snow_flake,
-    # )
-    # print(draw_flake(parameters))
 
-    # dimensions = Dimensions()
-    # snow_flake = SnowFlake()
-    # object_lines = LineGroup("object", "green", 8, "4rem")
-    # construction_lines = LineGroup("construction", "blue", 4, "4rem")
-    # dimension_lines = LineGroup("dimension", "red", 2, "4rem")
-    # image_parameters = ImageParameters(
-    #     min_x=-512 * 2.25,
-    #     min_y=-512 * 2.25,
-    #     width=512 * 4.5,
-    #     height=512 * 4.5,
-    # )
-    # parameters = Parameters(
-    #     construction_lines=construction_lines,
-    #     dimension_lines=dimension_lines,
-    #     dimensions=dimensions,
-    #     image_parameters=image_parameters,
-    #     object_lines=object_lines,
-    #     snow_flake=snow_flake,
-    # )
-    # print(draw_clean_flake(parameters))
+def write_dimensioned_flake() -> None:
+    dimensions = Dimensions()
+    snow_flake = SnowFlake()
+    object_lines = LineGroup("object", "green", 8, "4rem")
+    construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    dimension_lines = LineGroup("dimension", "red", 2, "4rem")
+    image_parameters = ImageParameters(
+        min_x=-dimensions.radius * 4,
+        min_y=-dimensions.radius * 4,
+        width=dimensions.radius * 8,
+        height=dimensions.radius * 8,
+    )
+    parameters = Parameters(
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        dimensions=dimensions,
+        image_parameters=image_parameters,
+        object_lines=object_lines,
+        snow_flake=snow_flake,
+    )
+    with open(Path("nixos-snowflake-dimensioned-linear.svg"), "w") as file:
+        file.write(str(draw_flake(parameters)))
+
+
+def write_clean_flake() -> None:
+    dimensions = Dimensions()
+    snow_flake = SnowFlake()
+    object_lines = LineGroup("object", "green", 8, "4rem")
+    construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    dimension_lines = LineGroup("dimension", "red", 2, "4rem")
+    image_parameters = ImageParameters(
+        min_x=-dimensions.radius * 2.25,
+        min_y=-dimensions.radius * 2.25,
+        width=dimensions.radius * 4.5,
+        height=dimensions.radius * 4.5,
+    )
+    parameters = Parameters(
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        dimensions=dimensions,
+        image_parameters=image_parameters,
+        object_lines=object_lines,
+        snow_flake=snow_flake,
+    )
+    with open(Path("nixos-snowflake-color.svg"), "w") as file:
+        file.write(str(draw_clean_flake(parameters)))
+
+
+if __name__ == "__main__":
+    write_clean_flake()
+    write_dimensioned_flake()
+    write_dimensioned_lambda()
