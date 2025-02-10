@@ -120,7 +120,7 @@ class Vector(Sequence):
         return f"{self.value}"
 
     def __add__(self, other: Self) -> Self:
-        return Vector((s + o for s, o in zip(self, other)))
+        return Vector(tuple(s + o for s, o in zip(self, other)))
 
     def __neg__(self):
         return Vector(tuple(-elem for elem in self))
