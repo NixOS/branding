@@ -318,13 +318,15 @@ def make_flake_points(parameters):
         thickness=parameters.dimensions.thickness,
         gap=parameters.dimensions.gap,
     )
-
-    translation = Vector(
-        (
-            1.25 * parameters.dimensions.radius * cosd(120),
-            1.25 * parameters.dimensions.radius * sind(120),
-        )
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=0,
     )
+
+    translation_to_tip = Vector(tuple(-x for x in lambda_points_no_gap[1]))
+    translation_left = Vector((-parameters.dimensions.radius, 0))
+    translation = translation_to_tip + translation_left
 
     lambdas_translated = [point + translation for point in lambda_points_gap]
     flake_points = [
