@@ -194,14 +194,15 @@ class LineGroup:
     name: str
     stroke: str
     stroke_width: int
+    font_size: str
 
 
 @dataclass
 class ImageParameters:
-    min_x: int = -1100
-    min_y: int = -1100
-    width: int = 2200
-    height: int = 2200
+    min_x: int
+    min_y: int
+    width: int
+    height: int
 
 
 @dataclass
@@ -393,7 +394,7 @@ def make_dimension_line(point1, point2, flip, side, offset, parameters, text=Non
             ],
         ),
         svg.Text(
-            font_size="2rem",
+            font_size=parameters.dimension_lines.font_size,
             elements=[
                 svg.TextPath(
                     href=f"#dimension_path_{input_hash}",
@@ -460,7 +461,7 @@ def make_dimension_angle(
             marker_end="url(#dimension-arrow-head)",
         ),
         svg.Text(
-            font_size="2rem",
+            font_size=parameters.dimension_lines.font_size,
             elements=[
                 svg.TextPath(
                     href=f"#dimension_angle_{input_hash}",
@@ -813,10 +814,15 @@ def draw_flake(parameters) -> svg.SVG:
 
 
 if __name__ == "__main__":
-    object_lines = LineGroup("object", "green", 4)
-    construction_lines = LineGroup("construction", "blue", 2)
-    dimension_lines = LineGroup("dimension", "red", 1)
-    image_parameters = ImageParameters()
+    object_lines = LineGroup("object", "green", 4, "2rem")
+    construction_lines = LineGroup("construction", "blue", 2, "2rem")
+    dimension_lines = LineGroup("dimension", "red", 1, "2rem")
+    image_parameters = ImageParameters(
+        min_x=-512 * 2,
+        min_y=-512 * 2,
+        width=512 * 4,
+        height=512 * 4,
+    )
     parameters = Parameters(
         object_lines,
         construction_lines,
@@ -826,6 +832,9 @@ if __name__ == "__main__":
     # print(draw_lambda_linear_dimensions(parameters))
     # print(draw_lambda_angular_dimensions(parameters))
 
+    object_lines = LineGroup("object", "green", 8, "4rem")
+    construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    dimension_lines = LineGroup("dimension", "red", 2, "4rem")
     image_parameters = ImageParameters(
         min_x=-512 * 4,
         min_y=-512 * 4,
