@@ -206,15 +206,25 @@ class ImageParameters:
 
 
 @dataclass
+class Dimensions:
+    radius: int = 512
+    thickness: float = 1 / 4
+    gap: float = 1 / 32
+
+
+@dataclass
+class SnowFlake:
+    colors: tuple["str"] = ("#5277C3", "#7EBAE4") * 3
+
+
+@dataclass
 class Parameters:
-    radius = 512
-    thickness = 1 / 4
-    gap = 1 / 32
-    object_lines: LineGroup
     construction_lines: LineGroup
     dimension_lines: LineGroup
+    dimensions: Dimensions
     image_parameters: ImageParameters
-    colors: tuple["str"] = ("#5277C3", "#7EBAE4") * 3
+    object_lines: LineGroup
+    snow_flake: SnowFlake
 
 
 def cosd(angle) -> float:
@@ -276,14 +286,14 @@ def make_lambda_points(radius: Number, thickness: Number, gap: Number) -> list[N
 
 def make_lambda_polygons(parameters):
     lambda_points_no_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
         gap=0,
     )
     lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=parameters.dimensions.gap,
     )
     return [
         svg.Polygon(
@@ -304,15 +314,15 @@ def make_lambda_polygons(parameters):
 
 def make_flake_points(parameters):
     lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=parameters.dimensions.gap,
     )
 
     translation = Vector(
         (
-            1.25 * parameters.radius * cosd(120),
-            1.25 * parameters.radius * sind(120),
+            1.25 * parameters.dimensions.radius * cosd(120),
+            1.25 * parameters.dimensions.radius * sind(120),
         )
     )
 
@@ -346,7 +356,7 @@ def make_clean_flake_polygons(parameters):
             points=lambda_points.to_list(),
             fill=fill,
         )
-        for lambda_points, fill in zip(flake_points, parameters.colors)
+        for lambda_points, fill in zip(flake_points, parameters.snow_flake.colors)
     ]
 
 
@@ -370,7 +380,9 @@ def make_dimension_line(point1, point2, flip, side, offset, parameters, text=Non
     input_hash = hash((point1, point2, flip, side, offset, text))
 
     if text is None:
-        text = fractions.Fraction(round(measured_line.length()), 2 * parameters.radius)
+        text = fractions.Fraction(
+            round(measured_line.length()), 2 * parameters.dimensions.radius
+        )
 
     return [
         svg.Line(
@@ -530,21 +542,21 @@ def make_lambda_construction_lines(parameters):
         svg.Circle(
             cx=0,
             cy=0,
-            r=parameters.radius,
+            r=parameters.dimensions.radius,
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polygon(
-            points=make_hexagon_points(radius=parameters.radius).to_list(),
+            points=make_hexagon_points(radius=parameters.dimensions.radius).to_list(),
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polyline(
-            points=make_diagonal_line(radius=parameters.radius).to_list(),
+            points=make_diagonal_line(radius=parameters.dimensions.radius).to_list(),
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
@@ -554,16 +566,16 @@ def make_lambda_construction_lines(parameters):
 
 
 def make_lambda_linear_dimensions(parameters):
-    hexagon_points = make_hexagon_points(radius=parameters.radius)
+    hexagon_points = make_hexagon_points(radius=parameters.dimensions.radius)
     lambda_points_no_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
         gap=0,
     )
     lambda_points_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=parameters.dimensions.gap,
     )
 
     dim_main_diagonal = make_dimension_line(
@@ -630,9 +642,9 @@ def make_lambda_linear_dimensions(parameters):
 
 def make_lambda_angular_dimensions(parameters):
     lambda_points_no_gap = make_lambda_points(
-        radius=parameters.radius,
-        thickness=parameters.thickness,
-        gap=parameters.gap,
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=parameters.dimensions.gap,
     )
     options = [
         {"flip": True, "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
@@ -663,21 +675,25 @@ def make_flake_construction_lines(parameters):
         svg.Circle(
             cx=0,
             cy=0,
-            r=parameters.radius * 2.25,
+            r=parameters.dimensions.radius * 2.25,
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polygon(
-            points=make_hexagon_points(radius=parameters.radius * 2.25).to_list(),
+            points=make_hexagon_points(
+                radius=parameters.dimensions.radius * 2.25
+            ).to_list(),
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
             fill="transparent",
         ),
         svg.Polyline(
-            points=make_diagonal_line(radius=parameters.radius * 2.25).to_list(),
+            points=make_diagonal_line(
+                radius=parameters.dimensions.radius * 2.25
+            ).to_list(),
             stroke=parameters.construction_lines.stroke,
             stroke_width=parameters.construction_lines.stroke_width,
             stroke_dasharray=4,
@@ -688,7 +704,7 @@ def make_flake_construction_lines(parameters):
 
 def make_flake_linear_dimensions(parameters):
     flake_points = make_flake_points(parameters)
-    hexagon_points = make_hexagon_points(radius=parameters.radius)
+    hexagon_points = make_hexagon_points(radius=parameters.dimensions.radius)
 
     lin_inner_hex_long_length = make_dimension_line(
         point1=hexagon_points[1],
@@ -839,6 +855,8 @@ def draw_clean_flake(parameters) -> svg.SVG:
 
 
 if __name__ == "__main__":
+    # dimensions = Dimensions()
+    # snow_flake = SnowFlake()
     # object_lines = LineGroup("object", "green", 4, "2rem")
     # construction_lines = LineGroup("construction", "blue", 2, "2rem")
     # dimension_lines = LineGroup("dimension", "red", 1, "2rem")
@@ -849,14 +867,18 @@ if __name__ == "__main__":
     #     height=512 * 4,
     # )
     # parameters = Parameters(
-    #     object_lines,
-    #     construction_lines,
-    #     dimension_lines,
-    #     image_parameters,
+    #     construction_lines=construction_lines,
+    #     dimension_lines=dimension_lines,
+    #     dimensions=dimensions,
+    #     image_parameters=image_parameters,
+    #     object_lines=object_lines,
+    #     snow_flake=snow_flake,
     # )
     # print(draw_lambda_linear_dimensions(parameters))
     # # print(draw_lambda_angular_dimensions(parameters))
 
+    # dimensions = Dimensions()
+    # snow_flake = SnowFlake()
     # object_lines = LineGroup("object", "green", 8, "4rem")
     # construction_lines = LineGroup("construction", "blue", 4, "4rem")
     # dimension_lines = LineGroup("dimension", "red", 2, "4rem")
@@ -867,13 +889,17 @@ if __name__ == "__main__":
     #     height=512 * 8,
     # )
     # parameters = Parameters(
-    #     object_lines,
-    #     construction_lines,
-    #     dimension_lines,
-    #     image_parameters,
+    #     construction_lines=construction_lines,
+    #     dimension_lines=dimension_lines,
+    #     dimensions=dimensions,
+    #     image_parameters=image_parameters,
+    #     object_lines=object_lines,
+    #     snow_flake=snow_flake,
     # )
     # print(draw_flake(parameters))
 
+    dimensions = Dimensions()
+    snow_flake = SnowFlake()
     object_lines = LineGroup("object", "green", 8, "4rem")
     construction_lines = LineGroup("construction", "blue", 4, "4rem")
     dimension_lines = LineGroup("dimension", "red", 2, "4rem")
@@ -884,9 +910,11 @@ if __name__ == "__main__":
         height=512 * 4.5,
     )
     parameters = Parameters(
-        object_lines,
-        construction_lines,
-        dimension_lines,
-        image_parameters,
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        dimensions=dimensions,
+        image_parameters=image_parameters,
+        object_lines=object_lines,
+        snow_flake=snow_flake,
     )
     print(draw_clean_flake(parameters))
