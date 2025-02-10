@@ -214,6 +214,7 @@ class Parameters:
     construction_lines: LineGroup
     dimension_lines: LineGroup
     image_parameters: ImageParameters
+    colors: tuple["str"] = ("#5277C3", "#7EBAE4") * 3
 
 
 def cosd(angle) -> float:
@@ -334,6 +335,18 @@ def make_flake_polygons(parameters):
             fill="transparent",
         )
         for lambda_points in flake_points
+    ]
+
+
+def make_clean_flake_polygons(parameters):
+    flake_points = make_flake_points(parameters)
+
+    return [
+        svg.Polygon(
+            points=lambda_points.to_list(),
+            fill=fill,
+        )
+        for lambda_points, fill in zip(flake_points, parameters.colors)
     ]
 
 
@@ -813,33 +826,62 @@ def draw_flake(parameters) -> svg.SVG:
     )
 
 
+def draw_clean_flake(parameters) -> svg.SVG:
+    return svg.SVG(
+        viewBox=svg.ViewBoxSpec(
+            min_x=parameters.image_parameters.min_x,
+            min_y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+        ),
+        elements=(make_clean_flake_polygons(parameters)),
+    )
+
+
 if __name__ == "__main__":
-    object_lines = LineGroup("object", "green", 4, "2rem")
-    construction_lines = LineGroup("construction", "blue", 2, "2rem")
-    dimension_lines = LineGroup("dimension", "red", 1, "2rem")
-    image_parameters = ImageParameters(
-        min_x=-512 * 2,
-        min_y=-512 * 2,
-        width=512 * 4,
-        height=512 * 4,
-    )
-    parameters = Parameters(
-        object_lines,
-        construction_lines,
-        dimension_lines,
-        image_parameters,
-    )
+    # object_lines = LineGroup("object", "green", 4, "2rem")
+    # construction_lines = LineGroup("construction", "blue", 2, "2rem")
+    # dimension_lines = LineGroup("dimension", "red", 1, "2rem")
+    # image_parameters = ImageParameters(
+    #     min_x=-512 * 2,
+    #     min_y=-512 * 2,
+    #     width=512 * 4,
+    #     height=512 * 4,
+    # )
+    # parameters = Parameters(
+    #     object_lines,
+    #     construction_lines,
+    #     dimension_lines,
+    #     image_parameters,
+    # )
     # print(draw_lambda_linear_dimensions(parameters))
-    # print(draw_lambda_angular_dimensions(parameters))
+    # # print(draw_lambda_angular_dimensions(parameters))
+
+    # object_lines = LineGroup("object", "green", 8, "4rem")
+    # construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    # dimension_lines = LineGroup("dimension", "red", 2, "4rem")
+    # image_parameters = ImageParameters(
+    #     min_x=-512 * 4,
+    #     min_y=-512 * 4,
+    #     width=512 * 8,
+    #     height=512 * 8,
+    # )
+    # parameters = Parameters(
+    #     object_lines,
+    #     construction_lines,
+    #     dimension_lines,
+    #     image_parameters,
+    # )
+    # print(draw_flake(parameters))
 
     object_lines = LineGroup("object", "green", 8, "4rem")
     construction_lines = LineGroup("construction", "blue", 4, "4rem")
     dimension_lines = LineGroup("dimension", "red", 2, "4rem")
     image_parameters = ImageParameters(
-        min_x=-512 * 4,
-        min_y=-512 * 4,
-        width=512 * 8,
-        height=512 * 8,
+        min_x=-512 * 2.25,
+        min_y=-512 * 2.25,
+        width=512 * 4.5,
+        height=512 * 4.5,
     )
     parameters = Parameters(
         object_lines,
@@ -847,4 +889,4 @@ if __name__ == "__main__":
         dimension_lines,
         image_parameters,
     )
-    print(draw_flake(parameters))
+    print(draw_clean_flake(parameters))
