@@ -714,7 +714,7 @@ def make_flake_linear_dimensions(parameters):
         point2=hexagon_points[4],
         flip=False,
         side="right",
-        offset=1 / 16,
+        offset=1 / 8,
         parameters=parameters,
     )
 
@@ -788,7 +788,8 @@ def draw_lambda_angular_dimensions(parameters) -> svg.SVG:
     )
 
 
-def draw_flake(parameters) -> svg.SVG:
+def draw_flake_linear_dimensions(parameters) -> svg.SVG:
+    dimension_arrows = make_dimension_arrow_defs(parameters)
     lambda_construction_lines = make_lambda_construction_lines(parameters=parameters)
     construction_lines = make_flake_construction_lines(parameters=parameters)
     linear_dimensions = make_flake_linear_dimensions(parameters)
@@ -802,6 +803,7 @@ def draw_flake(parameters) -> svg.SVG:
         ),
         elements=(
             make_flake_polygons(parameters)
+            + dimension_arrows
             + lambda_construction_lines
             + construction_lines
             + linear_dimensions
@@ -868,7 +870,7 @@ def write_dimensioned_flake() -> None:
         snow_flake=snow_flake,
     )
     with open(Path("nixos-snowflake-dimensioned-linear.svg"), "w") as file:
-        file.write(str(draw_flake(parameters)))
+        file.write(str(draw_flake_linear_dimensions(parameters)))
 
 
 def write_clean_flake() -> None:
