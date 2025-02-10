@@ -209,7 +209,7 @@ class ImageParameters:
 class Parameters:
     radius = 512
     thickness = 1 / 4
-    gap = 1 / 16
+    gap = 1 / 32
     object_lines: LineGroup
     construction_lines: LineGroup
     dimension_lines: LineGroup
