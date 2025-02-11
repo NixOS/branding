@@ -351,7 +351,73 @@ def make_flake_polygons(parameters):
     ]
 
 
-def make_clean_flake_polygons(parameters):
+def make_flake_gradients_defs(parameters):
+    lambda_points_no_gap = make_lambda_points(
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=0,
+    )
+    return [
+        svg.Defs(
+            elements=[
+                svg.LinearGradient(
+                    id="linear-gradient-light-blue",
+                    gradientUnits="userSpaceOnUse",
+                    x1=lambda_points_no_gap[0][0],
+                    y1=lambda_points_no_gap[1][1],
+                    x2=0,
+                    y2=0,
+                    elements=[
+                        svg.Stop(offset="0%", stop_color="#699ad7"),
+                        svg.Stop(offset="35%", stop_color="#7eb1dd"),
+                        svg.Stop(offset="100%", stop_color="#7ebae4"),
+                    ],
+                ),
+                svg.LinearGradient(
+                    id="linear-gradient-dark-blue",
+                    gradientUnits="userSpaceOnUse",
+                    x1=lambda_points_no_gap[0][0],
+                    y1=lambda_points_no_gap[1][1],
+                    x2=0,
+                    y2=0,
+                    elements=[
+                        svg.Stop(offset="0%", stop_color="#415e9a"),
+                        svg.Stop(offset="35%", stop_color="#4a6baf"),
+                        svg.Stop(offset="100%", stop_color="#5277c3"),
+                    ],
+                ),
+            ]
+        ),
+    ]
+
+
+def make_clean_flake_polygons_gradient(parameters):
+    lambda_points_gap = make_lambda_points(
+        radius=parameters.dimensions.radius,
+        thickness=parameters.dimensions.thickness,
+        gap=parameters.dimensions.gap,
+    )
+    return [
+        svg.Polygon(
+            points=lambda_points_gap.to_list(),
+            fill=fill,
+            transform=[
+                svg.Translate(
+                    1.25 * parameters.dimensions.radius * cosd(120),
+                    1.25 * parameters.dimensions.radius * sind(120),
+                ),
+                svg.Rotate(
+                    angle,
+                    -1.25 * parameters.dimensions.radius * cosd(120),
+                    -1.25 * parameters.dimensions.radius * sind(120),
+                ),
+            ],
+        )
+        for angle, fill in zip(range(0, 360, 60), parameters.snow_flake.colors)
+    ]
+
+
+def make_clean_flake_polygons_flat(parameters):
     flake_points = make_flake_points(parameters)
 
     return [
@@ -811,7 +877,7 @@ def draw_flake_linear_dimensions(parameters) -> svg.SVG:
     )
 
 
-def draw_clean_flake(parameters) -> svg.SVG:
+def draw_clean_flake_flat(parameters) -> svg.SVG:
     return svg.SVG(
         viewBox=svg.ViewBoxSpec(
             min_x=parameters.image_parameters.min_x,
@@ -819,7 +885,22 @@ def draw_clean_flake(parameters) -> svg.SVG:
             width=parameters.image_parameters.width,
             height=parameters.image_parameters.height,
         ),
-        elements=(make_clean_flake_polygons(parameters)),
+        elements=(make_clean_flake_polygons_flat(parameters)),
+    )
+
+
+def draw_clean_flake_gradient(parameters) -> svg.SVG:
+    return svg.SVG(
+        viewBox=svg.ViewBoxSpec(
+            min_x=parameters.image_parameters.min_x,
+            min_y=parameters.image_parameters.min_y,
+            width=parameters.image_parameters.width,
+            height=parameters.image_parameters.height,
+        ),
+        elements=(
+            make_flake_gradients_defs(parameters),
+            make_clean_flake_polygons_gradient(parameters),
+        ),
     )
 
 
@@ -873,7 +954,7 @@ def write_dimensioned_flake() -> None:
         file.write(str(draw_flake_linear_dimensions(parameters)))
 
 
-def write_clean_flake() -> None:
+def write_clean_flake_flat() -> None:
     dimensions = Dimensions()
     snow_flake = SnowFlake()
     object_lines = LineGroup("object", "green", 8, "4rem")
@@ -893,11 +974,42 @@ def write_clean_flake() -> None:
         object_lines=object_lines,
         snow_flake=snow_flake,
     )
-    with open(Path("nixos-snowflake-color.svg"), "w") as file:
-        file.write(str(draw_clean_flake(parameters)))
+    with open(Path("nixos-snowflake-color-flat.svg"), "w") as file:
+        file.write(str(draw_clean_flake_flat(parameters)))
+
+
+def write_clean_flake_gradient() -> None:
+    dimensions = Dimensions()
+    snow_flake = SnowFlake(
+        colors=(
+            "url(#linear-gradient-dark-blue)",
+            "url(#linear-gradient-light-blue)",
+        )
+        * 3
+    )
+    object_lines = LineGroup("object", "green", 8, "4rem")
+    construction_lines = LineGroup("construction", "blue", 4, "4rem")
+    dimension_lines = LineGroup("dimension", "red", 2, "4rem")
+    image_parameters = ImageParameters(
+        min_x=-dimensions.radius * 2.25,
+        min_y=-dimensions.radius * 2.25,
+        width=dimensions.radius * 4.5,
+        height=dimensions.radius * 4.5,
+    )
+    parameters = Parameters(
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        dimensions=dimensions,
+        image_parameters=image_parameters,
+        object_lines=object_lines,
+        snow_flake=snow_flake,
+    )
+    with open(Path("nixos-snowflake-color-gradient.svg"), "w") as file:
+        file.write(str(draw_clean_flake_gradient(parameters)))
 
 
 if __name__ == "__main__":
-    write_clean_flake()
+    write_clean_flake_flat()
+    write_clean_flake_gradient()
     write_dimensioned_flake()
     write_dimensioned_lambda()
