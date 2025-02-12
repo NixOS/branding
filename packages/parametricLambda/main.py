@@ -1,3 +1,4 @@
+import colorsys
 import fractions
 import math
 from collections.abc import Sequence
@@ -216,6 +217,7 @@ class Dimensions:
 @dataclass
 class SnowFlake:
     colors: tuple["str"] = ("#5277C3", "#7EBAE4") * 3
+    color_names: tuple["str"] = ("#5277C3", "#7EBAE4") * 3
 
 
 @dataclass
@@ -357,38 +359,45 @@ def make_flake_gradients_defs(parameters):
         thickness=parameters.dimensions.thickness,
         gap=0,
     )
+
+    linear_gradients = []
+    for color in parameters.snow_flake.colors:
+        color0 = color
+        color_hsv = colorsys.rgb_to_hsv(*rgb_hex_to_float(color))
+        color_hsv_darker = (*color_hsv[:2], color_hsv[2] - 0.08)
+        color_hsv_darkerer = (*color_hsv[:2], color_hsv[2] - 0.08 * 2)
+        color1 = rgb_float_to_hex(colorsys.hsv_to_rgb(*color_hsv_darker))
+        color2 = rgb_float_to_hex(colorsys.hsv_to_rgb(*color_hsv_darkerer))
+
+        linear_gradients.append(
+            svg.LinearGradient(
+                id=f"linear-gradient-{color}",
+                gradientUnits="userSpaceOnUse",
+                x1=lambda_points_no_gap[0][0],
+                y1=lambda_points_no_gap[1][1],
+                x2=0,
+                y2=0,
+                elements=[
+                    svg.Stop(offset="0%", stop_color=color2),
+                    svg.Stop(offset="35%", stop_color=color1),
+                    svg.Stop(offset="100%", stop_color=color0),
+                ],
+            )
+        )
     return [
-        svg.Defs(
-            elements=[
-                svg.LinearGradient(
-                    id="linear-gradient-light-blue",
-                    gradientUnits="userSpaceOnUse",
-                    x1=lambda_points_no_gap[0][0],
-                    y1=lambda_points_no_gap[1][1],
-                    x2=0,
-                    y2=0,
-                    elements=[
-                        svg.Stop(offset="0%", stop_color="#699ad7"),
-                        svg.Stop(offset="35%", stop_color="#7eb1dd"),
-                        svg.Stop(offset="100%", stop_color="#7ebae4"),
-                    ],
-                ),
-                svg.LinearGradient(
-                    id="linear-gradient-dark-blue",
-                    gradientUnits="userSpaceOnUse",
-                    x1=lambda_points_no_gap[0][0],
-                    y1=lambda_points_no_gap[1][1],
-                    x2=0,
-                    y2=0,
-                    elements=[
-                        svg.Stop(offset="0%", stop_color="#415e9a"),
-                        svg.Stop(offset="35%", stop_color="#4a6baf"),
-                        svg.Stop(offset="100%", stop_color="#5277c3"),
-                    ],
-                ),
-            ]
-        ),
+        svg.Defs(elements=linear_gradients),
     ]
+
+
+def rgb_hex_to_float(rgb):
+    if len(rgb) == 7:
+        rgb = rgb[1:]  # remove hash symbol
+
+    return tuple(int(rgb[2 * index : 2 * (index + 1)], 16) / 255 for index in range(3))
+
+
+def rgb_float_to_hex(rgb):
+    return "#" + "".join(hex(round(elem * 255))[2:] for elem in rgb)
 
 
 def make_clean_flake_polygons_gradient(parameters):
@@ -413,7 +422,7 @@ def make_clean_flake_polygons_gradient(parameters):
                 ),
             ],
         )
-        for angle, fill in zip(range(0, 360, 60), parameters.snow_flake.colors)
+        for angle, fill in zip(range(0, 360, 60), parameters.snow_flake.color_names)
     ]
 
 
@@ -425,7 +434,7 @@ def make_clean_flake_polygons_flat(parameters):
             points=lambda_points.to_list(),
             fill=fill,
         )
-        for lambda_points, fill in zip(flake_points, parameters.snow_flake.colors)
+        for lambda_points, fill in zip(flake_points, parameters.snow_flake.color_names)
     ]
 
 
@@ -981,9 +990,9 @@ def write_clean_flake_flat() -> None:
 def write_clean_flake_gradient() -> None:
     dimensions = Dimensions()
     snow_flake = SnowFlake(
-        colors=(
-            "url(#linear-gradient-dark-blue)",
-            "url(#linear-gradient-light-blue)",
+        color_names=(
+            "url(#linear-gradient-#5277C3)",
+            "url(#linear-gradient-#7EBAE4)",
         )
         * 3
     )
