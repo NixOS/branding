@@ -188,7 +188,9 @@ class Matrix(Sequence):
         if isinstance(other, Point | Vector):
             return [sum(row @ other) for row in self]
         else:
-            raise Exception(f"Not sure how to matrix multiply {type(self)} and {type(other)}.")
+            raise Exception(
+                f"Not sure how to matrix multiply {type(self)} and {type(other)}."
+            )
 
 
 @dataclass
