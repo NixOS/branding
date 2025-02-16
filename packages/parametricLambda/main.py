@@ -1,5 +1,6 @@
 import colorsys
 import fractions
+import itertools
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -714,7 +715,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
 class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
     def __init__(
         self,
-        colors: tuple["str"] = ("#5277C3", "#7EBAE4") * 3,
+        colors: tuple["str"] = ("#5277C3", "#7EBAE4"),
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -760,7 +761,9 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
                 points=lambda_points.to_list(),
                 fill=fill,
             )
-            for lambda_points, fill in zip(flake_points, self.color_names)
+            for lambda_points, fill in zip(
+                flake_points, itertools.cycle(self.color_names)
+            )
         ]
 
     def make_flake_construction_lines(self):
@@ -930,7 +933,7 @@ class SnowFlakeGradient(SnowFlake):
                     ),
                 ],
             )
-            for angle, fill in zip(range(0, 360, 60), self.color_names)
+            for angle, fill in zip(range(0, 360, 60), itertools.cycle(self.color_names))
         ]
 
     def draw_lambda_with_gradients_line(self) -> svg.SVG:
@@ -1217,6 +1220,7 @@ def make_lambda_gradient_line() -> None:
         gap=1 / 32,
     )
     snow_flake.write_lambda_with_gradient_line()
+
 
 def make_lambda_gradient_background() -> None:
     object_lines = LineGroup(
