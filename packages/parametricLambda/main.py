@@ -219,6 +219,7 @@ class LineGroup:
     stroke_width: int
     font_size: str
     stroke_dasharray: int = 4
+    fill: str = "transparent"
 
 
 class ConstructionLines:
@@ -361,7 +362,7 @@ class DimensionLines:
                 ],
                 stroke=self.dimension_lines.stroke,
                 stroke_width=self.dimension_lines.stroke_width,
-                fill="transparent",
+                fill=self.dimension_lines.fill,
                 marker_start="url(#dimension-arrow-head)",
                 marker_end="url(#dimension-arrow-head)",
             ),
@@ -393,7 +394,7 @@ class DimensionLines:
                         elements=[
                             svg.Path(
                                 d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
-                                fill=self.dimension_lines.stroke,
+                                fill=self.dimension_lines.stroke,  # can't use fill because of arcs
                             )
                         ],
                     )
@@ -509,14 +510,14 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 points=lambda_points_no_gap.to_list(),
                 stroke=self.object_lines.stroke,
                 stroke_width=self.object_lines.stroke_width,
-                fill="transparent",
+                fill=self.object_lines.fill,
                 stroke_dasharray=4,
             ),
             svg.Polygon(
                 points=lambda_points_gap.to_list(),
                 stroke=self.object_lines.stroke,
                 stroke_width=self.object_lines.stroke_width,
-                fill="transparent",
+                fill=self.object_lines.fill,
             ),
         ]
 
@@ -547,14 +548,14 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
             svg.Polygon(
                 points=self.make_hexagon_points(radius=self.radius).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
         ]
 
@@ -565,7 +566,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
         ]
 
@@ -746,7 +747,7 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
                 points=lambda_points.to_list(),
                 stroke=self.object_lines.stroke,
                 stroke_width=self.object_lines.stroke_width,
-                fill="transparent",
+                fill=self.object_lines.fill,
             )
             for lambda_points in flake_points
         ]
@@ -771,21 +772,21 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
             svg.Polygon(
                 points=self.make_hexagon_points(radius=self.radius * 2.25).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
             svg.Polyline(
                 points=Lambda.make_diagonal_line(radius=self.radius * 2.25).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
+                fill=self.construction_lines.fill,
             ),
         ]
 
@@ -942,22 +943,68 @@ class SnowFlakeGradient(SnowFlake):
             for offset in self._gradient_stop_offsets
         ]
 
-        gradient_lines = [
-            svg.Line(
-                **gradient_end_points,
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
+        lambda_points_no_gap = self.make_lambda_points(gap=0)
+        dimension_lines = [
+            self.make_dimension_line(
+                point1=lambda_points_no_gap[0],
+                point2=point_start,
+                flip=False,
+                side="left",
+                offset=0,
+                reference=2 * self.radius,
+                text="V",
             ),
-        ] + [
-            svg.Circle(
-                cx=stop_point.x,
-                cy=stop_point.y,
-                r=2 * self.construction_lines.stroke_width,
-                fill=self.construction_lines.stroke,
-            )
-            for stop_point in stop_points
+            self.make_dimension_line(
+                point1=lambda_points_no_gap[1],
+                point2=point_start,
+                flip=False,
+                side="left",
+                offset=0,
+                reference=2 * self.radius,
+                text="H",
+            ),
+            self.make_dimension_line(
+                point1=lambda_points_no_gap[4],
+                point2=point_stop,
+                flip=False,
+                side="left",
+                offset=0,
+                reference=2 * self.radius,
+                text="H",
+            ),
         ]
+
+        gradient_lines = (
+            [
+                svg.Line(
+                    **gradient_end_points,
+                    stroke=self.construction_lines.stroke,
+                    stroke_width=self.construction_lines.stroke_width,
+                    stroke_dasharray=self.construction_lines.stroke_dasharray,
+                ),
+            ]
+            + [
+                svg.Circle(
+                    cx=stop_point.x,
+                    cy=stop_point.y,
+                    r=2 * self.construction_lines.stroke_width,
+                    fill=self.construction_lines.stroke,
+                )
+                for stop_point in stop_points
+            ]
+            + [
+                svg.Text(
+                    x=stop_point.x,
+                    y=stop_point.y,
+                    dx=f"{0.01 * self.radius}",
+                    dy=f"-{0.01 * self.radius}",
+                    elements=[f"{offset}%"],
+                    font_size=self.construction_lines.font_size,
+                )
+                for stop_point, offset in zip(stop_points, self._gradient_stop_offsets)
+            ]
+            + dimension_lines
+        )
 
         axis_lines = self.make_axis_lines()
         dimension_arrows = self.make_dimension_arrow_defs()
@@ -967,7 +1014,8 @@ class SnowFlakeGradient(SnowFlake):
         return svg.SVG(
             viewBox=self.make_view_box(),
             elements=(
-                axis_lines
+                self.make_flake_gradients_defs()
+                + axis_lines
                 + dimension_arrows
                 + construction_lines
                 + lambda_polygons
@@ -978,6 +1026,79 @@ class SnowFlakeGradient(SnowFlake):
     def write_lambda_with_gradient_line(self) -> None:
         with open(Path("nixos-lambda-dimensioned-gradient.svg"), "w") as file:
             file.write(str(self.draw_lambda_with_gradients_line()))
+
+    def draw_lambda_with_gradients_background(self) -> svg.SVG:
+        gradient_end_points = self.make_gradient_end_points()
+        point_start = Point((gradient_end_points["x1"], gradient_end_points["y1"]))
+        point_stop = Point((gradient_end_points["x2"], gradient_end_points["y2"]))
+        point_vector = point_stop - point_start
+        stop_points = [
+            point_start + offset / 100 * point_vector
+            for offset in self._gradient_stop_offsets
+        ]
+
+        gradient_lines = (
+            [
+                svg.Line(
+                    **gradient_end_points,
+                    stroke=self.construction_lines.stroke,
+                    stroke_width=self.construction_lines.stroke_width,
+                    stroke_dasharray=self.construction_lines.stroke_dasharray,
+                ),
+            ]
+            + [
+                svg.Circle(
+                    cx=stop_point.x,
+                    cy=stop_point.y,
+                    r=2 * self.construction_lines.stroke_width,
+                    fill=self.construction_lines.stroke,
+                )
+                for stop_point in stop_points
+            ]
+            + [
+                svg.Text(
+                    x=stop_point.x,
+                    y=stop_point.y,
+                    dx=f"{0.01 * self.radius}",
+                    dy=f"-{0.01 * self.radius}",
+                    elements=[f"{offset}%"],
+                    font_size=self.construction_lines.font_size,
+                )
+                for stop_point, offset in zip(stop_points, self._gradient_stop_offsets)
+            ]
+        )
+
+        background = [
+            svg.Rect(
+                x=self.min_x,
+                y=self.min_y,
+                width=self.width,
+                height=self.height,
+                fill=f"url(#{self.color_names[0]})",
+            )
+        ]
+
+        axis_lines = self.make_axis_lines()
+        dimension_arrows = self.make_dimension_arrow_defs()
+        construction_lines = self.make_lambda_construction_lines()
+        lambda_polygons = self.make_lambda_polygons()
+
+        return svg.SVG(
+            viewBox=self.make_view_box(),
+            elements=(
+                self.make_flake_gradients_defs()
+                + background
+                + axis_lines
+                + dimension_arrows
+                + construction_lines
+                + lambda_polygons
+                + gradient_lines
+            ),
+        )
+
+    def write_lambda_with_gradient_background(self) -> None:
+        with open(Path("nixos-lambda-background-gradient.svg"), "w") as file:
+            file.write(str(self.draw_lambda_with_gradients_background()))
 
     def draw_clean_flake_gradient(self) -> svg.SVG:
         return svg.SVG(
@@ -1063,7 +1184,7 @@ def make_dimensioned_snowflake() -> None:
     snow_flake.write_dimensioned_flake()
 
 
-def make_lambda_gradient() -> None:
+def make_lambda_gradient_line() -> None:
     object_lines = LineGroup(
         name="object",
         stroke="green",
@@ -1087,15 +1208,50 @@ def make_lambda_gradient() -> None:
         object_lines=object_lines,
         construction_lines=construction_lines,
         dimension_lines=dimension_lines,
-        min_x=-2.25 * radius,
-        min_y=-2.25 * radius,
-        width=4.5 * radius,
-        height=4.5 * radius,
+        min_x=-2 * radius,
+        min_y=-2 * radius,
+        width=4 * radius,
+        height=4 * radius,
         radius=radius,
         thickness=1 / 4,
         gap=1 / 32,
     )
     snow_flake.write_lambda_with_gradient_line()
+
+def make_lambda_gradient_background() -> None:
+    object_lines = LineGroup(
+        name="object",
+        stroke="white",
+        stroke_width=4,
+        font_size="2rem",
+        fill="transparent",
+    )
+    construction_lines = LineGroup(
+        name="construction",
+        stroke="black",
+        stroke_width=2,
+        font_size="2rem",
+    )
+    dimension_lines = LineGroup(
+        name="dimension",
+        stroke="red",
+        stroke_width=1,
+        font_size="2rem",
+    )
+    radius = 512
+    snow_flake = SnowFlakeGradient(
+        object_lines=object_lines,
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+        min_x=-2 * radius,
+        min_y=-2 * radius,
+        width=4 * radius,
+        height=4 * radius,
+        radius=radius,
+        thickness=1 / 4,
+        gap=1 / 32,
+    )
+    snow_flake.write_lambda_with_gradient_background()
 
 
 def make_snowflake_flat() -> None:
@@ -1141,7 +1297,8 @@ def make_snowflake_gradient() -> None:
 def main():
     make_dimensioned_lambdas()
     make_dimensioned_snowflake()
-    make_lambda_gradient()
+    make_lambda_gradient_line()
+    make_lambda_gradient_background()
     make_snowflake_flat()
     make_snowflake_gradient()
 
