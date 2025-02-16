@@ -938,7 +938,6 @@ class SnowFlakeGradient(SnowFlake):
             point_start + offset / 100 * point_vector
             for offset in self._gradient_stop_offsets
         ]
-        print(stop_points)
 
         gradient_lines = [
             svg.Line(
