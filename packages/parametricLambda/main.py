@@ -218,6 +218,7 @@ class LineGroup:
     stroke: str
     stroke_width: int
     font_size: str
+    stroke_dasharray: int = 4
 
 
 class ConstructionLines:
@@ -541,21 +542,21 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 r=self.radius,
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
             svg.Polygon(
                 points=self.make_hexagon_points(radius=self.radius).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
             svg.Polyline(
                 points=Lambda.make_diagonal_line(radius=self.radius).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
         ]
@@ -753,21 +754,21 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
                 r=self.radius * 2.25,
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
             svg.Polygon(
                 points=self.make_hexagon_points(radius=self.radius * 2.25).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
             svg.Polyline(
                 points=Lambda.make_diagonal_line(radius=self.radius * 2.25).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=4,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
         ]
