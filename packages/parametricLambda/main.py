@@ -857,18 +857,21 @@ class SnowFlakeGradient(SnowFlake):
     ):
         super().__init__(**kwargs)
         self._make_color_names()
-        self._gradient_stop_offsets = [0, 35, 100]
+        self._gradient_stop_offsets = [0, 25, 100]
 
     def _make_color_names(self):
         self.color_names = tuple(f"linear-gradient-{color}" for color in self.colors)
 
     def make_gradient_end_points(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
+        stop_point = lambda_points_no_gap[4] + self.radius * self.thickness * Vector(
+            (1, 0)
+        )
         return {
-            "x1": lambda_points_no_gap[0][0],
-            "y1": lambda_points_no_gap[1][1],
-            "x2": 0,
-            "y2": 0,
+            "x1": lambda_points_no_gap[0].x,
+            "y1": lambda_points_no_gap[1].y,
+            "x2": stop_point.x,
+            "y2": stop_point.y,
         }
 
     def make_flake_gradients_defs(self):
