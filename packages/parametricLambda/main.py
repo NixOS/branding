@@ -520,7 +520,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             ),
         ]
 
-    def make_lambda_construction_lines(self):
+    def make_axis_lines(self):
         return [
             svg.Line(
                 x1=self.min_x,
@@ -536,6 +536,10 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 y2=self.min_y + self.height,
                 stroke="black",
             ),
+        ]
+
+    def make_lambda_construction_lines(self):
+        return [
             svg.Circle(
                 cx=0,
                 cy=0,
@@ -552,6 +556,10 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
+        ]
+
+    def make_lambda_main_diagonal(self):
+        return [
             svg.Polyline(
                 points=Lambda.make_diagonal_line(radius=self.radius).to_list(),
                 stroke=self.construction_lines.stroke,
@@ -656,32 +664,40 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
         ]
 
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
+        axis_lines = self.make_axis_lines()
         dimension_arrows = self.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
+        main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
         lambda_linear_dimensions = self.make_lambda_linear_dimensions()
 
         return svg.SVG(
             viewBox=self.make_view_box(),
             elements=(
-                dimension_arrows
+                axis_lines
+                + dimension_arrows
                 + construction_lines
+                + main_diagonal
                 + lambda_polygons
                 + lambda_linear_dimensions
             ),
         )
 
     def draw_lambda_angular_dimensions(self) -> svg.SVG:
+        axis_lines = self.make_axis_lines()
         dimension_arrows = self.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
+        main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
         lambda_angular_dimensions = self.make_lambda_angular_dimensions()
 
         return svg.SVG(
             viewBox=self.make_view_box(),
             elements=(
-                dimension_arrows
+                axis_lines
+                + dimension_arrows
                 + construction_lines
+                + main_diagonal
                 + lambda_polygons
                 + lambda_angular_dimensions
             ),
@@ -801,6 +817,7 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
         ]
 
     def draw_flake_linear_dimensions(self) -> svg.SVG:
+        axis_lines = self.make_axis_lines()
         dimension_arrows = self.make_dimension_arrow_defs()
         lambda_construction_lines = self.make_lambda_construction_lines()
         construction_lines = self.make_flake_construction_lines()
@@ -810,6 +827,7 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
             viewBox=self.make_view_box(),
             elements=(
                 self.make_flake_polygons_for_dimensions()
+                + axis_lines
                 + dimension_arrows
                 + lambda_construction_lines
                 + construction_lines
