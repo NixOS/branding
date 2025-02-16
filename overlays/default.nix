@@ -26,9 +26,7 @@ let
   # overlays
 
   allLocalOverlays = genAttrs (getDirectories ../overlays) (
-    dir: final: prev: {
-      "${dir}" = final.callPackage ../overlays/${dir}/overlay.nix { };
-    }
+    dir: import ../overlays/${dir}/overlay.nix inputs
   );
 
   allLocalPackages = genAttrs (getDirectories ../packages) (
