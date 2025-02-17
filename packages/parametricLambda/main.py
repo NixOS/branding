@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
+import hsluv
 import svg
 from svg._types import Number
 
@@ -28,6 +29,68 @@ def rgb_hex_to_float(rgb):
 
 def rgb_float_to_hex(rgb):
     return "#" + "".join(hex(round(elem * 255))[2:] for elem in rgb)
+
+
+class Color(Sequence):
+    def __init__(self, hue: float, saturation: float, lightness: float):
+        self.value = (hue, saturation, lightness)
+        super().__init__()
+
+    def __getitem__(self, index):
+        return self.value[index]
+
+    def __len__(self):
+        return len(self.value)
+
+    def __str__(self):
+        return f"{self.value}"
+
+    def __repr__(self):
+        return f"Color{self.value}"
+
+    @property
+    def hue(self) -> float:
+        """The hue property."""
+        return self.value[0]
+
+    @property
+    def saturation(self) -> float:
+        """The saturation property."""
+        return self.value[1]
+
+    @property
+    def lightness(self) -> float:
+        """The lightness property."""
+        return self.value[2]
+
+    @classmethod
+    def from_rgb(cls, *args) -> Self:
+        if all(isinstance(elem, float) for elem in args):
+            return cls(*hsluv.rgb_to_hsluv(args))
+        elif all(isinstance(elem, int) for elem in args):
+            return cls(*hsluv.rgb_to_hsluv([arg / 255 for arg in args]))
+        else:
+            raise Exception("Initializing values are of different types.")
+
+    @classmethod
+    def from_hsluv(cls, *args) -> Self:
+        if all(isinstance(elem, float) for elem in args):
+            return cls(*args)
+        elif all(isinstance(elem, int) for elem in args):
+            return cls(*(float(arg) for arg in args))
+        else:
+            raise Exception("Initializing values are of different types.")
+
+    def offset_color(self, offsets: dict[float]) -> Self:
+        keys = ("hue", "saturation", "lightness")
+
+        if not all(elem in keys for elem in offsets.keys()):
+            raise Exception("Offset key not one of hue, saturation, or lightness.")
+
+        offset_values = {
+            key: getattr(self, key) + offsets.get(key, 0.0) for key in keys
+        }
+        return Color(**offset_values)
 
 
 class Point(Sequence):
