@@ -13,10 +13,13 @@ inputs.self.library.defaultSystems (
 
     pythonShell = pkgs.mkShell {
       packages = [
-        (pkgs.python3.withPackages (ps: [
-          ps.svg-py
-          ps.hsluv
-        ]))
+        (pkgs.python3.withPackages (
+          ps: with ps; [
+            coloraide
+            hsluv
+            svg-py
+          ]
+        ))
       ];
     };
   }
