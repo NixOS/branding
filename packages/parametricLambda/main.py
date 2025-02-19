@@ -1,4 +1,3 @@
-import colorsys
 import fractions
 import itertools
 import math
@@ -8,6 +7,7 @@ from pathlib import Path
 from typing import Self
 
 import svg
+from coloraide import Color
 from svg._types import Number
 
 
@@ -19,15 +19,8 @@ def sind(angle) -> float:
     return math.sin(math.radians(angle))
 
 
-def rgb_hex_to_float(rgb):
-    if len(rgb) == 7:
-        rgb = rgb[1:]  # remove hash symbol
-
-    return tuple(int(rgb[2 * index : 2 * (index + 1)], 16) / 255 for index in range(3))
-
-
-def rgb_float_to_hex(rgb):
-    return "#" + "".join(hex(round(elem * 255))[2:] for elem in rgb)
+NIXOS_DARK_BLUE = Color("oklch", (0.58, 0.125, 260))
+NIXOS_LIGHT_BLUE = Color("oklch", (0.76, 0.090, 240))
 
 
 class Point(Sequence):
@@ -715,7 +708,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
 class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
     def __init__(
         self,
-        colors: tuple["str"] = ("#5277C3", "#7EBAE4"),
+        colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -723,7 +716,7 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
         self._make_color_names()
 
     def _make_color_names(self):
-        self.color_names = self.colors
+        self.color_names = tuple(color.to_string() for color in self.colors)
 
     def make_flake_points(self):
         lambda_points_gap = self.make_lambda_points()
@@ -862,9 +855,22 @@ class SnowFlakeGradient(SnowFlake):
         super().__init__(**kwargs)
         self._make_color_names()
         self._gradient_stop_offsets = [0, 25, 100]
+        self._gradient_lightness_delta = -0.04
+        self._gradient_chroma_delta = -0.01
 
     def _make_color_names(self):
-        self.color_names = tuple(f"linear-gradient-{color}" for color in self.colors)
+        self.color_names = tuple(
+            f"linear-gradient-{hash(color.to_string())}" for color in self.colors
+        )
+
+    def darken(self, color: Color) -> Color:
+        # fmt: off
+        return (
+            color.clone()
+            .set("lightness", lambda lightness: lightness + self._gradient_lightness_delta )
+            .set("chroma", lambda chroma: chroma + self._gradient_chroma_delta)
+        )
+        # fmt: on
 
     def make_gradient_end_points(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
@@ -883,12 +889,11 @@ class SnowFlakeGradient(SnowFlake):
 
         linear_gradients = []
         for color, color_name in zip(self.colors, self.color_names):
-            color0 = color
-            color_hsv = colorsys.rgb_to_hsv(*rgb_hex_to_float(color))
-            color_hsv_darker = (*color_hsv[:2], color_hsv[2] - 0.08)
-            color_hsv_darkerer = (*color_hsv[:2], color_hsv[2] - 0.08 * 2)
-            color1 = rgb_float_to_hex(colorsys.hsv_to_rgb(*color_hsv_darker))
-            color2 = rgb_float_to_hex(colorsys.hsv_to_rgb(*color_hsv_darkerer))
+            color_original = color.convert("srgb").to_string(hex=True)
+            color_midpoint = self.darken(color).convert("srgb").to_string(hex=True)
+            color_dark = (
+                self.darken(self.darken(color)).convert("srgb").to_string(hex=True)
+            )
 
             linear_gradients.append(
                 svg.LinearGradient(
@@ -898,15 +903,15 @@ class SnowFlakeGradient(SnowFlake):
                     elements=[
                         svg.Stop(
                             offset=f"{self._gradient_stop_offsets[0]}%",
-                            stop_color=color2,
+                            stop_color=color_dark,
                         ),
                         svg.Stop(
                             offset=f"{self._gradient_stop_offsets[1]}%",
-                            stop_color=color1,
+                            stop_color=color_midpoint,
                         ),
                         svg.Stop(
                             offset=f"{self._gradient_stop_offsets[2]}%",
-                            stop_color=color0,
+                            stop_color=color_original,
                         ),
                     ],
                 )
