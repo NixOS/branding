@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Self
 
 import svg
-from coloraide import Color
+from coloraide import Color as ColorBase
 from svg._types import Number
 
 
@@ -17,6 +17,25 @@ def cosd(angle) -> float:
 
 def sind(angle) -> float:
     return math.sin(math.radians(angle))
+
+
+class Color(ColorBase):
+    GRADIENT_LIGHTNESS_DELTA = -0.04
+    GRADIENT_CHROMA_DELTA = -0.01
+
+    def darken(self, scale) -> Self:
+        """Clones and darkens the color. Only used for Lch-like colorspaces."""
+        return (
+            self.clone()
+            .set(
+                "lightness",
+                lambda lightness: lightness + scale * self.GRADIENT_LIGHTNESS_DELTA,
+            )
+            .set("chroma", lambda chroma: chroma + scale * self.GRADIENT_CHROMA_DELTA)
+        )
+
+    def gradient_color_name(self) -> str:
+        return f"linear-gradient-{hash(self.to_string())}"
 
 
 NIXOS_DARK_BLUE = Color("oklch", (0.58, 0.125, 260))
@@ -859,18 +878,7 @@ class SnowFlakeGradient(SnowFlake):
         self._gradient_chroma_delta = -0.01
 
     def _make_color_names(self):
-        self.color_names = tuple(
-            f"linear-gradient-{hash(color.to_string())}" for color in self.colors
-        )
-
-    def darken(self, color: Color) -> Color:
-        # fmt: off
-        return (
-            color.clone()
-            .set("lightness", lambda lightness: lightness + self._gradient_lightness_delta )
-            .set("chroma", lambda chroma: chroma + self._gradient_chroma_delta)
-        )
-        # fmt: on
+        self.color_names = tuple(color.gradient_color_name() for color in self.colors)
 
     def make_gradient_end_points(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
@@ -890,10 +898,8 @@ class SnowFlakeGradient(SnowFlake):
         linear_gradients = []
         for color, color_name in zip(self.colors, self.color_names):
             color_original = color.convert("srgb").to_string(hex=True)
-            color_midpoint = self.darken(color).convert("srgb").to_string(hex=True)
-            color_dark = (
-                self.darken(self.darken(color)).convert("srgb").to_string(hex=True)
-            )
+            color_midpoint = color.darken(1).convert("srgb").to_string(hex=True)
+            color_dark = color.darken(2).convert("srgb").to_string(hex=True)
 
             linear_gradients.append(
                 svg.LinearGradient(
