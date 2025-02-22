@@ -38,8 +38,8 @@ class Color(ColorBase):
         return f"linear-gradient-{hash(self.to_string())}"
 
 
-NIXOS_DARK_BLUE = Color("oklch", (0.58, 0.125, 264))
-NIXOS_LIGHT_BLUE = Color("oklch", (0.76, 0.090, 240))
+NIXOS_DARK_BLUE = Color("oklch", (0.5774, 0.1248, 264))
+NIXOS_LIGHT_BLUE = Color("oklch", (0.7636, 0.0866, 240))
 
 
 class Point(Sequence):
