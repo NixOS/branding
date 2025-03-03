@@ -11,12 +11,12 @@ inputs.self.library.defaultSystems (
       inherit (inputs.self.checks.${system}.pre-commit-check) shellHook;
     };
 
-    pythonShell = pkgs.mkShell {
+    logoDev = pkgs.mkShell {
       packages = [
         (pkgs.python3.withPackages (
           ps: with ps; [
             coloraide
-            hsluv
+            freetype-py
             svg-py
           ]
         ))
