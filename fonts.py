@@ -23,7 +23,7 @@ face.set_transform(
 )
 
 # face.set_char_size(48 * 64)  # Sets the font size
-face.set_char_size(1 * 64)  # Sets the font size
+face.set_char_size(8 * 64)  # Sets the font size
 # face.set_char_size(height=150, hres=300, vres=300)  # Sets the font size
 # face.set_pixel_sizes(4, 4)  # Sets the font size
 
