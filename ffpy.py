@@ -8,7 +8,9 @@ class Character:
     def __init__(
         self,
         character,
-        font_file=Path("./vegur.602/Vegur-Regular-0.602.otf"),
+        # font_file=Path("./vegur.602/Vegur-Regular-0.602.otf"),
+        # font_file=Path("./vegur_0701/Vegur-Regular.otf"),
+        font_file=Path("./route159_110/Route159-Regular.otf"),
         scale=1,
         remove_bearing=True,
     ):
@@ -100,6 +102,39 @@ class Character:
         )
 
 
-my_char = Character("N")
+class Characters:
+    def __init__(
+        self,
+        characters: list[str],
+        spacings: list[int],
+    ):
+        self.characters = [Character(elem) for elem in characters]
+        x_offset = 0
+        for character, spacing in zip(self.characters, spacings):
+            x_offset += spacing
+            character.glyph.transform((1, 0, 0, 1, x_offset, 0))
+            character_width = (
+                character.glyph.boundingBox()[2] - character.glyph.boundingBox()[0]
+            )
+            x_offset += character_width
+
+    def make_svg(self):
+        constants = {"size": 800, "scale": 1}
+
+        return svg.SVG(
+            viewBox=svg.ViewBoxSpec(
+                min_x=-constants["size"] * 0,
+                min_y=-constants["size"] * 1,
+                width=constants["size"] * 4,
+                height=constants["size"] * 1,
+            ),
+            elements=[elem.get_svg_element() for elem in self.characters],
+        )
+
+
+my_char = Characters(
+    characters=["N", "i", "x", "O", "S"],
+    spacings=[200, 90, 70, 50, 10],
+)
 with open(Path("blah.svg"), "w") as file:
     file.write(str(my_char.make_svg()))
