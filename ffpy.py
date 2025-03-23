@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, ClassVar
 
 import fontforge
 import svg
@@ -12,39 +13,51 @@ from everything import (
     Point,
 )
 
+DEFAULT_CHARACTER_TRANSFORMS = {
+    "scale_x": 1,
+    "scale_y": -1,
+    "remove_bearing": True,
+    "color": "black",
+}
+DEFAULT_FONT_TRANSFORMS = {
+    "N": DEFAULT_CHARACTER_TRANSFORMS,
+    "i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1},
+    "x": DEFAULT_CHARACTER_TRANSFORMS,
+    "O": DEFAULT_CHARACTER_TRANSFORMS,
+    "S": DEFAULT_CHARACTER_TRANSFORMS,
+}
 
-@dataclass(kw_only=True)
-class Character:
-    character: str | None
+
+@dataclass
+class FontLoader:
     font_file: Path = Path("./route159_110/Route159-Regular.otf")
-    color: str = "black"
-    scale: float = 1
-    flip_x: bool = False
-    flip_y: bool = True
-    remove_bearing: bool = True
+    transforms_map: ClassVar[dict[str, Any]] = DEFAULT_FONT_TRANSFORMS
 
     def __post_init__(self):
         self.font = fontforge.open(str(self.font_file))
-        self.glyph = self.font[self.character]
-        self._transform_glyph()
 
-    def _transform_glyph(self):
-        self.glyph.transform(
+        for character, transforms in self.transforms_map.items():
+            self._scale_glyph(character, transforms)
+            self._offset_glyph(character, transforms)
+
+    def _scale_glyph(self, character, transforms):
+        self.font[character].transform(
             (
-                (-1 if self.flip_x else 1) * self.scale,
+                transforms["scale_x"],
                 0,
                 0,
-                (-1 if self.flip_y else 1) * self.scale,
+                transforms["scale_y"],
                 0,
                 0,
             )
         )
 
+    def _offset_glyph(self, character, transforms):
         x_offset = 0
-        if self.remove_bearing:
-            x_offset = -self.glyph.left_side_bearing
+        if transforms["remove_bearing"]:
+            x_offset = -self.font[character].left_side_bearing
 
-        self.glyph.transform(
+        self.font[character].transform(
             (
                 1,
                 0,
@@ -54,6 +67,17 @@ class Character:
                 0,
             )
         )
+
+
+@dataclass(kw_only=True)
+class Character:
+    character: str | None
+    loader: FontLoader
+    color: str = "black"
+
+    def __post_init__(self):
+        self.font = self.loader.font
+        self.glyph = self.font[self.character]
 
     @property
     def glyph_width(self):
@@ -386,13 +410,14 @@ class DimensionedCharacters(Characters, DimensionLines):
 
 
 def make_logotype():
+    loader = FontLoader()
     my_char = Characters(
         characters=[
-            Character(character="N"),
-            Character(character="i", flip_x=True),
-            Character(character="x"),
-            Character(character="O"),
-            Character(character="S"),
+            Character(character="N", loader=loader),
+            Character(character="i", loader=loader),
+            Character(character="x", loader=loader),
+            Character(character="O", loader=loader),
+            Character(character="S", loader=loader),
         ],
         spacings=[200, 90, 70, 50, 10],
         reference_size=None,
@@ -405,13 +430,14 @@ def make_logotype():
 
 
 def make_modified_logotype():
+    loader = FontLoader()
     my_char = Characters(
         characters=[
-            Character(character="N"),
-            Character(character="i", flip_x=True),
-            ModifiedCharacter(),
-            Character(character="O"),
-            Character(character="S"),
+            Character(character="N", loader=loader),
+            Character(character="i", loader=loader),
+            ModifiedCharacter(loader=loader),
+            Character(character="O", loader=loader),
+            Character(character="S", loader=loader),
         ],
         spacings=[200, 90, 70, 50, 10],
         reference_size=None,
@@ -438,13 +464,14 @@ def make_dimensioned_logotype():
         stroke_dasharray=8,
         font_size="2rem",
     )
+    loader = FontLoader()
     my_char_dim = DimensionedCharacters(
         characters=[
-            Character(character="N"),
-            Character(character="i", flip_x=True),
-            Character(character="x"),
-            Character(character="O"),
-            Character(character="S"),
+            Character(character="N", loader=loader),
+            Character(character="i", loader=loader),
+            Character(character="x", loader=loader),
+            Character(character="O", loader=loader),
+            Character(character="S", loader=loader),
         ],
         spacings=[0, 90, 70, 50, 10],
         reference_size=None,
