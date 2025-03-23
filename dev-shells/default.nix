@@ -16,6 +16,7 @@ inputs.self.library.defaultSystems (
         (pkgs.python3.withPackages (
           ps: with ps; [
             coloraide
+            fontforge
             freetype-py
             svg-py
           ]
