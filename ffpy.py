@@ -4,39 +4,44 @@ from pathlib import Path
 import fontforge
 import svg
 
-from everything import DimensionLines, LineGroup, Point
+from everything import (
+    NIXOS_DARK_BLUE,
+    NIXOS_LIGHT_BLUE,
+    DimensionLines,
+    LineGroup,
+    Point,
+)
 
 
+@dataclass(kw_only=True)
 class Character:
-    def __init__(
-        self,
-        character,
-        # font_file=Path("./vegur.602/Vegur-Regular-0.602.otf"),
-        # font_file=Path("./vegur_0701/Vegur-Regular.otf"),
-        font_file=Path("./route159_110/Route159-Regular.otf"),
-        scale=1,
-        flip_x=False,
-        flip_y=True,
-        remove_bearing=True,
-    ):
-        self.font = fontforge.open(str(font_file))
-        self.glyph = self.font[character]
-        self._transform_glyph(scale, flip_x, flip_y, remove_bearing)
+    character: str | None
+    font_file: Path = Path("./route159_110/Route159-Regular.otf")
+    color: str = "black"
+    scale: float = 1
+    flip_x: bool = False
+    flip_y: bool = True
+    remove_bearing: bool = True
 
-    def _transform_glyph(self, scale, flip_x, flip_y, remove_bearing):
+    def __post_init__(self):
+        self.font = fontforge.open(str(self.font_file))
+        self.glyph = self.font[self.character]
+        self._transform_glyph()
+
+    def _transform_glyph(self):
         self.glyph.transform(
             (
-                (-1 if flip_x else 1) * scale,
+                (-1 if self.flip_x else 1) * self.scale,
                 0,
                 0,
-                (-1 if flip_y else 1) * scale,
+                (-1 if self.flip_y else 1) * self.scale,
                 0,
                 0,
             )
         )
 
         x_offset = 0
-        if remove_bearing:
+        if self.remove_bearing:
             x_offset = -self.glyph.left_side_bearing
 
         self.glyph.transform(
@@ -76,11 +81,9 @@ class Character:
     def yMax(self):
         return self.glyph.boundingBox()[3]
 
-    def get_glyph_path(self):
-        foreground = self.glyph.foreground
+    def get_glyph_path(self, layer):
         path = []
-
-        for contour in foreground:
+        for contour in layer:
             first_iteration = True
             points = list(contour)
 
@@ -119,7 +122,10 @@ class Character:
         return path
 
     def get_svg_element(self):
-        return svg.Path(d=self.get_glyph_path())
+        return svg.Path(
+            d=self.get_glyph_path(self.glyph.foreground),
+            fill=self.color,
+        )
 
     def make_svg(self):
         constants = {"size": 800, "scale": 1}
@@ -142,6 +148,29 @@ class Character:
                 self.get_svg_element(),
             ],
         )
+
+
+@dataclass(kw_only=True)
+class ModifiedCharacter(Character):
+    character: str = "x"
+
+    def __post_init__(self):
+        super().__post_init__()
+
+    def get_svg_element(self):
+        foreground = self.glyph.foreground
+        layer = [foreground[0][:2] + foreground[0][10:]]
+        alt_layer = [foreground[0][2:10]]
+        return [
+            svg.Path(
+                d=self.get_glyph_path(layer),
+                fill=NIXOS_LIGHT_BLUE.to_string(),
+            ),
+            svg.Path(
+                d=self.get_glyph_path(alt_layer),
+                fill=NIXOS_DARK_BLUE.to_string(),
+            ),
+        ]
 
 
 @dataclass
@@ -230,13 +259,13 @@ class Characters:
                 height=viewport[3],
             ),
             elements=[
-                svg.Rect(  # TODO: delete
-                    x=viewport[0],
-                    y=viewport[1],
-                    width=viewport[2],
-                    height=viewport[3],
-                    fill="#8888ee",
-                ),
+                # svg.Rect(  # TODO: delete
+                #     x=viewport[0],
+                #     y=viewport[1],
+                #     width=viewport[2],
+                #     height=viewport[3],
+                #     fill="#8888ee",
+                # ),
             ]
             + [elem.get_svg_element() for elem in self.characters],
         )
@@ -359,16 +388,35 @@ class DimensionedCharacters(Characters, DimensionLines):
 def make_logotype():
     my_char = Characters(
         characters=[
-            Character("N"),
-            Character("i", flip_x=True),
-            Character("x"),
-            Character("O"),
-            Character("S"),
+            Character(character="N"),
+            Character(character="i", flip_x=True),
+            Character(character="x"),
+            Character(character="O"),
+            Character(character="S"),
         ],
         spacings=[200, 90, 70, 50, 10],
         reference_size=None,
     )
-    with open(Path("blah.svg"), "w") as file:
+    with open(Path("logotype.svg"), "w") as file:
+        file.write(str(my_char.make_svg()))
+
+    # close out font because it retains state
+    my_char.characters[0].font.close()
+
+
+def make_modified_logotype():
+    my_char = Characters(
+        characters=[
+            Character(character="N"),
+            Character(character="i", flip_x=True),
+            ModifiedCharacter(),
+            Character(character="O"),
+            Character(character="S"),
+        ],
+        spacings=[200, 90, 70, 50, 10],
+        reference_size=None,
+    )
+    with open(Path("logotype-modified.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
 
     # close out font because it retains state
@@ -392,18 +440,18 @@ def make_dimensioned_logotype():
     )
     my_char_dim = DimensionedCharacters(
         characters=[
-            Character("N"),
-            Character("i", flip_x=True),
-            Character("x"),
-            Character("O"),
-            Character("S"),
+            Character(character="N"),
+            Character(character="i", flip_x=True),
+            Character(character="x"),
+            Character(character="O"),
+            Character(character="S"),
         ],
         spacings=[0, 90, 70, 50, 10],
         reference_size=None,
         construction_lines=construction_lines,
         dimension_lines=dimension_lines,
     )
-    with open(Path("blah-dim.svg"), "w") as file:
+    with open(Path("logotype-dimensioned.svg"), "w") as file:
         file.write(str(my_char_dim.make_dimensioned_svg()))
 
     # close out font because it retains state
@@ -411,4 +459,5 @@ def make_dimensioned_logotype():
 
 
 make_logotype()
+make_modified_logotype()
 make_dimensioned_logotype()
