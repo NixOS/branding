@@ -173,8 +173,8 @@ class DimensionedCharacters(Characters):
     reference_size: int = 1024
 
     def __post_init__(self):
-        self._set_ref_size()
         super().__post_init__()
+        # self._set_ref_size()
 
     def _set_ref_size(self):
         for character in self.characters:
@@ -246,7 +246,8 @@ my_char_dim = DimensionedCharacters(
         Character("O"),
         Character("S"),
     ],
-    spacings=[0, 124, 96, 70, 14],
+    spacings=[200, 90, 70, 50, 10],
+    # spacings=[0, 124, 96, 70, 14],
     # spacings=[0, 0, 0, 0, 0],
     reference_size=1024,
 )
