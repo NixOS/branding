@@ -255,6 +255,9 @@ class DimensionLines:
         offset=1,
         reference=1,
         text=None,
+        text_offset=False,
+        fractional=True,
+        precision=3,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -268,16 +271,44 @@ class DimensionLines:
         point1_dim = point1 + 1.20 * distance * normal
         point2_dim = point2 + 1.20 * distance * normal
 
-        text_offset = 1.19 if side == "left" else 1.21
-        point1_text = point1 + text_offset * distance * normal
-        point2_text = point2 + text_offset * distance * normal
+        text_offset_scale = 1.19 if side == "left" else 1.21
+        point1_text = point1 + text_offset_scale * distance * normal
+        point2_text = point2 + text_offset_scale * distance * normal
 
         hash_args = locals()
         hash_args.pop("self")
         input_hash = hash(frozenset(hash_args.items()))
 
         if text is None:
-            text = fractions.Fraction(round(measured_line.length()), reference)
+            if fractional:
+                text = fractions.Fraction(round(measured_line.length()), reference)
+            else:
+                text = round(measured_line.length() / reference, precision)
+
+        if not text_offset:
+            text_element = (
+                svg.Text(
+                    font_size=self.dimension_lines.font_size,
+                    elements=[
+                        svg.TextPath(
+                            href=f"#dimension_path_{input_hash}",
+                            text=text,
+                            startOffset="50%",
+                            text_anchor="middle",
+                            side=side,
+                        ),
+                    ],
+                ),
+            )
+        else:
+            text_element = svg.Text(
+                font_size=self.dimension_lines.font_size,
+                x=(point1_end.x + point2_end.x) / 2,
+                y=point2_end.y,
+                elements=[text],
+                dominant_baseline="alphabetic" if flip else "hanging",
+                text_anchor="middle",
+            )
 
         return [
             svg.Line(
@@ -313,18 +344,7 @@ class DimensionLines:
                     svg.L(point2_text.x, point2_text.y),
                 ],
             ),
-            svg.Text(
-                font_size=self.dimension_lines.font_size,
-                elements=[
-                    svg.TextPath(
-                        href=f"#dimension_path_{input_hash}",
-                        text=text,
-                        startOffset="50%",
-                        text_anchor="middle",
-                        side=side,
-                    ),
-                ],
-            ),
+            text_element,
         ]
 
     def make_dimension_angle(
