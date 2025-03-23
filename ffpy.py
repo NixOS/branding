@@ -4,7 +4,7 @@ from pathlib import Path
 import fontforge
 import svg
 
-from everything import LineGroup
+from everything import DimensionLines, LineGroup, Point
 
 
 class Character:
@@ -211,18 +211,18 @@ class Characters:
 
 
 @dataclass
-class DimensionedCharacters(Characters):
+class DimensionedCharacters(Characters, DimensionLines):
     construction_lines: LineGroup
     dimension_lines: LineGroup
-    reference_size = None
+    reference_size: int | None = None
 
     def __post_init__(self):
-        super().__post_init__()
         self._set_ref_size()
+        super().__post_init__()
 
     def _set_ref_size(self):
         if self.reference_size is None:
-            self.reference_size = self.characters[0].font.capHeight
+            self.reference_size = int(self.characters[0].font.capHeight)
 
         for character in self.characters:
             character.glyph.transform(
@@ -252,15 +252,17 @@ class DimensionedCharacters(Characters):
                 height=viewport[3],
             ),
             elements=[
-                svg.Rect(  # TODO: delete
-                    x=viewport[0],
-                    y=viewport[1],
-                    width=viewport[2],
-                    height=viewport[3],
-                    fill="#8888ee",
-                ),
+                # svg.Rect(  # TODO: delete
+                #     x=viewport[0],
+                #     y=viewport[1],
+                #     width=viewport[2],
+                #     height=viewport[3],
+                #     fill="#8888ee",
+                # ),
             ]
             + self.svg_bounding_box()
+            + self.dimension_cap_height()
+            + self.dimension_spacings()
             + [elem.get_svg_element() for elem in self.characters],
         )
 
@@ -278,6 +280,47 @@ class DimensionedCharacters(Characters):
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             )
+        ]
+
+    def dimension_cap_height(self):
+        point1 = Point((self.characters[0].xMin, self.characters[0].yMin))
+        point2 = Point((self.characters[0].xMin, self.characters[0].yMax))
+        return [
+            self.make_dimension_line(
+                point1=point1,
+                point2=point2,
+                flip=False,
+                side="right",
+                offset=1 / 4,
+                reference=self.reference_size,
+            )
+        ]
+
+    def dimension_spacings(self):
+        points = [
+            (
+                Point((self.characters[index + 0].xMax, self.yMin)),
+                Point((self.characters[index + 1].xMin, self.yMin)),
+            )
+            for index in range(4)
+        ]
+        offsets = [
+            self.reference_size / (point1 - point2).length()
+            for point1, point2 in points
+        ]
+        sides = ["left", "right", "right", "right"]
+        return [
+            self.make_dimension_line(
+                point1=point1,
+                point2=point2,
+                flip=False,
+                side=side,
+                offset=offset,
+                reference=self.reference_size,
+                text_offset=True,
+                fractional=False,
+            )
+            for (point1, point2), offset, side in zip(points, offsets, sides)
         ]
 
 
@@ -321,6 +364,7 @@ def make_dimensioned_logotype():
         spacings=[0, 90, 70, 50, 10],
         # spacings=[0, 124, 96, 70, 14],
         # spacings=[0, 0, 0, 0, 0],
+        # reference_size=1024,
         construction_lines=construction_lines,
         dimension_lines=dimension_lines,
     )
