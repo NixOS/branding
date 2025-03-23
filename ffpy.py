@@ -342,18 +342,22 @@ class DimensionedCharacters(Characters, DimensionLines):
         ]
 
 
-# my_char = Characters(
-#     characters=[
-#         Character("N"),
-#         Character("i", flip_x=True),
-#         Character("x"),
-#         Character("O"),
-#         Character("S"),
-#     ],
-#     spacings=[200, 90, 70, 50, 10],
-# )
-# with open(Path("blah.svg"), "w") as file:
-#     file.write(str(my_char.make_svg()))
+def make_logotype():
+    my_char = Characters(
+        characters=[
+            Character("N"),
+            Character("i", flip_x=True),
+            Character("x"),
+            Character("O"),
+            Character("S"),
+        ],
+        spacings=[200, 90, 70, 50, 10],
+    )
+    with open(Path("blah.svg"), "w") as file:
+        file.write(str(my_char.make_svg()))
+
+    # close out font because it retains state
+    my_char.characters[0].font.close()
 
 
 def make_dimensioned_logotype():
@@ -389,5 +393,9 @@ def make_dimensioned_logotype():
     with open(Path("blah-dim.svg"), "w") as file:
         file.write(str(my_char_dim.make_dimensioned_svg()))
 
+    # close out font because it retains state
+    my_char_dim.characters[0].font.close()
 
+
+make_logotype()
 make_dimensioned_logotype()
