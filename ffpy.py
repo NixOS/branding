@@ -69,6 +69,27 @@ class FontLoader:
         )
 
 
+def make_view_box(viewport):
+    return svg.ViewBoxSpec(
+        min_x=viewport[0],
+        min_y=viewport[1],
+        width=viewport[2],
+        height=viewport[3],
+    )
+
+
+def make_svg_background(viewport, color="#8888ee"):  # TODO: delete
+    return [
+        svg.Rect(
+            x=viewport[0],
+            y=viewport[1],
+            width=viewport[2],
+            height=viewport[3],
+            fill=color,
+        ),
+    ]
+
+
 @dataclass(kw_only=True)
 class Character:
     character: str | None
@@ -153,25 +174,21 @@ class Character:
         )
 
     def make_svg(self):
-        constants = {"size": 800, "scale": 1}
+        viewport = (
+            self.xMin - self.width / 2,
+            self.yMin - self.height / 2,
+            self.width * 2,
+            self.height * 2,
+        )
 
         return svg.SVG(
-            viewBox=svg.ViewBoxSpec(
-                min_x=-constants["size"],
-                min_y=-constants["size"],
-                width=constants["size"] * 2,
-                height=constants["size"] * 2,
+            viewBox=make_view_box(viewport),
+            elements=(
+                make_svg_background(viewport)
+                + [
+                    self.get_svg_element(),
+                ]
             ),
-            elements=[
-                svg.Rect(  # TODO: delete
-                    x=0,
-                    y=-constants["size"],
-                    width=constants["size"],
-                    height=constants["size"],
-                    fill="#8888ee",
-                ),
-                self.get_svg_element(),
-            ],
         )
 
 
@@ -276,22 +293,11 @@ class Characters:
         )
 
         return svg.SVG(
-            viewBox=svg.ViewBoxSpec(
-                min_x=viewport[0],
-                min_y=viewport[1],
-                width=viewport[2],
-                height=viewport[3],
+            viewBox=make_view_box(viewport),
+            elements=(
+                # make_svg_background(viewport)
+                [] + [elem.get_svg_element() for elem in self.characters]
             ),
-            elements=[
-                # svg.Rect(  # TODO: delete
-                #     x=viewport[0],
-                #     y=viewport[1],
-                #     width=viewport[2],
-                #     height=viewport[3],
-                #     fill="#8888ee",
-                # ),
-            ]
-            + [elem.get_svg_element() for elem in self.characters],
         )
 
 
@@ -312,25 +318,15 @@ class DimensionedCharacters(Characters, DimensionLines):
         )
 
         return svg.SVG(
-            viewBox=svg.ViewBoxSpec(
-                min_x=viewport[0],
-                min_y=viewport[1],
-                width=viewport[2],
-                height=viewport[3],
+            viewBox=make_view_box(viewport),
+            elements=(
+                # make_svg_background(viewport)
+                []
+                + self.svg_bounding_box()
+                + self.dimension_cap_height()
+                + self.dimension_spacings()
+                + [elem.get_svg_element() for elem in self.characters],
             ),
-            elements=[
-                # svg.Rect(  # TODO: delete
-                #     x=viewport[0],
-                #     y=viewport[1],
-                #     width=viewport[2],
-                #     height=viewport[3],
-                #     fill="#8888ee",
-                # ),
-            ]
-            + self.svg_bounding_box()
-            + self.dimension_cap_height()
-            + self.dimension_spacings()
-            + [elem.get_svg_element() for elem in self.characters],
         )
 
     def svg_bounding_box(self):
@@ -409,6 +405,16 @@ class DimensionedCharacters(Characters, DimensionLines):
         ]
 
 
+def make_character_N():
+    loader = FontLoader()
+    char = Character(character="N", loader=loader)
+    with open(Path("character-N.svg"), "w") as file:
+        file.write(str(char.make_svg()))
+
+    # close out font because it retains state
+    loader.font.close()
+
+
 def make_logotype():
     loader = FontLoader()
     my_char = Characters(
@@ -485,6 +491,7 @@ def make_dimensioned_logotype():
     loader.font.close()
 
 
+make_character_N()
 make_logotype()
 make_modified_logotype()
 make_dimensioned_logotype()
