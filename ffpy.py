@@ -148,9 +148,27 @@ class Character:
 class Characters:
     characters: list[Character]
     spacings: list[int]
+    reference_size: int | None
 
     def __post_init__(self):
+        self._set_ref_size()
         self._set_spacings()
+
+    def _set_ref_size(self):
+        if self.reference_size is None:
+            self.reference_size = int(self.characters[0].font.capHeight)
+
+        for character in self.characters:
+            character.glyph.transform(
+                (
+                    self.reference_size / character.font.capHeight,
+                    0,
+                    0,
+                    self.reference_size / character.font.capHeight,
+                    0,
+                    0,
+                )
+            )
 
     def _set_spacings(self):
         x_offset = 0
@@ -197,16 +215,30 @@ class Characters:
         return self.boundingBox[3] - self.boundingBox[1]
 
     def make_svg(self):
-        constants = {"size": 800, "scale": 1}
+        viewport = (
+            self.xMin - self.reference_size / 2,
+            self.yMin - self.reference_size / 2,
+            self.width + self.reference_size,
+            self.height + self.reference_size,
+        )
 
         return svg.SVG(
             viewBox=svg.ViewBoxSpec(
-                min_x=-constants["size"] * 0,
-                min_y=-constants["size"] * 1,
-                width=constants["size"] * 4,
-                height=constants["size"] * 1,
+                min_x=viewport[0],
+                min_y=viewport[1],
+                width=viewport[2],
+                height=viewport[3],
             ),
-            elements=[elem.get_svg_element() for elem in self.characters],
+            elements=[
+                svg.Rect(  # TODO: delete
+                    x=viewport[0],
+                    y=viewport[1],
+                    width=viewport[2],
+                    height=viewport[3],
+                    fill="#8888ee",
+                ),
+            ]
+            + [elem.get_svg_element() for elem in self.characters],
         )
 
 
@@ -214,27 +246,9 @@ class Characters:
 class DimensionedCharacters(Characters, DimensionLines):
     construction_lines: LineGroup
     dimension_lines: LineGroup
-    reference_size: int | None = None
 
     def __post_init__(self):
-        self._set_ref_size()
         super().__post_init__()
-
-    def _set_ref_size(self):
-        if self.reference_size is None:
-            self.reference_size = int(self.characters[0].font.capHeight)
-
-        for character in self.characters:
-            character.glyph.transform(
-                (
-                    self.reference_size / character.font.capHeight,
-                    0,
-                    0,
-                    self.reference_size / character.font.capHeight,
-                    0,
-                    0,
-                )
-            )
 
     def make_dimensioned_svg(self):
         viewport = (
@@ -352,6 +366,7 @@ def make_logotype():
             Character("S"),
         ],
         spacings=[200, 90, 70, 50, 10],
+        reference_size=None,
     )
     with open(Path("blah.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
@@ -384,9 +399,7 @@ def make_dimensioned_logotype():
             Character("S"),
         ],
         spacings=[0, 90, 70, 50, 10],
-        # spacings=[0, 124, 96, 70, 14],
-        # spacings=[0, 0, 0, 0, 0],
-        # reference_size=1024,
+        reference_size=None,
         construction_lines=construction_lines,
         dimension_lines=dimension_lines,
     )
