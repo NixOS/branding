@@ -149,6 +149,7 @@ class Character:
                     continue
 
                 if points[0].on_curve:
+                    # If the next point is on curve, it is a straight line from the previous point.
                     point = points.pop(0)
                     element = svg.LineTo(point.x, point.y)
                     path.append(element)
