@@ -4,6 +4,8 @@ from pathlib import Path
 import fontforge
 import svg
 
+from everything import LineGroup
+
 
 class Character:
     def __init__(
@@ -57,6 +59,22 @@ class Character:
     def glyph_height(self):
         bbox = self.glyph.boundingBox()
         return bbox[3] - bbox[1]
+
+    @property
+    def xMin(self):
+        return self.glyph.boundingBox()[0]
+
+    @property
+    def yMin(self):
+        return self.glyph.boundingBox()[1]
+
+    @property
+    def xMax(self):
+        return self.glyph.boundingBox()[2]
+
+    @property
+    def yMax(self):
+        return self.glyph.boundingBox()[3]
 
     def get_glyph_path(self):
         foreground = self.glyph.foreground
@@ -154,6 +172,30 @@ class Characters:
             )
         ]
 
+    @property
+    def xMin(self):
+        return self.boundingBox[0]
+
+    @property
+    def yMin(self):
+        return self.boundingBox[1]
+
+    @property
+    def xMax(self):
+        return self.boundingBox[2]
+
+    @property
+    def yMax(self):
+        return self.boundingBox[3]
+
+    @property
+    def width(self):
+        return self.boundingBox[2] - self.boundingBox[0]
+
+    @property
+    def height(self):
+        return self.boundingBox[3] - self.boundingBox[1]
+
     def make_svg(self):
         constants = {"size": 800, "scale": 1}
 
@@ -170,13 +212,18 @@ class Characters:
 
 @dataclass
 class DimensionedCharacters(Characters):
-    reference_size: int = 1024
+    construction_lines: LineGroup
+    dimension_lines: LineGroup
+    reference_size = None
 
     def __post_init__(self):
         super().__post_init__()
-        # self._set_ref_size()
+        self._set_ref_size()
 
     def _set_ref_size(self):
+        if self.reference_size is None:
+            self.reference_size = self.characters[0].font.capHeight
+
         for character in self.characters:
             character.glyph.transform(
                 (
@@ -190,39 +237,48 @@ class DimensionedCharacters(Characters):
             )
 
     def make_dimensioned_svg(self):
-        constants = {"size": self.reference_size * 1.1, "scale": 1}
-        bbox = self.boundingBox
+        viewport = (
+            self.xMin - self.reference_size / 2,
+            self.yMin - self.reference_size / 2,
+            self.width + self.reference_size,
+            self.height + self.reference_size,
+        )
 
         return svg.SVG(
             viewBox=svg.ViewBoxSpec(
-                min_x=-constants["size"] * 0,
-                min_y=-constants["size"] * 1,
-                width=constants["size"] * 4,
-                height=constants["size"] * 1,
+                min_x=viewport[0],
+                min_y=viewport[1],
+                width=viewport[2],
+                height=viewport[3],
             ),
             elements=[
                 svg.Rect(  # TODO: delete
-                    x=0,
-                    y=-constants["size"],
-                    width=4 * constants["size"],
-                    height=constants["size"],
+                    x=viewport[0],
+                    y=viewport[1],
+                    width=viewport[2],
+                    height=viewport[3],
                     fill="#8888ee",
                 ),
             ]
-            + [elem.get_svg_element() for elem in self.characters]
-            + [
-                svg.Rect(
-                    x=bbox[0],
-                    y=bbox[1],
-                    width=bbox[2] - bbox[0],
-                    height=bbox[3] - bbox[1],
-                    stroke="black",
-                    stroke_width=4,
-                    stroke_dasharray=8,
-                    fill="transparent",
-                )
-            ],
+            + self.svg_bounding_box()
+            + [elem.get_svg_element() for elem in self.characters],
         )
+
+    def svg_bounding_box(self):
+        bbox = self.boundingBox
+
+        return [
+            svg.Rect(
+                x=bbox[0],
+                y=bbox[1],
+                width=self.width,
+                height=self.height,
+                stroke=self.construction_lines.stroke,
+                stroke_width=self.construction_lines.stroke_width,
+                stroke_dasharray=self.construction_lines.stroke_dasharray,
+                fill="transparent",
+            )
+        ]
 
 
 # my_char = Characters(
@@ -238,18 +294,38 @@ class DimensionedCharacters(Characters):
 # with open(Path("blah.svg"), "w") as file:
 #     file.write(str(my_char.make_svg()))
 
-my_char_dim = DimensionedCharacters(
-    characters=[
-        Character("N"),
-        Character("i", flip_x=True),
-        Character("x"),
-        Character("O"),
-        Character("S"),
-    ],
-    spacings=[200, 90, 70, 50, 10],
-    # spacings=[0, 124, 96, 70, 14],
-    # spacings=[0, 0, 0, 0, 0],
-    reference_size=1024,
-)
-with open(Path("blah-dim.svg"), "w") as file:
-    file.write(str(my_char_dim.make_dimensioned_svg()))
+
+def make_dimensioned_logotype():
+    construction_lines = LineGroup(
+        name="construction",
+        stroke="black",
+        stroke_width=2,
+        stroke_dasharray=16,
+        font_size="2rem",
+    )
+    dimension_lines = LineGroup(
+        name="dimension",
+        stroke="red",
+        stroke_width=1,
+        stroke_dasharray=8,
+        font_size="2rem",
+    )
+    my_char_dim = DimensionedCharacters(
+        characters=[
+            Character("N"),
+            Character("i", flip_x=True),
+            Character("x"),
+            Character("O"),
+            Character("S"),
+        ],
+        spacings=[0, 90, 70, 50, 10],
+        # spacings=[0, 124, 96, 70, 14],
+        # spacings=[0, 0, 0, 0, 0],
+        construction_lines=construction_lines,
+        dimension_lines=dimension_lines,
+    )
+    with open(Path("blah-dim.svg"), "w") as file:
+        file.write(str(my_char_dim.make_dimensioned_svg()))
+
+
+make_dimensioned_logotype()
