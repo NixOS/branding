@@ -17,7 +17,6 @@ DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
     "scale_y": -1,
     "remove_bearing": True,
-    "color": "black",
 }
 
 
