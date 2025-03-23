@@ -279,7 +279,25 @@ class DimensionedCharacters(Characters, DimensionLines):
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
-            )
+            ),
+            self.make_dimension_line(
+                point1=Point((self.xMax, self.yMin)),
+                point2=Point((self.xMin, self.yMin)),
+                flip=False,
+                side="right",
+                offset=1 / 16,
+                reference=self.reference_size,
+                fractional=False,
+            ),
+            self.make_dimension_line(
+                point1=Point((self.xMax, self.yMax)),
+                point2=Point((self.xMax, self.yMin)),
+                flip=False,
+                side="right",
+                offset=1 / 4,
+                reference=self.reference_size,
+                fractional=False,
+            ),
         ]
 
     def dimension_cap_height(self):
