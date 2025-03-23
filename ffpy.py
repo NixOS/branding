@@ -19,6 +19,8 @@ DEFAULT_CHARACTER_TRANSFORMS = {
     "remove_bearing": True,
     "color": "black",
 }
+
+
 DEFAULT_FONT_TRANSFORMS = {
     "N": DEFAULT_CHARACTER_TRANSFORMS,
     "i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1},
