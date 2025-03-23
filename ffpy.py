@@ -78,34 +78,35 @@ class Character:
     def __post_init__(self):
         self.font = self.loader.font
         self.glyph = self.font[self.character]
+        self.layer = self.glyph.foreground.dup()
 
     @property
-    def glyph_width(self):
-        bbox = self.glyph.boundingBox()
+    def width(self):
+        bbox = self.layer.boundingBox()
         return bbox[2] - bbox[0]
 
     @property
-    def glyph_height(self):
-        bbox = self.glyph.boundingBox()
+    def height(self):
+        bbox = self.layer.boundingBox()
         return bbox[3] - bbox[1]
 
     @property
     def xMin(self):
-        return self.glyph.boundingBox()[0]
+        return self.layer.boundingBox()[0]
 
     @property
     def yMin(self):
-        return self.glyph.boundingBox()[1]
+        return self.layer.boundingBox()[1]
 
     @property
     def xMax(self):
-        return self.glyph.boundingBox()[2]
+        return self.layer.boundingBox()[2]
 
     @property
     def yMax(self):
-        return self.glyph.boundingBox()[3]
+        return self.layer.boundingBox()[3]
 
-    def get_glyph_path(self, layer):
+    def get_path(self, layer):
         path = []
         for contour in layer:
             first_iteration = True
@@ -147,7 +148,7 @@ class Character:
 
     def get_svg_element(self):
         return svg.Path(
-            d=self.get_glyph_path(self.glyph.foreground),
+            d=self.get_path(self.layer),
             fill=self.color,
         )
 
@@ -175,23 +176,22 @@ class Character:
 
 
 @dataclass(kw_only=True)
-class ModifiedCharacter(Character):
+class ModifiedCharacterX(Character):
     character: str = "x"
 
     def __post_init__(self):
         super().__post_init__()
 
     def get_svg_element(self):
-        foreground = self.glyph.foreground
-        layer = [foreground[0][:2] + foreground[0][10:]]
-        alt_layer = [foreground[0][2:10]]
+        upper = [self.layer[0][:2] + self.layer[0][10:]]
+        lower = [self.layer[0][2:10]]
         return [
             svg.Path(
-                d=self.get_glyph_path(layer),
+                d=self.get_path(upper),
                 fill=NIXOS_LIGHT_BLUE.to_string(),
             ),
             svg.Path(
-                d=self.get_glyph_path(alt_layer),
+                d=self.get_path(lower),
                 fill=NIXOS_DARK_BLUE.to_string(),
             ),
         ]
@@ -212,7 +212,7 @@ class Characters:
             self.reference_size = int(self.characters[0].font.capHeight)
 
         for character in self.characters:
-            character.glyph.transform(
+            character.layer.transform(
                 (
                     self.reference_size / character.font.capHeight,
                     0,
@@ -227,9 +227,9 @@ class Characters:
         x_offset = 0
         for character, spacing in zip(self.characters, self.spacings):
             x_offset += spacing
-            character.glyph.transform((1, 0, 0, 1, x_offset, 0))
+            character.layer.transform((1, 0, 0, 1, x_offset, 0))
             character_width = (
-                character.glyph.boundingBox()[2] - character.glyph.boundingBox()[0]
+                character.layer.boundingBox()[2] - character.layer.boundingBox()[0]
             )
             x_offset += character_width
 
@@ -239,7 +239,7 @@ class Characters:
             f(elem)
             for f, elem in zip(
                 (min, min, max, max),
-                list(zip(*(elem.glyph.boundingBox() for elem in self.characters))),
+                list(zip(*(elem.layer.boundingBox() for elem in self.characters))),
             )
         ]
 
@@ -426,7 +426,7 @@ def make_logotype():
         file.write(str(my_char.make_svg()))
 
     # close out font because it retains state
-    my_char.characters[0].font.close()
+    loader.font.close()
 
 
 def make_modified_logotype():
@@ -435,7 +435,7 @@ def make_modified_logotype():
         characters=[
             Character(character="N", loader=loader),
             Character(character="i", loader=loader),
-            ModifiedCharacter(loader=loader),
+            ModifiedCharacterX(loader=loader),
             Character(character="O", loader=loader),
             Character(character="S", loader=loader),
         ],
@@ -446,7 +446,7 @@ def make_modified_logotype():
         file.write(str(my_char.make_svg()))
 
     # close out font because it retains state
-    my_char.characters[0].font.close()
+    loader.font.close()
 
 
 def make_dimensioned_logotype():
@@ -482,7 +482,7 @@ def make_dimensioned_logotype():
         file.write(str(my_char_dim.make_dimensioned_svg()))
 
     # close out font because it retains state
-    my_char_dim.characters[0].font.close()
+    loader.font.close()
 
 
 make_logotype()
