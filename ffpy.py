@@ -1,3 +1,4 @@
+import string
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, ClassVar
@@ -21,25 +22,31 @@ DEFAULT_CHARACTER_TRANSFORMS = {
 
 
 DEFAULT_FONT_TRANSFORMS = {
-    "N": DEFAULT_CHARACTER_TRANSFORMS,
-    "i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1},
-    "x": DEFAULT_CHARACTER_TRANSFORMS,
-    "O": DEFAULT_CHARACTER_TRANSFORMS,
-    "S": DEFAULT_CHARACTER_TRANSFORMS,
-}
+    char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters if char != "M"
+} | {"i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1}}
 
 
 @dataclass
 class FontLoader:
     font_file: Path = Path("./route159_110/Route159-Regular.otf")
     transforms_map: ClassVar[dict[str, Any]] = DEFAULT_FONT_TRANSFORMS
+    capHeight: int | None = None
 
     def __post_init__(self):
         self.font = fontforge.open(str(self.font_file))
+        self._set_ref_size()
 
         for character, transforms in self.transforms_map.items():
             self._scale_glyph(character, transforms)
             self._offset_glyph(character, transforms)
+
+    def _set_ref_size(self):
+        if self.capHeight is None:
+            self.scale = 1
+            self.capHeight = int(self.font.capHeight)
+        else:
+            self.scale = self.capHeight / self.font.capHeight
+            self.font.em = round(self.font.em * self.scale)
 
     def _scale_glyph(self, character, transforms):
         self.font[character].transform(
@@ -220,27 +227,10 @@ class ModifiedCharacterX(Character):
 class Characters:
     characters: list[Character]
     spacings: list[int]
-    reference_size: int | None
 
     def __post_init__(self):
-        self._set_ref_size()
         self._set_spacings()
-
-    def _set_ref_size(self):
-        if self.reference_size is None:
-            self.reference_size = int(self.characters[0].font.capHeight)
-
-        for character in self.characters:
-            character.layer.transform(
-                (
-                    self.reference_size / character.font.capHeight,
-                    0,
-                    0,
-                    self.reference_size / character.font.capHeight,
-                    0,
-                    0,
-                )
-            )
+        self.capHeight = self.characters[0].loader.capHeight
 
     def _set_spacings(self):
         x_offset = 0
@@ -288,10 +278,10 @@ class Characters:
 
     def make_svg(self):
         viewport = (
-            self.xMin - self.reference_size / 2,
-            self.yMin - self.reference_size / 2,
-            self.width + self.reference_size,
-            self.height + self.reference_size,
+            self.xMin - self.capHeight / 2,
+            self.yMin - self.capHeight / 2,
+            self.width + self.capHeight,
+            self.height + self.capHeight,
         )
 
         return svg.SVG(
@@ -313,10 +303,10 @@ class DimensionedCharacters(Characters, DimensionLines):
 
     def make_dimensioned_svg(self):
         viewport = (
-            self.xMin - self.reference_size / 2,
-            self.yMin - self.reference_size / 2,
-            self.width + self.reference_size,
-            self.height + self.reference_size,
+            self.xMin - self.capHeight / 2,
+            self.yMin - self.capHeight / 2,
+            self.width + self.capHeight,
+            self.height + self.capHeight,
         )
 
         return svg.SVG(
@@ -351,7 +341,7 @@ class DimensionedCharacters(Characters, DimensionLines):
                 flip=False,
                 side="right",
                 offset=1 / 16,
-                reference=self.reference_size,
+                reference=self.capHeight,
                 fractional=False,
             ),
             self.make_dimension_line(
@@ -360,7 +350,7 @@ class DimensionedCharacters(Characters, DimensionLines):
                 flip=False,
                 side="right",
                 offset=1 / 4,
-                reference=self.reference_size,
+                reference=self.capHeight,
                 fractional=False,
             ),
         ]
@@ -375,7 +365,7 @@ class DimensionedCharacters(Characters, DimensionLines):
                 flip=False,
                 side="right",
                 offset=1 / 4,
-                reference=self.reference_size,
+                reference=self.capHeight,
             )
         ]
 
@@ -388,8 +378,7 @@ class DimensionedCharacters(Characters, DimensionLines):
             for index in range(4)
         ]
         offsets = [
-            self.reference_size / (point1 - point2).length()
-            for point1, point2 in points
+            self.capHeight / (point1 - point2).length() for point1, point2 in points
         ]
         sides = ["left", "right", "right", "right"]
         return [
@@ -399,7 +388,7 @@ class DimensionedCharacters(Characters, DimensionLines):
                 flip=False,
                 side=side,
                 offset=offset,
-                reference=self.reference_size,
+                reference=self.capHeight,
                 text_offset=True,
                 fractional=False,
             )
@@ -428,7 +417,6 @@ def make_logotype():
             Character(character="S", loader=loader),
         ],
         spacings=[200, 90, 70, 50, 10],
-        reference_size=None,
     )
     with open(Path("logotype.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
@@ -448,7 +436,6 @@ def make_modified_logotype():
             Character(character="S", loader=loader),
         ],
         spacings=[200, 90, 70, 50, 10],
-        reference_size=None,
     )
     with open(Path("logotype-modified.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
@@ -482,7 +469,6 @@ def make_dimensioned_logotype():
             Character(character="S", loader=loader),
         ],
         spacings=[0, 90, 70, 50, 10],
-        reference_size=None,
         construction_lines=construction_lines,
         dimension_lines=dimension_lines,
     )
