@@ -229,13 +229,14 @@ class Characters:
     spacings: list[int]
 
     def __post_init__(self):
-        self._set_spacings()
         self.capHeight = self.characters[0].loader.capHeight
+        self.scale = self.characters[0].loader.scale
+        self._set_spacings()
 
     def _set_spacings(self):
         x_offset = 0
         for character, spacing in zip(self.characters, self.spacings):
-            x_offset += spacing
+            x_offset += spacing * self.scale
             character.layer.transform((1, 0, 0, 1, x_offset, 0))
             character_width = (
                 character.layer.boundingBox()[2] - character.layer.boundingBox()[0]
@@ -456,10 +457,9 @@ def make_dimensioned_logotype():
         name="dimension",
         stroke="red",
         stroke_width=1,
-        stroke_dasharray=8,
         font_size="2rem",
     )
-    loader = FontLoader()
+    loader = FontLoader(capHeight=512)
     my_char_dim = DimensionedCharacters(
         characters=[
             Character(character="N", loader=loader),
