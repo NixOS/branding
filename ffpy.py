@@ -22,7 +22,7 @@ DEFAULT_CHARACTER_TRANSFORMS = {
 
 
 DEFAULT_FONT_TRANSFORMS = {
-    char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters if char != "M"
+    char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters
 } | {"i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1}}
 
 
