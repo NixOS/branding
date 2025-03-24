@@ -41,6 +41,12 @@ class FontLoader:
             self._offset_glyph(character, transforms)
 
     def _set_ref_size(self):
+        """
+        Conditionally update the font size.
+
+        The glyphs can be scaled by updating the `em` attribute.
+        `capHeight` goes to zero because we are flipping glyphs so that is stored off for later use.
+        """
         if self.capHeight is None:
             self.scale = 1
             self.capHeight = int(self.font.capHeight)
@@ -49,6 +55,7 @@ class FontLoader:
             self.font.em = round(self.font.em * self.scale)
 
     def _scale_glyph(self, character, transforms):
+        """Scale a glyph; primarily used for vertically flipping."""
         self.font[character].transform(
             (
                 transforms["scale_x"],
@@ -61,6 +68,7 @@ class FontLoader:
         )
 
     def _offset_glyph(self, character, transforms):
+        """Offset a glyph; primarily used to remove the left side bearing."""
         x_offset = 0
         if transforms["remove_bearing"]:
             x_offset = -self.font[character].left_side_bearing
