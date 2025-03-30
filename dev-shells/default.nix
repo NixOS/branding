@@ -19,6 +19,7 @@ inputs.self.library.defaultSystems (
             coloraide
             fontforge
             freetype-py
+            jsonpickle
             svg-py
           ]
         ))

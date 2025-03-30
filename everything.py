@@ -1,4 +1,5 @@
 import fractions
+import hashlib
 import itertools
 import math
 from collections.abc import Sequence
@@ -6,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
+import jsonpickle
 import svg
 from coloraide import Color as ColorBase
 from svg._types import Number
@@ -17,6 +19,11 @@ def cosd(angle) -> float:
 
 def sind(angle) -> float:
     return math.sin(math.radians(angle))
+
+
+def stable_hash(thing):
+    dump = jsonpickle.encode(thing)
+    return hashlib.md5(dump.encode("utf-8")).digest().hex()
 
 
 class Color(ColorBase):
@@ -35,7 +42,7 @@ class Color(ColorBase):
         )
 
     def gradient_color_name(self) -> str:
-        return f"linear-gradient-{hash(self.to_string())}"
+        return f"linear-gradient-{stable_hash(self.to_string())}"
 
 
 NIXOS_DARK_BLUE = Color("oklch", (0.5774, 0.1248, 264))
@@ -275,15 +282,15 @@ class DimensionLines:
         point1_text = point1 + text_offset_scale * distance * normal
         point2_text = point2 + text_offset_scale * distance * normal
 
-        hash_args = locals()
-        hash_args.pop("self")
-        input_hash = hash(frozenset(hash_args.items()))
-
         if text is None:
             if fractional:
                 text = fractions.Fraction(round(measured_line.length()), reference)
             else:
                 text = round(measured_line.length() / reference, precision)
+
+        hash_args = locals()
+        hash_args.pop("self")
+        input_hash = stable_hash(hash_args)
 
         if not text_offset:
             text_element = (
@@ -370,10 +377,12 @@ class DimensionLines:
         mid_point_1 = reference + shorter_length * ratio * vector1.normalize()
         mid_point_2 = reference + shorter_length * ratio * vector2.normalize()
 
-        input_hash = hash((point1, point2, reference, flip, large, text, side, ratio))
-
         if text is None:
             text = f"{round(math.degrees(vector1.angle_from(vector2)))}°"
+
+        hash_args = locals()
+        hash_args.pop("self")
+        input_hash = stable_hash(hash_args)
 
         return [
             svg.Path(
