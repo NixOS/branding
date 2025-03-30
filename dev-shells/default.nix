@@ -13,7 +13,7 @@ inputs.self.library.defaultSystems (
 
     logoDev = pkgs.mkShell {
       packages = [
-        pkgs.uv
+        pkgs.poetry
         (pkgs.python3.withPackages (
           ps: with ps; [
             coloraide
