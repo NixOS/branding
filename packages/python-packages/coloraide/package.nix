@@ -7,14 +7,14 @@
 
 buildPythonPackage rec {
   pname = "coloraide";
-  version = "4.2.1";
+  version = "4.5.1";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "facelessuser";
     repo = "coloraide";
     rev = version;
-    hash = "sha256-HsV/+WzlHpa/fWeEDHlmTwZwwwtXGLGz2d3vNduMuEI=";
+    hash = "sha256-/jhVYJE3zxnSTPTFWB4CWw3TPq1qyte+hN7hcgzbbkE=";
   };
 
   build-system = [
