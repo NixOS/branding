@@ -3,14 +3,25 @@
   coloraide,
   fontforge,
   jsonpickle,
+  lib,
   poetry-core,
   svg-py,
 }:
 
+let
+
+  inherit (lib.trivial)
+    importTOML
+    ;
+
+  pyproject = importTOML ./pyproject.toml;
+
+in
+
 buildPythonPackage {
 
-  pname = "nixoslogo";
-  version = "0.1.0";
+  pname = pyproject.project.name;
+  version = pyproject.project.version;
 
   pyproject = true;
 
