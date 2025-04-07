@@ -10,11 +10,12 @@ runCommandLocal "nixos-lambda-dimensioned-angular"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-MjGS0GJhJ5u2AijXIXmlqji1BGljsR5pq0T0aoUilyc=";
+    outputHash = "sha256-VzxhRyVCEzVC92LoHiocQb/fedQypOqMVl7Zkx8JXJk=";
     outputHashAlgo = "sha256";
-    outputHashMode = "flat";
+    outputHashMode = "recursive";
   }
   ''
     python $script
-    cp nixos-lambda-dimensioned-angular.svg $out
+    mkdir $out
+    cp nixos-lambda-dimensioned-angular.svg $out/
   ''

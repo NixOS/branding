@@ -10,11 +10,12 @@ runCommandLocal "nixos-lambda-dimensioned-linear"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-CSosXo75VpVUVHh2vslrIC7avyxsuP7Z4dRsyM0W5sM=";
+    outputHash = "sha256-PO5WI3/VQcJbEHLicrPORc0/Cfrx/7RD4JHZaAxRjFo=";
     outputHashAlgo = "sha256";
-    outputHashMode = "flat";
+    outputHashMode = "recursive";
   }
   ''
     python $script
-    cp nixos-lambda-dimensioned-linear.svg $out
+    mkdir $out
+    cp nixos-lambda-dimensioned-linear.svg $out/
   ''
