@@ -13,6 +13,7 @@ let
 
   inherit (lib.attrsets)
     genAttrs
+    listToAttrs
     ;
 
   inherit (lib.fixedPoints)
@@ -22,10 +23,12 @@ let
   inherit (lib.lists)
     elem
     filter
+    map
     ;
 
   inherit (inputs.self.library)
     getDirectories
+    getDirectoriesAndFilter
     ;
 
   # helpers
@@ -59,9 +62,25 @@ let
     }
   );
 
+  pythonEditable = listToAttrs (
+    map (dir: {
+      name = "${dir}-editable";
+      value = final: prev: {
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (python-final: python-prev: {
+            "${dir}-editable" = python-final.callPackage ../packages/python-packages/${dir}/editable.nix { };
+          })
+        ];
+      };
+    }) (getDirectoriesAndFilter ../packages/python-packages "editable.nix")
+  );
+
   default = composeManyExtensions (
-    (attrValues allLocalOverlays) ++ (attrValues allLocalPackages) ++ (attrValues pythonExtensions)
+    (attrValues allLocalOverlays)
+    ++ (attrValues allLocalPackages)
+    ++ (attrValues pythonExtensions)
+    ++ (attrValues pythonEditable)
   );
 
 in
-allLocalOverlays // allLocalPackages // pythonExtensions // { inherit default; }
+allLocalOverlays // allLocalPackages // pythonExtensions // pythonEditable // { inherit default; }

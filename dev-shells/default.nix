@@ -26,22 +26,11 @@ inputs.self.library.defaultSystems (
       ];
     };
 
-    nixoslogo-dev =
-      let
-        myPython = pkgs.python3.override {
-          self = myPython;
-          packageOverrides = pyfinal: pyprev: {
-            nixoslogo-editable = pyfinal.callPackage ../packages/python-packages/nixoslogo/editable.nix { };
-          };
-        };
-
-        pythonEnv = myPython.withPackages (ps: [ ps.nixoslogo-editable ]);
-      in
-      pkgs.mkShell {
-        packages = [ pythonEnv ];
-        shellHook = ''
-          export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
-        '';
-      };
+    nixoslogo-dev = pkgs.mkShell {
+      packages = [ (pkgs.python3.withPackages (ps: [ ps.nixoslogo-editable ])) ];
+      shellHook = ''
+        export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
+      '';
+    };
   }
 )

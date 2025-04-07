@@ -1,5 +1,6 @@
 inputs:
 let
+
   inherit (builtins)
     attrNames
     readDir
@@ -13,10 +14,22 @@ let
     filterAttrs
     genAttrs
     ;
+
+  inherit (lib.lists)
+    filter
+    ;
+
+  inherit (lib.trivial)
+    pathExists
+    ;
+
 in
-{
+rec {
   getDirectories =
     path: attrNames (filterAttrs (_: fileType: fileType == "directory") (readDir path));
+
+  getDirectoriesAndFilter =
+    path: file: filter (dirName: pathExists (path + "/${dirName}" + "/${file}")) (getDirectories path);
 
   defaultSystems = genAttrs [
     "x86_64-linux"
