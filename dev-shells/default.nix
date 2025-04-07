@@ -40,7 +40,7 @@ inputs.self.library.defaultSystems (
       pkgs.mkShell {
         packages = [ pythonEnv ];
         shellHook = ''
-          export NIXOSLOGO_SRC=$PWD/packages/python-packages/nixoslogo
+          export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
         '';
       };
   }
