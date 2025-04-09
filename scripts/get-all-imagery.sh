@@ -4,11 +4,37 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-python ../packages/nixos-lambda-dimensioned-angular/script.py
-python ../packages/nixos-lambda-dimensioned-linear/script.py
-python ../packages/nixos-lambda-gradient-background/script.py
-python ../packages/nixos-lambda-gradient-dimensioned/script.py
-python ../packages/nixos-snowflake-color-flat/script.py
-python ../packages/nixos-snowflake-color-gradient/script.py
-python ../packages/nixos-snowflake-dimensioned-linear/script.py
-python ../packages/nixos-snowflake-rainbow-gradient/script.py
+if ! command -v python3 >/dev/null 2>&1; then
+  echo 'No Python available. Try using the logo devShell.'
+  exit 1
+fi
+
+if ! python -c "import nixoslogo"; then
+  echo 'Python package "nixoslogo" not found. Try using the logo devShell.'
+  exit 1
+fi
+
+IMAGERY=(
+  "nixos-lambda-dimensioned-angular"
+  "nixos-lambda-dimensioned-linear"
+  "nixos-lambda-gradient-background"
+  "nixos-lambda-gradient-dimensioned"
+  "nixos-snowflake-color-flat"
+  "nixos-snowflake-color-gradient"
+  "nixos-snowflake-dimensioned-linear"
+  "nixos-snowflake-rainbow-gradient"
+)
+
+for IMAGE in "${IMAGERY[@]}"; do
+  python ../packages/"$IMAGE"/script.py
+done
+
+nix build .#all-developed-imagery
+
+for IMAGE in "${IMAGERY[@]}"; do
+  if cmp -s "${IMAGE}.svg" "./result/${IMAGE}.svg"; then
+    echo "SAME ${IMAGE}"
+  else
+    echo "NOT SAME ${IMAGE}"
+  fi
+done
