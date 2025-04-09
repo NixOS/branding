@@ -1,6 +1,5 @@
 import itertools
 import math
-from pathlib import Path
 
 import svg
 from svg._types import Number
@@ -288,16 +287,6 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             ),
         )
 
-    def write_dimensioned_lambda(self) -> None:
-        with open(Path("nixos-lambda-dimensioned-linear.svg"), "w") as file:
-            file.write(str(self.draw_lambda_linear_dimensions()))
-        with open(Path("nixos-lambda-dimensioned-angular.svg"), "w") as file:
-            file.write(str(self.draw_lambda_angular_dimensions()))
-
-    def write_dimensioned_lambda_linear(self, filename) -> None:
-        with open(filename, "w") as file:
-            file.write(str(self.draw_lambda_linear_dimensions()))
-
 
 class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
     def __init__(
@@ -431,14 +420,6 @@ class SnowFlake(Lambda, ConstructionLines, DimensionLines, ImageParameters):
             viewBox=self.make_view_box(),
             elements=(self.make_clean_flake_polygons_flat()),
         )
-
-    def write_dimensioned_flake(self) -> None:
-        with open(Path("nixos-snowflake-dimensioned-linear.svg"), "w") as file:
-            file.write(str(self.draw_flake_linear_dimensions()))
-
-    def write_clean_flake_flat(self) -> None:
-        with open(Path("nixos-snowflake-color-flat.svg"), "w") as file:
-            file.write(str(self.draw_clean_flake_flat()))
 
 
 class SnowFlakeGradient(SnowFlake):
@@ -612,10 +593,6 @@ class SnowFlakeGradient(SnowFlake):
             ),
         )
 
-    def write_lambda_with_gradient_line(self) -> None:
-        with open(Path("nixos-lambda-dimensioned-gradient.svg"), "w") as file:
-            file.write(str(self.draw_lambda_with_gradients_line()))
-
     def draw_lambda_with_gradients_background(self) -> svg.SVG:
         gradient_end_points = self.make_gradient_end_points()
         point_start = Point((gradient_end_points["x1"], gradient_end_points["y1"]))
@@ -685,10 +662,6 @@ class SnowFlakeGradient(SnowFlake):
             ),
         )
 
-    def write_lambda_with_gradient_background(self) -> None:
-        with open(Path("nixos-lambda-background-gradient.svg"), "w") as file:
-            file.write(str(self.draw_lambda_with_gradients_background()))
-
     def draw_clean_flake_gradient(self) -> svg.SVG:
         return svg.SVG(
             viewBox=self.make_view_box(),
@@ -697,7 +670,3 @@ class SnowFlakeGradient(SnowFlake):
                 self.make_clean_flake_polygons_gradient(),
             ),
         )
-
-    def write_clean_flake_gradient(self) -> None:
-        with open(Path("nixos-snowflake-color-gradient.svg"), "w") as file:
-            file.write(str(self.draw_clean_flake_gradient()))
