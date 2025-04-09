@@ -29,9 +29,8 @@ for IMAGE in "${IMAGERY[@]}"; do
   python ../packages/"$IMAGE"/script.py
 done
 
-nix build .#all-developed-imagery
-
 for IMAGE in "${IMAGERY[@]}"; do
+  nix build ..#"${IMAGE}"
   if cmp -s "${IMAGE}.svg" "./result/${IMAGE}.svg"; then
     echo "SAME ${IMAGE}"
   else
