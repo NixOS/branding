@@ -30,7 +30,7 @@ for IMAGE in "${IMAGERY[@]}"; do
 done
 
 for IMAGE in "${IMAGERY[@]}"; do
-  nix build ..#"${IMAGE}"
+  nix build ..#"${IMAGE}" --rebuild
   if cmp -s "${IMAGE}.svg" "./result/${IMAGE}.svg"; then
     echo "SAME ${IMAGE}"
   else

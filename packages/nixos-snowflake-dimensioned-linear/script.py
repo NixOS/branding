@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.lines import LineGroup
-from nixoslogo.snowflake import SnowFlake
+from nixoslogo.snowflake import Lambda, SnowFlake
 
 object_lines = LineGroup(
     name="object",
@@ -22,7 +22,7 @@ dimension_lines = LineGroup(
     font_size="4rem",
 )
 radius = 512
-snow_flake = SnowFlake(
+ilambda = Lambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
@@ -33,6 +33,15 @@ snow_flake = SnowFlake(
     radius=radius,
     thickness=1 / 4,
     gap=1 / 32,
+)
+snow_flake = SnowFlake(
+    ilambda=ilambda,
+    construction_lines=construction_lines,
+    dimension_lines=dimension_lines,
+    min_x=-4 * radius,
+    min_y=-4 * radius,
+    width=8 * radius,
+    height=8 * radius,
 )
 
 with open(Path("nixos-snowflake-dimensioned-linear.svg"), "w") as file:

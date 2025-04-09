@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.lines import LineGroup
-from nixoslogo.snowflake import SnowFlakeGradient
+from nixoslogo.snowflake import Lambda, SnowFlakeGradient
 
 object_lines = LineGroup(
     name="object",
@@ -23,7 +23,7 @@ dimension_lines = LineGroup(
     font_size="2rem",
 )
 radius = 512
-snow_flake = SnowFlakeGradient(
+ilambda = Lambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
@@ -34,6 +34,15 @@ snow_flake = SnowFlakeGradient(
     radius=radius,
     thickness=1 / 4,
     gap=1 / 32,
+)
+snow_flake = SnowFlakeGradient(
+    ilambda=ilambda,
+    construction_lines=construction_lines,
+    dimension_lines=dimension_lines,
+    min_x=-2 * radius,
+    min_y=-2 * radius,
+    width=4 * radius,
+    height=4 * radius,
 )
 
 with open(Path("nixos-lambda-gradient-background.svg"), "w") as file:
