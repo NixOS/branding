@@ -10,17 +10,17 @@ from .lines import ConstructionLines, DimensionLines, LineGroup
 from .svghelpers import ImageParameters
 
 
-class Lambda(ConstructionLines, DimensionLines, ImageParameters):
+class Lambda:
     def __init__(
         self,
-        object_lines: LineGroup,
+        image_parameters: ImageParameters,
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.object_lines = object_lines
+        self.image_parameters = image_parameters
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
@@ -102,11 +102,25 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             ),
         ]
 
+
+class DimensionedLambda(Lambda):
+    def __init__(
+        self,
+        object_lines: LineGroup,
+        construction_lines: ConstructionLines,
+        dimension_lines: DimensionLines,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.object_lines = object_lines
+        self.construction_lines = construction_lines
+        self.dimension_lines = dimension_lines
+
     def make_axis_lines(self):
         return [
             svg.Line(
-                x1=self.min_x,
-                x2=self.min_x + self.width,
+                x1=self.image_parameters.min_x,
+                x2=self.image_parameters.min_x + self.image_parameters.width,
                 y1=0,
                 y2=0,
                 stroke="black",
@@ -114,8 +128,8 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             svg.Line(
                 x1=0,
                 x2=0,
-                y1=self.min_y,
-                y2=self.min_y + self.height,
+                y1=self.image_parameters.min_y,
+                y2=self.image_parameters.min_y + self.image_parameters.height,
                 stroke="black",
             ),
         ]
@@ -156,7 +170,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_lambda_points()
 
-        dim_main_diagonal = self.make_dimension_line(
+        dim_main_diagonal = self.dimension_lines.make_dimension_line(
             point1=hexagon_points[1],
             point2=hexagon_points[4],
             flip=False,
@@ -165,7 +179,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             reference=2 * self.radius,
         )
 
-        dim_gap_diagonal = self.make_dimension_line(
+        dim_gap_diagonal = self.dimension_lines.make_dimension_line(
             point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
             point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
             flip=False,
@@ -173,7 +187,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             offset=15 / 32,
             reference=2 * self.radius,
         )
-        dim_gap_long_edge = self.make_dimension_line(
+        dim_gap_long_edge = self.dimension_lines.make_dimension_line(
             point1=lambda_points_gap[1],
             point2=lambda_points_gap[2],
             flip=True,
@@ -181,7 +195,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             offset=7 / 16,
             reference=2 * self.radius,
         )
-        dim_gap_left_top = self.make_dimension_line(
+        dim_gap_left_top = self.dimension_lines.make_dimension_line(
             point1=lambda_points_gap[8],
             point2=lambda_points_gap[0],
             flip=False,
@@ -210,7 +224,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
             dim_gap_long_edge,
             dim_gap_left_top,
         ] + [
-            self.make_dimension_line(
+            self.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 1) % 9],
                 reference=2 * self.radius,
@@ -236,7 +250,7 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
         # fmt: on
 
         return [
-            self.make_dimension_angle(
+            self.dimension_lines.make_dimension_angle(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 2) % 9],
                 reference=lambda_points_no_gap[(index + 1) % 9],
@@ -247,14 +261,14 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
 
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.make_axis_lines()
-        dimension_arrows = self.make_dimension_arrow_defs()
+        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
         lambda_linear_dimensions = self.make_lambda_linear_dimensions()
 
         return svg.SVG(
-            viewBox=self.make_view_box(),
+            viewBox=self.image_parameters.make_view_box(),
             elements=(
                 axis_lines
                 + dimension_arrows
@@ -267,14 +281,14 @@ class Lambda(ConstructionLines, DimensionLines, ImageParameters):
 
     def draw_lambda_angular_dimensions(self) -> svg.SVG:
         axis_lines = self.make_axis_lines()
-        dimension_arrows = self.make_dimension_arrow_defs()
+        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
         lambda_angular_dimensions = self.make_lambda_angular_dimensions()
 
         return svg.SVG(
-            viewBox=self.make_view_box(),
+            viewBox=self.image_parameters.make_view_box(),
             elements=(
                 axis_lines
                 + dimension_arrows
@@ -354,14 +368,18 @@ class SnowFlake(ConstructionLines, DimensionLines, ImageParameters):
                 fill=self.construction_lines.fill,
             ),
             svg.Polygon(
-                points=self.ilambda.make_hexagon_points(radius=self.ilambda.radius * 2.25).to_list(),
+                points=self.ilambda.make_hexagon_points(
+                    radius=self.ilambda.radius * 2.25
+                ).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill=self.construction_lines.fill,
             ),
             svg.Polyline(
-                points=self.ilambda.make_diagonal_line(radius=self.ilambda.radius * 2.25).to_list(),
+                points=self.ilambda.make_diagonal_line(
+                    radius=self.ilambda.radius * 2.25
+                ).to_list(),
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
@@ -430,17 +448,15 @@ class SnowFlakeGradient(SnowFlake):
         super().__init__(**kwargs)
         self._make_color_names()
         self._gradient_stop_offsets = [0, 25, 100]
-        self._gradient_lightness_delta = -0.04
-        self._gradient_chroma_delta = -0.01
 
     def _make_color_names(self):
         self.color_names = tuple(color.gradient_color_name() for color in self.colors)
 
     def make_gradient_end_points(self):
         lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
-        stop_point = lambda_points_no_gap[4] + self.ilambda.radius * self.ilambda.thickness * Vector(
-            (1, 0)
-        )
+        stop_point = lambda_points_no_gap[
+            4
+        ] + self.ilambda.radius * self.ilambda.thickness * Vector((1, 0))
         return {
             "x1": lambda_points_no_gap[0].x,
             "y1": lambda_points_no_gap[1].y,

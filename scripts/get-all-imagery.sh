@@ -17,12 +17,12 @@ fi
 IMAGERY=(
   "nixos-lambda-dimensioned-angular"
   "nixos-lambda-dimensioned-linear"
-  "nixos-lambda-gradient-background"
-  "nixos-lambda-gradient-dimensioned"
-  "nixos-snowflake-color-flat"
-  "nixos-snowflake-color-gradient"
-  "nixos-snowflake-dimensioned-linear"
-  "nixos-snowflake-rainbow-gradient"
+  # "nixos-lambda-gradient-background"
+  # "nixos-lambda-gradient-dimensioned"
+  # "nixos-snowflake-color-flat"
+  # "nixos-snowflake-color-gradient"
+  # "nixos-snowflake-dimensioned-linear"
+  # "nixos-snowflake-rainbow-gradient"
 )
 
 for IMAGE in "${IMAGERY[@]}"; do

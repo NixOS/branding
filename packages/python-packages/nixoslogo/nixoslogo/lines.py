@@ -17,16 +17,14 @@ class LineGroup:
     fill: str = "transparent"
 
 
-class ConstructionLines:
-    def __init__(self, construction_lines: LineGroup, **kwargs):
+class ConstructionLines(LineGroup):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.construction_lines = construction_lines
 
 
-class DimensionLines:
-    def __init__(self, dimension_lines: LineGroup, **kwargs):
+class DimensionLines(LineGroup):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.dimension_lines = dimension_lines
 
     def make_dimension_line(
         self,
@@ -70,7 +68,7 @@ class DimensionLines:
         if not text_offset:
             text_element = (
                 svg.Text(
-                    font_size=self.dimension_lines.font_size,
+                    font_size=self.font_size,
                     elements=[
                         svg.TextPath(
                             href=f"#dimension_path_{input_hash}",
@@ -84,7 +82,7 @@ class DimensionLines:
             )
         else:
             text_element = svg.Text(
-                font_size=self.dimension_lines.font_size,
+                font_size=self.font_size,
                 x=(point1_end.x + point2_end.x) / 2,
                 y=point2_end.y,
                 elements=[text],
@@ -98,24 +96,24 @@ class DimensionLines:
                 y1=point1.y,
                 x2=point1_end.x,
                 y2=point1_end.y,
-                stroke=self.dimension_lines.stroke,
-                stroke_width=self.dimension_lines.stroke_width,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
             ),
             svg.Line(
                 x1=point2.x,
                 y1=point2.y,
                 x2=point2_end.x,
                 y2=point2_end.y,
-                stroke=self.dimension_lines.stroke,
-                stroke_width=self.dimension_lines.stroke_width,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
             ),
             svg.Line(
                 x1=point1_dim.x,
                 y1=point1_dim.y,
                 x2=point2_dim.x,
                 y2=point2_dim.y,
-                stroke=self.dimension_lines.stroke,
-                stroke_width=self.dimension_lines.stroke_width,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
                 marker_start="url(#dimension-arrow-head)",
                 marker_end="url(#dimension-arrow-head)",
             ),
@@ -177,14 +175,14 @@ class DimensionLines:
                         mid_point_2.y,
                     ),
                 ],
-                stroke=self.dimension_lines.stroke,
-                stroke_width=self.dimension_lines.stroke_width,
-                fill=self.dimension_lines.fill,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
+                fill=self.fill,
                 marker_start="url(#dimension-arrow-head)",
                 marker_end="url(#dimension-arrow-head)",
             ),
             svg.Text(
-                font_size=self.dimension_lines.font_size,
+                font_size=self.font_size,
                 elements=[
                     svg.TextPath(
                         href=f"#dimension_angle_{input_hash}",
@@ -211,7 +209,7 @@ class DimensionLines:
                         elements=[
                             svg.Path(
                                 d=[svg.M(0, 0), svg.v(10), svg.L(20, 5), svg.Z()],
-                                fill=self.dimension_lines.stroke,  # can't use fill because of arcs
+                                fill=self.stroke,  # can't use fill because of arcs
                             )
                         ],
                     )

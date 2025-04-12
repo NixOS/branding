@@ -1,20 +1,14 @@
+from dataclasses import dataclass
+
 import svg
 
 
+@dataclass(kw_only=True)
 class ImageParameters:
-    def __init__(
-        self,
-        min_x: int,
-        min_y: int,
-        width: int,
-        height: int,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.min_x = min_x
-        self.min_y = min_y
-        self.width = width
-        self.height = height
+    min_x: int
+    min_y: int
+    width: int
+    height: int
 
     def make_view_box(self):
         return svg.ViewBoxSpec(
