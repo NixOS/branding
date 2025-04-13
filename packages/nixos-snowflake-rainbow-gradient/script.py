@@ -6,7 +6,6 @@ from nixoslogo.svghelpers import ImageParameters
 
 radius = 512
 
-
 image_parameters = ImageParameters(
     min_x=-2.25 * radius,
     min_y=-2.25 * radius,
