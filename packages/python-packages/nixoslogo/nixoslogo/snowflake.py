@@ -682,16 +682,9 @@ class DimensionedSnowFlake(SnowFlake):
             ]
         )
 
-        background = [
-            svg.Rect(
-                x=self.image_parameters.min_x,
-                y=self.image_parameters.min_y,
-                width=self.image_parameters.width,
-                height=self.image_parameters.height,
-                fill=f"url(#{self.color_names[0]})",
-            )
-        ]
-
+        background = self.image_parameters.make_svg_background(
+            fill=f"url(#{self.color_names[0]})"
+        )
         axis_lines = self.ilambda.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.ilambda.make_lambda_construction_lines()
