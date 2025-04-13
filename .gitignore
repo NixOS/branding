@@ -1,6 +1,7 @@
 # Nix
 result/
 .pre-commit-config.yaml
+*.otf
 
 # Python
 __pycache__

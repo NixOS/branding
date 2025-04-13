@@ -26,11 +26,25 @@ inputs.self.library.defaultSystems (
       ];
     };
 
-    nixoslogo-dev = pkgs.mkShell {
-      packages = [ (pkgs.python3.withPackages (ps: [ ps.nixoslogo-editable ])) ];
-      shellHook = ''
-        export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
-      '';
-    };
+    nixoslogo-dev = pkgs.callPackage (
+      {
+        mkShell,
+        python3,
+        route159,
+      }:
+      mkShell {
+
+        packages = [
+          (python3.withPackages (ps: [ ps.nixoslogo-editable ]))
+        ];
+
+        shellHook = ''
+          export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
+
+          cp "${route159}/share/fonts/opentype/Route159-Regular.otf" $(git rev-parse --show-toplevel)
+        '';
+
+      }
+    ) { };
   }
 )
