@@ -1,7 +1,9 @@
 from pathlib import Path
 
-from nixoslogo.lines import LineGroup
-from nixoslogo.snowflake import Lambda, SnowFlakeGradient
+from nixoslogo.colors import ColorStyle
+from nixoslogo.lines import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.snowflake import DimensionedLambda, DimensionedSnowFlake
+from nixoslogo.svghelpers import ImageParameters
 
 object_lines = LineGroup(
     name="object",
@@ -9,39 +11,45 @@ object_lines = LineGroup(
     stroke_width=4,
     font_size="2rem",
 )
-construction_lines = LineGroup(
+construction_lines = ConstructionLines(
     name="construction",
     stroke="blue",
     stroke_width=2,
     font_size="2rem",
 )
-dimension_lines = LineGroup(
+dimension_lines = DimensionLines(
     name="dimension",
     stroke="red",
     stroke_width=1,
     font_size="2rem",
 )
+
 radius = 512
-ilambda = Lambda(
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+
+image_parameters = ImageParameters(
     min_x=-2 * radius,
     min_y=-2 * radius,
     width=4 * radius,
     height=4 * radius,
+)
+
+ilambda = DimensionedLambda(
+    object_lines=object_lines,
+    construction_lines=construction_lines,
+    dimension_lines=dimension_lines,
+    image_parameters=image_parameters,
     radius=radius,
     thickness=1 / 4,
     gap=1 / 32,
 )
-snow_flake = SnowFlakeGradient(
+
+snow_flake = DimensionedSnowFlake(
     ilambda=ilambda,
+    color_style=ColorStyle.GRADIENT,
+    image_parameters=image_parameters,
+    object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
-    min_x=-2 * radius,
-    min_y=-2 * radius,
-    width=4 * radius,
-    height=4 * radius,
 )
 
 with open(Path("nixos-lambda-gradient-dimensioned.svg"), "w") as file:

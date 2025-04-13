@@ -1,8 +1,14 @@
+from enum import Enum, auto
 from typing import Self
 
 from coloraide import Color as ColorBase
 
 from .helpers import stable_hash
+
+
+class ColorStyle(Enum):
+    FLAT = auto()
+    GRADIENT = auto()
 
 
 class Color(ColorBase):

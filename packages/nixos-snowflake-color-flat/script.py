@@ -1,32 +1,29 @@
 from pathlib import Path
 
+from nixoslogo.colors import ColorStyle
 from nixoslogo.snowflake import Lambda, SnowFlake
+from nixoslogo.svghelpers import ImageParameters
 
-object_lines = None
-construction_lines = None
-dimension_lines = None
 radius = 512
-ilambda = Lambda(
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+
+image_parameters = ImageParameters(
     min_x=-2.25 * radius,
     min_y=-2.25 * radius,
     width=4.5 * radius,
     height=4.5 * radius,
+)
+
+ilambda = Lambda(
+    image_parameters=image_parameters,
     radius=radius,
     thickness=1 / 4,
     gap=1 / 32,
 )
 snow_flake = SnowFlake(
     ilambda=ilambda,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
-    min_x=-2.25 * radius,
-    min_y=-2.25 * radius,
-    width=4.5 * radius,
-    height=4.5 * radius,
+    color_style=ColorStyle.FLAT,
+    image_parameters=image_parameters,
 )
 
 with open(Path("nixos-snowflake-color-flat.svg"), "w") as file:
-    file.write(str(snow_flake.draw_clean_flake_flat()))
+    file.write(str(snow_flake.draw_snowflake()))
