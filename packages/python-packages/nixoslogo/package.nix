@@ -20,8 +20,7 @@ in
 
 buildPythonPackage {
 
-  pname = pyproject.project.name;
-  version = pyproject.project.version;
+ inherit (pyproject.project) name version;
 
   pyproject = true;
 
