@@ -13,7 +13,7 @@ buildPythonPackage rec {
   src = fetchFromGitHub {
     owner = "facelessuser";
     repo = "coloraide";
-    rev = version;
+    tag = version;
     hash = "sha256-/jhVYJE3zxnSTPTFWB4CWw3TPq1qyte+hN7hcgzbbkE=";
   };
 
