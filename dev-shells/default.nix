@@ -29,13 +29,18 @@ inputs.self.library.defaultSystems (
     nixoslogo-dev = pkgs.callPackage (
       {
         mkShell,
+        poetry,
         python3,
         route159,
       }:
       mkShell {
 
         packages = [
-          (python3.withPackages (ps: [ ps.nixoslogo-editable ]))
+          poetry
+          (python3.withPackages (ps: [
+            ps.nixoslogo-editable
+            ps.fontforge
+          ]))
         ];
 
         shellHook = ''
