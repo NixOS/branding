@@ -45,8 +45,7 @@ inputs.self.library.defaultSystems (
 
         shellHook = ''
           export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
-
-          cp "${route159}/share/fonts/opentype/Route159-Regular.otf" $(git rev-parse --show-toplevel)
+          export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/Route159-Regular.otf";
         '';
 
       }
