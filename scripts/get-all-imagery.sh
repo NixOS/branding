@@ -20,6 +20,7 @@ IMAGERY=(
   "nixos-lambda-gradient-background"
   "nixos-lambda-gradient-dimensioned"
   "nixos-logotype-black"
+  "nixos-logotype-black-dimensioned"
   "nixos-snowflake-color-flat"
   "nixos-snowflake-color-gradient"
   "nixos-snowflake-dimensioned-linear"

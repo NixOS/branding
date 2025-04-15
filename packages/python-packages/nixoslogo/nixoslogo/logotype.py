@@ -305,9 +305,7 @@ class Characters:
 
 
 @dataclass
-class DimensionedCharacters(
-    Characters,
-):
+class DimensionedCharacters(Characters):
     construction_lines: ConstructionLines
     dimension_lines: DimensionLines
 
@@ -348,7 +346,7 @@ class DimensionedCharacters(
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
-            self.make_dimension_line(
+            self.dimension_lines.make_dimension_line(
                 point1=Point((self.xMax, self.yMin)),
                 point2=Point((self.xMin, self.yMin)),
                 flip=False,
@@ -357,7 +355,7 @@ class DimensionedCharacters(
                 reference=self.capHeight,
                 fractional=False,
             ),
-            self.make_dimension_line(
+            self.dimension_lines.make_dimension_line(
                 point1=Point((self.xMax, self.yMax)),
                 point2=Point((self.xMax, self.yMin)),
                 flip=False,
@@ -372,7 +370,7 @@ class DimensionedCharacters(
         point1 = Point((self.characters[0].xMin, self.characters[0].yMin))
         point2 = Point((self.characters[0].xMin, self.characters[0].yMax))
         return [
-            self.make_dimension_line(
+            self.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
                 flip=False,
@@ -395,7 +393,7 @@ class DimensionedCharacters(
         ]
         sides = ["left", "right", "right", "right"]
         return [
-            self.make_dimension_line(
+            self.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
                 flip=False,

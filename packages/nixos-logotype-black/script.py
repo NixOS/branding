@@ -8,6 +8,7 @@ from nixoslogo.logotype import (
 )
 
 loader = FontLoader()
+
 my_char = Characters(
     characters=[
         Character(character="N", loader=loader),
@@ -18,6 +19,7 @@ my_char = Characters(
     ],
     spacings=DEFAULT_LOGOTYPE_SPACINGS,
 )
+
 with open(Path("nixos-logotype-black.svg"), "w") as file:
     file.write(str(my_char.make_svg()))
 
