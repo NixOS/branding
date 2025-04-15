@@ -253,13 +253,15 @@ class Characters:
 
     @property
     def boundingBox(self):
-        return [
+        characters_box = [
             f(elem)
             for f, elem in zip(
                 (min, min, max, max),
                 list(zip(*(elem.layer.boundingBox() for elem in self.characters))),
             )
         ]
+        with_lead_spacing = [characters_box[0] - self.spacings[0]] + characters_box[1:]
+        return with_lead_spacing
 
     @property
     def xMin(self):
@@ -425,7 +427,7 @@ def make_logotype():
             Character(character="O", loader=loader),
             Character(character="S", loader=loader),
         ],
-        spacings=[200, 90, 70, 50, 10],
+        spacings=[0, 90, 70, 50, 10],
     )
     with open(Path("logotype.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
@@ -444,7 +446,7 @@ def make_modified_logotype():
             Character(character="O", loader=loader),
             Character(character="S", loader=loader),
         ],
-        spacings=[200, 90, 70, 50, 10],
+        spacings=[0, 90, 70, 50, 10],
     )
     with open(Path("logotype-modified.svg"), "w") as file:
         file.write(str(my_char.make_svg()))
