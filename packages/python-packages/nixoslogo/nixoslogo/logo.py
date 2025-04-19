@@ -47,7 +47,7 @@ class NixosLogo:
             thickness=self.thickness,
             gap=self.gap,
         )
-        self.snowflake = SnowFlake(
+        self.logomark = SnowFlake(
             ilambda=self.ilambda,
             color_style=self.color_style,
         )
@@ -73,7 +73,7 @@ class NixosLogo:
 
     @property
     def bounding_box(self):
-        logomark_box = self.snowflake.bounding_box
+        logomark_box = self.logomark.bounding_box
         logotype_box = self.logotype.boundingBox
         logotype_box_translated = (
             logotype_box[0] + self.characters_transform.x,
@@ -114,15 +114,15 @@ class NixosLogo:
             case ClearSpace.NONE:
                 return 0
             case ClearSpace.MINIMAL:
-                return self.snowflake.radius * math.sqrt(3) / 4
+                return self.logomark.radius * math.sqrt(3) / 4
             case ClearSpace.RECOMMENDED:
-                return self.snowflake.radius * math.sqrt(3) / 2
+                return self.logomark.radius * math.sqrt(3) / 2
             case _:
                 raise Exception("Unknown ClearSpace")
 
     def make_svg_elements(self):
         return (
-            self.snowflake.get_svg_elements(),
+            self.logomark.get_svg_elements(),
             svg.G(
                 transform=[self.characters_transform],
                 elements=(self.logotype.make_svg_elements()),
