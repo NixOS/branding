@@ -29,8 +29,9 @@ class NixosLogo:
     gap: float = 1 / 32
     color_style: ColorStyle = ColorStyle.GRADIENT
     capHeight: float | None = None
-    characters: str = "NixOS"
+    character_color: str = "black"
     character_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
+    characters: str = "NixOS"
     characters_transform: svg.Translate | None = None
     image_parameters: ImageParameters | None = None
     clear_space: ClearSpace = ClearSpace.RECOMMENDED
@@ -60,7 +61,11 @@ class NixosLogo:
         self.loader = FontLoader(capHeight=self.capHeight)
         self.logotype = Characters(
             characters=[
-                Character(character=letter, loader=self.loader)
+                Character(
+                    character=letter,
+                    loader=self.loader,
+                    color=self.character_color,
+                )
                 for letter in self.characters
             ],
             spacings=self.character_spacings,
