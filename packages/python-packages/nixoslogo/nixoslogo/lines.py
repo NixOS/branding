@@ -90,7 +90,7 @@ class DimensionLines(LineGroup):
                 text_anchor="middle",
             )
 
-        return [
+        return (
             svg.Line(
                 x1=point1.x,
                 y1=point1.y,
@@ -125,7 +125,7 @@ class DimensionLines(LineGroup):
                 ],
             ),
             text_element,
-        ]
+        )
 
     def make_dimension_angle(
         self,
@@ -157,7 +157,7 @@ class DimensionLines(LineGroup):
         hash_args.pop("self")
         input_hash = stable_hash(hash_args)
 
-        return [
+        return (
             svg.Path(
                 id=f"dimension_angle_{input_hash}",
                 d=[
@@ -193,10 +193,10 @@ class DimensionLines(LineGroup):
                     ),
                 ],
             ),
-        ]
+        )
 
     def make_dimension_arrow_defs(self):
-        return [
+        return (
             svg.Defs(
                 elements=[
                     svg.Marker(
@@ -214,5 +214,5 @@ class DimensionLines(LineGroup):
                         ],
                     )
                 ]
-            )
-        ]
+            ),
+        )

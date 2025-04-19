@@ -20,7 +20,7 @@ class Lambda:
         **kwargs,
     ):
         super().__init__(**kwargs)
-        # self.image_parameters = image_parameters
+        self.image_parameters = image_parameters
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
@@ -86,7 +86,7 @@ class Lambda:
     def make_lambda_polygons(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_lambda_points()
-        return [
+        return (
             svg.Polygon(
                 points=lambda_points_no_gap.to_list(),
                 stroke=self.object_lines.stroke,
@@ -100,7 +100,7 @@ class Lambda:
                 stroke_width=self.object_lines.stroke_width,
                 fill=self.object_lines.fill,
             ),
-        ]
+        )
 
 
 class DimensionedLambda(Lambda):
@@ -117,7 +117,7 @@ class DimensionedLambda(Lambda):
         self.dimension_lines = dimension_lines
 
     def make_axis_lines(self):
-        return [
+        return (
             svg.Line(
                 x1=self.image_parameters.min_x,
                 x2=self.image_parameters.min_x + self.image_parameters.width,
@@ -132,10 +132,10 @@ class DimensionedLambda(Lambda):
                 y2=self.image_parameters.min_y + self.image_parameters.height,
                 stroke="black",
             ),
-        ]
+        )
 
     def make_lambda_construction_lines(self):
-        return [
+        return (
             svg.Circle(
                 cx=0,
                 cy=0,
@@ -152,10 +152,10 @@ class DimensionedLambda(Lambda):
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill=self.construction_lines.fill,
             ),
-        ]
+        )
 
     def make_lambda_main_diagonal(self):
-        return [
+        return (
             svg.Polyline(
                 points=self.make_diagonal_line(radius=self.radius).to_list(),
                 stroke=self.construction_lines.stroke,
@@ -163,7 +163,7 @@ class DimensionedLambda(Lambda):
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill=self.construction_lines.fill,
             ),
-        ]
+        )
 
     def make_lambda_linear_dimensions(self):
         hexagon_points = self.make_hexagon_points(radius=self.radius)
@@ -218,12 +218,12 @@ class DimensionedLambda(Lambda):
         ]
         # fmt: on
 
-        return [
+        return (
             dim_main_diagonal,
             dim_gap_diagonal,
             dim_gap_long_edge,
             dim_gap_left_top,
-        ] + [
+        ) + tuple(
             self.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 1) % 9],
@@ -231,7 +231,7 @@ class DimensionedLambda(Lambda):
                 **opts,
             )
             for index, opts in enumerate(options)
-        ]
+        )
 
     def make_lambda_angular_dimensions(self):
         lambda_points_no_gap = self.make_lambda_points()
@@ -249,7 +249,7 @@ class DimensionedLambda(Lambda):
         ]
         # fmt: on
 
-        return [
+        return tuple(
             self.dimension_lines.make_dimension_angle(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 2) % 9],
@@ -257,7 +257,7 @@ class DimensionedLambda(Lambda):
                 **opts,
             )
             for index, opts in enumerate(options)
-        ]
+        )
 
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.make_axis_lines()
@@ -314,7 +314,7 @@ class SnowFlake:
         self.colors = colors
         self.color_style = color_style
         self._make_color_names()
-        # self.image_parameters = image_parameters
+        self.image_parameters = image_parameters
         self._gradient_stop_offsets = [0, 25, 100]
         self.snowflake_lambda_ratio = 9 / 4
 
@@ -404,7 +404,7 @@ class SnowFlake:
     def make_flake_polygons_for_dimensions(self):
         flake_points = self.make_flake_points()
 
-        return [
+        return tuple(
             svg.Polygon(
                 points=lambda_points.to_list(),
                 stroke=self.ilambda.object_lines.stroke,
@@ -412,7 +412,7 @@ class SnowFlake:
                 fill=self.ilambda.object_lines.fill,
             )
             for lambda_points in flake_points
-        ]
+        )
 
     def make_clean_flake_polygons_flat(self):
         flake_points = self.make_flake_points()
@@ -475,9 +475,7 @@ class SnowFlake:
                     ],
                 )
             )
-        return [
-            svg.Defs(elements=linear_gradients),
-        ]
+        return (svg.Defs(elements=linear_gradients),)
 
     def make_clean_flake_polygons_gradient(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
@@ -524,7 +522,7 @@ class DimensionedSnowFlake(SnowFlake):
         self.dimension_lines = dimension_lines
 
     def make_flake_construction_lines(self):
-        return [
+        return (
             svg.Circle(
                 cx=0,
                 cy=0,
@@ -552,7 +550,7 @@ class DimensionedSnowFlake(SnowFlake):
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill=self.construction_lines.fill,
             ),
-        ]
+        )
 
     def make_flake_linear_dimensions(self):
         flake_points = self.make_flake_points()
@@ -576,10 +574,10 @@ class DimensionedSnowFlake(SnowFlake):
             reference=2 * self.ilambda.radius,
         )
 
-        return [
+        return (
             lin_inner_hex_long_length,
             lin_flake_long_length,
-        ]
+        )
 
     def draw_flake_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.ilambda.make_axis_lines()
@@ -641,7 +639,7 @@ class DimensionedSnowFlake(SnowFlake):
             ),
         ]
 
-        gradient_lines = (
+        gradient_lines = tuple(
             [
                 svg.Line(
                     **gradient_end_points,
@@ -700,7 +698,7 @@ class DimensionedSnowFlake(SnowFlake):
             for offset in self._gradient_stop_offsets
         ]
 
-        gradient_lines = (
+        gradient_lines = tuple(
             [
                 svg.Line(
                     **gradient_end_points,
