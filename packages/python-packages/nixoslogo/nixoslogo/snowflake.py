@@ -13,14 +13,14 @@ from .svghelpers import ImageParameters
 class Lambda:
     def __init__(
         self,
-        image_parameters: ImageParameters,
+        image_parameters: ImageParameters | None = None,
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.image_parameters = image_parameters
+        # self.image_parameters = image_parameters
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
@@ -305,7 +305,7 @@ class SnowFlake:
         self,
         ilambda: Lambda,
         color_style: ColorStyle,
-        image_parameters: ImageParameters,
+        image_parameters: ImageParameters | None = None,
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
     ):
@@ -314,8 +314,44 @@ class SnowFlake:
         self.colors = colors
         self.color_style = color_style
         self._make_color_names()
-        self.image_parameters = image_parameters
+        # self.image_parameters = image_parameters
         self._gradient_stop_offsets = [0, 25, 100]
+        self.snowflake_lambda_ratio = 9 / 4
+
+    @property
+    def x_max(self):
+        """The maximum x-value."""
+        return self.ilambda.radius * self.snowflake_lambda_ratio
+
+    @property
+    def x_min(self):
+        """The minimum x-value."""
+        return -self.x_max
+
+    @property
+    def y_max(self):
+        """The maximum y-value."""
+        return self.x_max * math.sqrt(3) / 2
+
+    @property
+    def y_min(self):
+        """The minimum y-value."""
+        return -self.y_max
+
+    @property
+    def bounding_box(self):
+        """The bounding box."""
+        return (
+            self.x_min,
+            self.y_min,
+            self.x_max,
+            self.y_max,
+        )
+
+    @property
+    def radius(self):
+        """The snowflake radius."""
+        return self.x_max
 
     def _make_color_names(self):
         match self.color_style:
@@ -328,12 +364,25 @@ class SnowFlake:
             case _:
                 raise Exception("Unknown ColorStyle")
 
+    # TODO: @djacu - use get_svg_elements and remove the two draw_clean_flake_* functions
     def draw_snowflake(self):
         match self.color_style:
             case ColorStyle.FLAT:
                 return self.draw_clean_flake_flat()
             case ColorStyle.GRADIENT:
                 return self.draw_clean_flake_gradient()
+            case _:
+                raise Exception("Unknown ColorStyle")
+
+    def get_svg_elements(self):
+        match self.color_style:
+            case ColorStyle.FLAT:
+                return self.make_clean_flake_polygons_flat()
+            case ColorStyle.GRADIENT:
+                return (
+                    self.make_flake_gradients_defs(),
+                    self.make_clean_flake_polygons_gradient(),
+                )
             case _:
                 raise Exception("Unknown ColorStyle")
 

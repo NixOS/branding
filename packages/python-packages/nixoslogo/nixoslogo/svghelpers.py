@@ -19,7 +19,7 @@ class ImageParameters:
         )
 
     def make_svg_background(self, fill="#8888ee"):
-        return [
+        return (
             svg.Rect(
                 x=self.min_x,
                 y=self.min_y,
@@ -27,4 +27,4 @@ class ImageParameters:
                 height=self.height,
                 fill=fill,
             ),
-        ]
+        )
