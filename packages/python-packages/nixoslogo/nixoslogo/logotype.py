@@ -1,8 +1,8 @@
 import os
 import string
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any
 
 import fontforge
 import svg
@@ -24,12 +24,15 @@ DEFAULT_FONT_TRANSFORMS = {
 
 
 DEFAULT_LOGOTYPE_SPACINGS = (0, 90, 70, 50, 10)
+DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
 
 
-@dataclass
+@dataclass(kw_only=True)
 class FontLoader:
     font_file: Path = Path(os.getenv("NIXOS_LOGOTYPE_FONT_FILE"))
-    transforms_map: ClassVar[dict[str, Any]] = DEFAULT_FONT_TRANSFORMS
+    transforms_map: dict[str, Any] = field(
+        default_factory=lambda: DEFAULT_FONT_TRANSFORMS
+    )
     capHeight: int | None = None
 
     def __post_init__(self):
@@ -286,6 +289,9 @@ class Characters:
     @property
     def height(self):
         return self.boundingBox[3] - self.boundingBox[1]
+
+    def make_svg_elements(self):
+        return [elem.get_svg_element() for elem in self.characters]
 
     def make_svg(self):
         viewport = (
