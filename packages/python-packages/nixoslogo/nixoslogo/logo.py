@@ -24,17 +24,18 @@ class ClearSpace(Enum):
 
 @dataclass(kw_only=True)
 class NixosLogo:
-    radius: int = 512
-    thickness: float = 1 / 4
-    gap: float = 1 / 32
-    color_style: ColorStyle = ColorStyle.GRADIENT
-    capHeight: float | None = None
-    character_color: str = "black"
-    character_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
-    characters: str = "NixOS"
-    characters_transform: svg.Translate | None = None
+    lambda_radius: int = 512
+    lambda_thickness: float = 1 / 4
+    lambda_gap: float = 1 / 32
+    logomark_color_style: ColorStyle = ColorStyle.GRADIENT
+    logotype_cap_height: float | None = None
+    logotype_color: str = "black"
+    logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
+    logotype_characters: str = "NixOS"
+    logotype_transform: svg.Translate | None = None
     image_parameters: ImageParameters | None = None
     clear_space: ClearSpace = ClearSpace.RECOMMENDED
+    background_color: str | None = None
 
     def __post_init__(self):
         self._init_snowflake()
@@ -44,47 +45,49 @@ class NixosLogo:
 
     def _init_snowflake(self):
         self.ilambda = Lambda(
-            radius=self.radius,
-            thickness=self.thickness,
-            gap=self.gap,
+            radius=self.lambda_radius,
+            thickness=self.lambda_thickness,
+            gap=self.lambda_gap,
         )
         self.logomark = SnowFlake(
             ilambda=self.ilambda,
-            color_style=self.color_style,
+            color_style=self.logomark_color_style,
         )
 
     def _init_capHeight(self):
-        if self.capHeight is None:
-            self.capHeight = self.radius * (1 + self.thickness * 2) * math.sqrt(3)
+        if self.logotype_cap_height is None:
+            self.logotype_cap_height = (
+                self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
+            )
 
     def _init_logotype(self):
-        self.loader = FontLoader(capHeight=self.capHeight)
+        self.loader = FontLoader(capHeight=self.logotype_cap_height)
         self.logotype = Characters(
             characters=[
                 Character(
                     character=letter,
                     loader=self.loader,
-                    color=self.character_color,
+                    color=self.logotype_color,
                 )
-                for letter in self.characters
+                for letter in self.logotype_characters
             ],
-            spacings=self.character_spacings,
+            spacings=self.logotype_spacings,
         )
 
-        if self.characters_transform is None:
-            self.characters_transform = svg.Translate(
-                9 / 4 * self.radius, self.capHeight / 2
+        if self.logotype_transform is None:
+            self.logotype_transform = svg.Translate(
+                9 / 4 * self.lambda_radius, self.logotype_cap_height / 2
             )
 
     @property
-    def bounding_box(self):
+    def elements_bounding_box(self):
         logomark_box = self.logomark.bounding_box
         logotype_box = self.logotype.boundingBox
         logotype_box_translated = (
-            logotype_box[0] + self.characters_transform.x,
-            logotype_box[1] + self.characters_transform.y,
-            logotype_box[2] + self.characters_transform.x,
-            logotype_box[3] + self.characters_transform.y,
+            logotype_box[0] + self.logotype_transform.x,
+            logotype_box[1] + self.logotype_transform.y,
+            logotype_box[2] + self.logotype_transform.x,
+            logotype_box[3] + self.logotype_transform.y,
         )
         return [
             predicate(elem)
@@ -94,9 +97,18 @@ class NixosLogo:
             )
         ]
 
+    @property
+    def bounding_box(self):
+        return (
+            self.image_parameters.min_x,
+            self.image_parameters.min_y,
+            self.image_parameters.min_x + self.image_parameters.width,
+            self.image_parameters.min_y + self.image_parameters.height,
+        )
+
     def _init_image_parameters(self):
         if self.image_parameters is None:
-            min_x, min_y, max_x, max_y = self.bounding_box
+            min_x, min_y, max_x, max_y = self.elements_bounding_box
 
             clear_space = self._get_clearspace()
             min_x -= clear_space
@@ -126,11 +138,16 @@ class NixosLogo:
                 raise Exception("Unknown ClearSpace")
 
     def make_svg_elements(self):
-        return (
+        background = (
+            ()
+            if self.background_color is None
+            else self.image_parameters.make_svg_background(fill=self.background_color)
+        )
+        return background + (
             self.logomark.get_svg_elements(),
             svg.G(
-                transform=[self.characters_transform],
-                elements=(self.logotype.make_svg_elements()),
+                transform=[self.logotype_transform],
+                elements=self.logotype.make_svg_elements(),
             ),
         )
 
@@ -143,3 +160,7 @@ class NixosLogo:
     def write_svg(self):
         with open(Path("test-logo.svg"), "w") as file:
             file.write(str(self.make_svg()))
+
+
+if __name__ == "__main__":
+    NixosLogo(background_color="#dddddd").write_svg()
