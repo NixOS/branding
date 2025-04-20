@@ -291,7 +291,7 @@ class Characters:
         return self.boundingBox[3] - self.boundingBox[1]
 
     def make_svg_elements(self):
-        return [elem.get_svg_element() for elem in self.characters]
+        return tuple(elem.get_svg_element() for elem in self.characters)
 
     def make_svg(self):
         viewport = (
