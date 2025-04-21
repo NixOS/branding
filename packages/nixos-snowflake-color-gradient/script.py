@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.colors import ColorStyle
-from nixoslogo.snowflake import Lambda, SnowFlake
+from nixoslogo.logomark import Lambda, SnowFlake
 from nixoslogo.svghelpers import ImageParameters
 
 radius = 512

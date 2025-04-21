@@ -12,7 +12,7 @@ from nixoslogo.logotype import (
     Characters,
     FontLoader,
 )
-from nixoslogo.snowflake import Lambda, SnowFlake
+from nixoslogo.logomark import Lambda, SnowFlake
 from nixoslogo.svghelpers import ImageParameters
 
 
