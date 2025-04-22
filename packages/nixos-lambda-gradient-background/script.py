@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.colors import ColorStyle
-from nixoslogo.lines import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.logomark import DimensionedLambda, DimensionedSnowFlake
 from nixoslogo.svghelpers import ImageParameters
 

@@ -6,7 +6,7 @@ from svg._types import Number
 
 from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE, Color, ColorStyle
 from .geometry import Point, Points, Vector, cosd, sind
-from .lines import ConstructionLines, DimensionLines, LineGroup
+from .annotations import ConstructionLines, DimensionLines, LineGroup
 from .svghelpers import ImageParameters
 
 

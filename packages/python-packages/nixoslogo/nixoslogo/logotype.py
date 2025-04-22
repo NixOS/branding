@@ -9,7 +9,7 @@ import svg
 
 from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
 from .geometry import Point
-from .lines import ConstructionLines, DimensionLines
+from .annotations import ConstructionLines, DimensionLines
 
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nixoslogo.lines import ConstructionLines, DimensionLines
+from nixoslogo.annotations import ConstructionLines, DimensionLines
 from nixoslogo.logotype import (
     DEFAULT_LOGOTYPE_SPACINGS,
     Character,

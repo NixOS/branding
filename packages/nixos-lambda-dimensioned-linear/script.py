@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nixoslogo.lines import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.logomark import DimensionedLambda
 from nixoslogo.svghelpers import ImageParameters
 
