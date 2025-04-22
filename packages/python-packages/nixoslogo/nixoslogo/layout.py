@@ -4,7 +4,7 @@ import svg
 
 
 @dataclass(kw_only=True)
-class ImageParameters:
+class Canvas:
     min_x: int
     min_y: int
     width: int

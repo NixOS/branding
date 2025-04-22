@@ -6,20 +6,20 @@ from svg._types import Number
 
 from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE, Color, ColorStyle
 from .geometry import Point, Points, Vector, cosd, sind
-from .layout import ImageParameters
+from .layout import Canvas
 
 
 class Lambda:
     def __init__(
         self,
-        image_parameters: ImageParameters | None = None,
+        canvas: Canvas | None = None,
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.image_parameters = image_parameters
+        self.canvas = canvas
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
@@ -107,7 +107,7 @@ class Logomark:
         self,
         ilambda: Lambda,
         color_style: ColorStyle,
-        image_parameters: ImageParameters | None = None,
+        canvas: Canvas | None = None,
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
     ):
@@ -116,7 +116,7 @@ class Logomark:
         self.colors = colors
         self.color_style = color_style
         self._make_color_names()
-        self.image_parameters = image_parameters
+        self.canvas = canvas
         self._gradient_stop_offsets = [0, 25, 100]
         self.snowflake_lambda_ratio = 9 / 4
 
@@ -231,7 +231,7 @@ class Logomark:
 
     def draw_clean_flake_flat(self) -> svg.SVG:
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(self.make_clean_flake_polygons_flat()),
         )
 
@@ -302,7 +302,7 @@ class Logomark:
 
     def draw_clean_flake_gradient(self) -> svg.SVG:
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_gradients_defs(),
                 self.make_clean_flake_polygons_gradient(),

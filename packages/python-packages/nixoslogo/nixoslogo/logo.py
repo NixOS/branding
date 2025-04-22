@@ -13,7 +13,7 @@ from nixoslogo.logotype import (
     FontLoader,
 )
 from nixoslogo.logomark import Lambda, Logomark
-from nixoslogo.layout import ImageParameters
+from nixoslogo.layout import Canvas
 
 
 class ClearSpace(Enum):
@@ -33,7 +33,7 @@ class NixosLogo:
     logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
     logotype_characters: str = "NixOS"
     logotype_transform: svg.Translate | None = None
-    image_parameters: ImageParameters | None = None
+    canvas: Canvas | None = None
     clear_space: ClearSpace = ClearSpace.RECOMMENDED
     background_color: str | None = None
 
@@ -41,7 +41,7 @@ class NixosLogo:
         self._init_snowflake()
         self._init_capHeight()
         self._init_logotype()
-        self._init_image_parameters()
+        self._init_canvas()
 
     def _init_snowflake(self):
         self.ilambda = Lambda(
@@ -100,14 +100,14 @@ class NixosLogo:
     @property
     def bounding_box(self):
         return (
-            self.image_parameters.min_x,
-            self.image_parameters.min_y,
-            self.image_parameters.min_x + self.image_parameters.width,
-            self.image_parameters.min_y + self.image_parameters.height,
+            self.canvas.min_x,
+            self.canvas.min_y,
+            self.canvas.min_x + self.canvas.width,
+            self.canvas.min_y + self.canvas.height,
         )
 
-    def _init_image_parameters(self):
-        if self.image_parameters is None:
+    def _init_canvas(self):
+        if self.canvas is None:
             min_x, min_y, max_x, max_y = self.elements_bounding_box
 
             clear_space = self._get_clearspace()
@@ -119,7 +119,7 @@ class NixosLogo:
             width = max_x - min_x
             height = max_y - min_y
 
-            self.image_parameters = ImageParameters(
+            self.canvas = Canvas(
                 min_x=min_x,
                 min_y=min_y,
                 width=width,
@@ -141,7 +141,7 @@ class NixosLogo:
         background = (
             ()
             if self.background_color is None
-            else self.image_parameters.make_svg_background(fill=self.background_color)
+            else self.canvas.make_svg_background(fill=self.background_color)
         )
         return background + (
             self.logomark.get_svg_elements(),
@@ -153,7 +153,7 @@ class NixosLogo:
 
     def make_svg(self):
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=self.make_svg_elements(),
         )
 

@@ -24,8 +24,8 @@ class DimensionedLambda(Lambda):
     def make_axis_lines(self):
         return (
             svg.Line(
-                x1=self.image_parameters.min_x,
-                x2=self.image_parameters.min_x + self.image_parameters.width,
+                x1=self.canvas.min_x,
+                x2=self.canvas.min_x + self.canvas.width,
                 y1=0,
                 y2=0,
                 stroke="black",
@@ -33,8 +33,8 @@ class DimensionedLambda(Lambda):
             svg.Line(
                 x1=0,
                 x2=0,
-                y1=self.image_parameters.min_y,
-                y2=self.image_parameters.min_y + self.image_parameters.height,
+                y1=self.canvas.min_y,
+                y2=self.canvas.min_y + self.canvas.height,
                 stroke="black",
             ),
         )
@@ -173,7 +173,7 @@ class DimensionedLambda(Lambda):
         lambda_linear_dimensions = self.make_lambda_linear_dimensions()
 
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 axis_lines
                 + dimension_arrows
@@ -193,7 +193,7 @@ class DimensionedLambda(Lambda):
         lambda_angular_dimensions = self.make_lambda_angular_dimensions()
 
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 axis_lines
                 + dimension_arrows
@@ -284,7 +284,7 @@ class DimensionedLogomark(Logomark):
         linear_dimensions = self.make_flake_linear_dimensions()
 
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_polygons_for_dimensions()
                 + axis_lines
@@ -374,7 +374,7 @@ class DimensionedLogomark(Logomark):
         lambda_polygons = self.ilambda.make_lambda_polygons()
 
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_gradients_defs()
                 + axis_lines
@@ -426,7 +426,7 @@ class DimensionedLogomark(Logomark):
             ]
         )
 
-        background = self.image_parameters.make_svg_background(
+        background = self.canvas.make_svg_background(
             fill=f"url(#{self.color_names[0]})"
         )
         axis_lines = self.ilambda.make_axis_lines()
@@ -435,7 +435,7 @@ class DimensionedLogomark(Logomark):
         lambda_polygons = self.ilambda.make_lambda_polygons()
 
         return svg.SVG(
-            viewBox=self.image_parameters.make_view_box(),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_gradients_defs()
                 + background

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.dimensioned import DimensionedLambda
-from nixoslogo.layout import ImageParameters
+from nixoslogo.layout import Canvas
 
 object_lines = LineGroup(
     name="object",
@@ -25,7 +25,7 @@ dimension_lines = DimensionLines(
 
 radius = 512
 
-image_parameters = ImageParameters(
+canvas = Canvas(
     min_x=-2 * radius,
     min_y=-2 * radius,
     width=4 * radius,
@@ -36,7 +36,7 @@ lambda_inst = DimensionedLambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
-    image_parameters=image_parameters,
+    canvas=canvas,
     radius=radius,
     thickness=1 / 4,
     gap=1 / 32,
