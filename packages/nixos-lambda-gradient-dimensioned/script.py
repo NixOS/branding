@@ -3,7 +3,7 @@ from pathlib import Path
 from nixoslogo.colors import ColorStyle
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.logomark import DimensionedLambda, DimensionedLogomark
-from nixoslogo.svghelpers import ImageParameters
+from nixoslogo.layout import ImageParameters
 
 object_lines = LineGroup(
     name="object",

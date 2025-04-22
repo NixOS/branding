@@ -2,7 +2,7 @@ from pathlib import Path
 
 from nixoslogo.colors import Color, ColorStyle
 from nixoslogo.logomark import Lambda, Logomark
-from nixoslogo.svghelpers import ImageParameters
+from nixoslogo.layout import ImageParameters
 
 radius = 512
 

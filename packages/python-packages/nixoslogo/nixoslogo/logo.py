@@ -13,7 +13,7 @@ from nixoslogo.logotype import (
     FontLoader,
 )
 from nixoslogo.logomark import Lambda, Logomark
-from nixoslogo.svghelpers import ImageParameters
+from nixoslogo.layout import ImageParameters
 
 
 class ClearSpace(Enum):
