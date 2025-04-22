@@ -458,10 +458,10 @@ class DimensionedLogotype(Logotype):
 
     def make_dimensioned_svg(self):
         viewport = (
-            self.xMin - self.capHeight / 2,
-            self.yMin - self.capHeight / 2,
-            self.width + self.capHeight,
-            self.height + self.capHeight,
+            self.xMin - self.cap_height / 2,
+            self.yMin - self.cap_height / 2,
+            self.width + self.cap_height,
+            self.height + self.cap_height,
         )
 
         return svg.SVG(
@@ -496,7 +496,7 @@ class DimensionedLogotype(Logotype):
                 flip=False,
                 side="right",
                 offset=1 / 16,
-                reference=self.capHeight,
+                reference=self.cap_height,
                 fractional=False,
             ),
             self.dimension_lines.make_dimension_line(
@@ -505,7 +505,7 @@ class DimensionedLogotype(Logotype):
                 flip=False,
                 side="right",
                 offset=1 / 4,
-                reference=self.capHeight,
+                reference=self.cap_height,
                 fractional=False,
             ),
         ]
@@ -520,7 +520,7 @@ class DimensionedLogotype(Logotype):
                 flip=False,
                 side="right",
                 offset=1 / 4,
-                reference=self.capHeight,
+                reference=self.cap_height,
             )
         ]
 
@@ -533,7 +533,7 @@ class DimensionedLogotype(Logotype):
             for index in range(4)
         ]
         offsets = [
-            self.capHeight / (point1 - point2).length() for point1, point2 in points
+            self.cap_height / (point1 - point2).length() for point1, point2 in points
         ]
         sides = ["left", "right", "right", "right"]
         return [
@@ -543,7 +543,7 @@ class DimensionedLogotype(Logotype):
                 flip=False,
                 side=side,
                 offset=offset,
-                reference=self.capHeight,
+                reference=self.cap_height,
                 text_offset=True,
                 fractional=False,
             )

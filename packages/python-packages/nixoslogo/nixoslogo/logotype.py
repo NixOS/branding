@@ -7,7 +7,7 @@ from typing import Any
 import fontforge
 import svg
 
-from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
+from nixoslogo.colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
 
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
@@ -248,7 +248,7 @@ class Logotype:
     spacings: tuple[int]
 
     def __post_init__(self):
-        self.capHeight = self.characters[0].loader.capHeight
+        self.cap_height = self.characters[0].loader.capHeight
         self.scale = self.characters[0].loader.scale
         self._set_spacings()
 
@@ -303,10 +303,10 @@ class Logotype:
 
     def make_svg(self):
         viewport = (
-            self.xMin - self.capHeight / 2,
-            self.yMin - self.capHeight / 2,
-            self.width + self.capHeight,
-            self.height + self.capHeight,
+            self.xMin - self.cap_height / 2,
+            self.yMin - self.cap_height / 2,
+            self.width + self.cap_height,
+            self.height + self.cap_height,
         )
 
         return svg.SVG(
