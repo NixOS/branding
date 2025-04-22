@@ -477,7 +477,7 @@ class DimensionedLogotype(Logotype):
         )
 
     def svg_bounding_box(self):
-        bbox = self.boundingBox
+        bbox = self.elements_bounding_box
 
         return [
             svg.Rect(

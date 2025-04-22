@@ -75,7 +75,7 @@ class NixosLogo:
     @property
     def elements_bounding_box(self):
         logomark_box = self.logomark.bounding_box
-        logotype_box = self.logotype.boundingBox
+        logotype_box = self.logotype.elements_bounding_box
         logotype_box_translated = (
             logotype_box[0] + self.logotype_transform.x,
             logotype_box[1] + self.logotype_transform.y,

@@ -242,7 +242,7 @@ class ModifiedCharacterX(Character):
         ]
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Logotype:
     characters: list[Character]
     spacings: tuple[int]
@@ -263,7 +263,7 @@ class Logotype:
             x_offset += character_width
 
     @property
-    def boundingBox(self):
+    def elements_bounding_box(self):
         characters_box = [
             f(elem)
             for f, elem in zip(
@@ -276,27 +276,27 @@ class Logotype:
 
     @property
     def xMin(self):
-        return self.boundingBox[0]
+        return self.elements_bounding_box[0]
 
     @property
     def yMin(self):
-        return self.boundingBox[1]
+        return self.elements_bounding_box[1]
 
     @property
     def xMax(self):
-        return self.boundingBox[2]
+        return self.elements_bounding_box[2]
 
     @property
     def yMax(self):
-        return self.boundingBox[3]
+        return self.elements_bounding_box[3]
 
     @property
     def width(self):
-        return self.boundingBox[2] - self.boundingBox[0]
+        return self.elements_bounding_box[2] - self.elements_bounding_box[0]
 
     @property
     def height(self):
-        return self.boundingBox[3] - self.boundingBox[1]
+        return self.elements_bounding_box[3] - self.elements_bounding_box[1]
 
     def make_svg_elements(self):
         return tuple(elem.get_svg_element() for elem in self.characters)
