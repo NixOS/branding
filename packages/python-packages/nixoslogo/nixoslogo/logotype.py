@@ -235,7 +235,7 @@ class ModifiedCharacterX(Character):
 
 
 @dataclass
-class Characters:
+class Logotype:
     characters: list[Character]
     spacings: tuple[int]
 
@@ -311,7 +311,7 @@ class Characters:
 
 
 @dataclass
-class DimensionedCharacters(Characters):
+class DimensionedLogotype(Logotype):
     construction_lines: ConstructionLines
     dimension_lines: DimensionLines
 

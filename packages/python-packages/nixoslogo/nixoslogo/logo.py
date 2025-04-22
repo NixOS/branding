@@ -9,7 +9,7 @@ from nixoslogo.colors import ColorStyle
 from nixoslogo.logotype import (
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     Character,
-    Characters,
+    Logotype,
     FontLoader,
 )
 from nixoslogo.logomark import Lambda, Logomark
@@ -62,7 +62,7 @@ class NixosLogo:
 
     def _init_logotype(self):
         self.loader = FontLoader(capHeight=self.logotype_cap_height)
-        self.logotype = Characters(
+        self.logotype = Logotype(
             characters=[
                 Character(
                     character=letter,

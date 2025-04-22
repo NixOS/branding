@@ -3,13 +3,13 @@ from pathlib import Path
 from nixoslogo.logotype import (
     DEFAULT_LOGOTYPE_SPACINGS,
     Character,
-    Characters,
+    Logotype,
     FontLoader,
 )
 
 loader = FontLoader()
 
-my_char = Characters(
+my_char = Logotype(
     characters=[
         Character(character="N", loader=loader),
         Character(character="i", loader=loader),
