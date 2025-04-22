@@ -1,6 +1,13 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 
 import svg
+
+
+class ClearSpace(Enum):
+    NONE = auto()
+    MINIMAL = auto()
+    RECOMMENDED = auto()
 
 
 @dataclass(kw_only=True)

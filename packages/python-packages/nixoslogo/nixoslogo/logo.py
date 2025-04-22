@@ -1,25 +1,18 @@
 import math
 from dataclasses import dataclass
-from enum import Enum, auto
 from pathlib import Path
 
 import svg
 
 from nixoslogo.colors import ColorStyle
+from nixoslogo.layout import Canvas, ClearSpace
+from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     Character,
-    Logotype,
     FontLoader,
+    Logotype,
 )
-from nixoslogo.logomark import Lambda, Logomark
-from nixoslogo.layout import Canvas
-
-
-class ClearSpace(Enum):
-    NONE = auto()
-    MINIMAL = auto()
-    RECOMMENDED = auto()
 
 
 @dataclass(kw_only=True)
