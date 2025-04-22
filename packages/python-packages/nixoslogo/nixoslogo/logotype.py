@@ -8,8 +8,6 @@ import fontforge
 import svg
 
 from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
-from .geometry import Point
-from .annotations import ConstructionLines, DimensionLines
 
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
@@ -27,9 +25,19 @@ DEFAULT_LOGOTYPE_SPACINGS = (0, 90, 70, 50, 10)
 DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
 
 
+def _default_font_file() -> Path:
+    path = os.getenv("NIXOS_LOGOTYPE_FONT_FILE")
+    if not path:
+        raise EnvironmentError(
+            "NIXOS_LOGOTYPE_FONT_FILE is not set. "
+            "Please provide a font path explicitly or set the environment variable."
+        )
+    return Path(path)
+
+
 @dataclass(kw_only=True)
 class FontLoader:
-    font_file: Path = Path(os.getenv("NIXOS_LOGOTYPE_FONT_FILE"))
+    font_file: Path = field(default_factory=_default_font_file)
     transforms_map: dict[str, Any] = field(
         default_factory=lambda: DEFAULT_FONT_TRANSFORMS
     )
@@ -308,106 +316,3 @@ class Logotype:
                 [] + [elem.get_svg_element() for elem in self.characters]
             ),
         )
-
-
-@dataclass
-class DimensionedLogotype(Logotype):
-    construction_lines: ConstructionLines
-    dimension_lines: DimensionLines
-
-    def __post_init__(self):
-        super().__post_init__()
-
-    def make_dimensioned_svg(self):
-        viewport = (
-            self.xMin - self.capHeight / 2,
-            self.yMin - self.capHeight / 2,
-            self.width + self.capHeight,
-            self.height + self.capHeight,
-        )
-
-        return svg.SVG(
-            viewBox=make_view_box(viewport),
-            elements=(
-                # make_svg_background(viewport)
-                []
-                + self.svg_bounding_box()
-                + self.dimension_cap_height()
-                + self.dimension_spacings()
-                + [elem.get_svg_element() for elem in self.characters],
-            ),
-        )
-
-    def svg_bounding_box(self):
-        bbox = self.boundingBox
-
-        return [
-            svg.Rect(
-                x=bbox[0],
-                y=bbox[1],
-                width=self.width,
-                height=self.height,
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill="transparent",
-            ),
-            self.dimension_lines.make_dimension_line(
-                point1=Point((self.xMax, self.yMin)),
-                point2=Point((self.xMin, self.yMin)),
-                flip=False,
-                side="right",
-                offset=1 / 16,
-                reference=self.capHeight,
-                fractional=False,
-            ),
-            self.dimension_lines.make_dimension_line(
-                point1=Point((self.xMax, self.yMax)),
-                point2=Point((self.xMax, self.yMin)),
-                flip=False,
-                side="right",
-                offset=1 / 4,
-                reference=self.capHeight,
-                fractional=False,
-            ),
-        ]
-
-    def dimension_cap_height(self):
-        point1 = Point((self.characters[0].xMin, self.characters[0].yMin))
-        point2 = Point((self.characters[0].xMin, self.characters[0].yMax))
-        return [
-            self.dimension_lines.make_dimension_line(
-                point1=point1,
-                point2=point2,
-                flip=False,
-                side="right",
-                offset=1 / 4,
-                reference=self.capHeight,
-            )
-        ]
-
-    def dimension_spacings(self):
-        points = [
-            (
-                Point((self.characters[index + 0].xMax, self.yMin)),
-                Point((self.characters[index + 1].xMin, self.yMin)),
-            )
-            for index in range(4)
-        ]
-        offsets = [
-            self.capHeight / (point1 - point2).length() for point1, point2 in points
-        ]
-        sides = ["left", "right", "right", "right"]
-        return [
-            self.dimension_lines.make_dimension_line(
-                point1=point1,
-                point2=point2,
-                flip=False,
-                side=side,
-                offset=offset,
-                reference=self.capHeight,
-                text_offset=True,
-                fractional=False,
-            )
-            for (point1, point2), offset, side in zip(points, offsets, sides)
-        ]

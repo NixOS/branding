@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
-from nixoslogo.logomark import DimensionedLambda
+from nixoslogo.dimensioned import DimensionedLambda
 from nixoslogo.layout import ImageParameters
 
 object_lines = LineGroup(
