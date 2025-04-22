@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nixoslogo.colors import ColorStyle
-from nixoslogo.logomark import Lambda, SnowFlake
+from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.svghelpers import ImageParameters
 
 radius = 512
@@ -20,7 +20,7 @@ ilambda = Lambda(
     gap=1 / 32,
 )
 
-snow_flake = SnowFlake(
+snow_flake = Logomark(
     ilambda=ilambda,
     color_style=ColorStyle.GRADIENT,
     image_parameters=image_parameters,

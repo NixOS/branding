@@ -12,7 +12,7 @@ from nixoslogo.logotype import (
     Characters,
     FontLoader,
 )
-from nixoslogo.logomark import Lambda, SnowFlake
+from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.svghelpers import ImageParameters
 
 
@@ -49,7 +49,7 @@ class NixosLogo:
             thickness=self.lambda_thickness,
             gap=self.lambda_gap,
         )
-        self.logomark = SnowFlake(
+        self.logomark = Logomark(
             ilambda=self.ilambda,
             color_style=self.logomark_color_style,
         )

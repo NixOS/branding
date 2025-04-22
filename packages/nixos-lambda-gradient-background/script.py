@@ -2,7 +2,7 @@ from pathlib import Path
 
 from nixoslogo.colors import ColorStyle
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
-from nixoslogo.logomark import DimensionedLambda, DimensionedSnowFlake
+from nixoslogo.logomark import DimensionedLambda, DimensionedLogomark
 from nixoslogo.svghelpers import ImageParameters
 
 object_lines = LineGroup(
@@ -44,7 +44,7 @@ ilambda = DimensionedLambda(
     dimension_lines=dimension_lines,
 )
 
-snow_flake = DimensionedSnowFlake(
+snow_flake = DimensionedLogomark(
     ilambda=ilambda,
     color_style=ColorStyle.GRADIENT,
     image_parameters=image_parameters,

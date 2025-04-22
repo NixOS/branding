@@ -300,7 +300,7 @@ class DimensionedLambda(Lambda):
         )
 
 
-class SnowFlake:
+class Logomark:
     def __init__(
         self,
         ilambda: Lambda,
@@ -508,7 +508,7 @@ class SnowFlake:
         )
 
 
-class DimensionedSnowFlake(SnowFlake):
+class DimensionedLogomark(Logomark):
     def __init__(
         self,
         object_lines: LineGroup,
