@@ -8,6 +8,7 @@ import fontforge
 import svg
 
 from nixoslogo.colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
+from nixoslogo.layout import Canvas, ClearSpace
 
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
@@ -246,11 +247,15 @@ class ModifiedCharacterX(Character):
 class Logotype:
     characters: list[Character]
     spacings: tuple[int]
+    canvas: Canvas | None = None
+    clear_space: ClearSpace = ClearSpace.RECOMMENDED
+    background_color: str | None = None
 
     def __post_init__(self):
         self.cap_height = self.characters[0].loader.capHeight
         self.scale = self.characters[0].loader.scale
         self._set_spacings()
+        self._init_canvas()
 
     def _set_spacings(self):
         x_offset = 0
@@ -261,6 +266,37 @@ class Logotype:
                 character.layer.boundingBox()[2] - character.layer.boundingBox()[0]
             )
             x_offset += character_width
+
+    def _init_canvas(self):
+        if self.canvas is None:
+            min_x, min_y, max_x, max_y = self.elements_bounding_box
+
+            clear_space = self._get_clearspace()
+            min_x -= clear_space
+            min_y -= clear_space
+            max_x += clear_space
+            max_y += clear_space
+
+            width = max_x - min_x
+            height = max_y - min_y
+
+            self.canvas = Canvas(
+                min_x=min_x,
+                min_y=min_y,
+                width=width,
+                height=height,
+            )
+
+    def _get_clearspace(self):
+        match self.clear_space:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return self.cap_height / 2
+            case ClearSpace.RECOMMENDED:
+                return self.cap_height
+            case _:
+                raise Exception("Unknown ClearSpace")
 
     @property
     def elements_bounding_box(self):
@@ -299,20 +335,15 @@ class Logotype:
         return self.elements_bounding_box[3] - self.elements_bounding_box[1]
 
     def make_svg_elements(self):
-        return tuple(elem.get_svg_element() for elem in self.characters)
+        background = (
+            ()
+            if self.background_color is None
+            else self.canvas.make_svg_background(fill=self.background_color)
+        )
+        return background + tuple(elem.get_svg_element() for elem in self.characters)
 
     def make_svg(self):
-        viewport = (
-            self.xMin - self.cap_height / 2,
-            self.yMin - self.cap_height / 2,
-            self.width + self.cap_height,
-            self.height + self.cap_height,
-        )
-
         return svg.SVG(
-            viewBox=make_view_box(viewport),
-            elements=(
-                # make_svg_background(viewport)
-                [] + [elem.get_svg_element() for elem in self.characters]
-            ),
+            viewBox=self.canvas.make_view_box(),
+            elements=self.make_svg_elements(),
         )

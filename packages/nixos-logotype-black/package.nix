@@ -13,7 +13,7 @@ runCommandLocal "nixos-logotype-black"
 
     env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/Route159-Regular.otf";
 
-    outputHash = "sha256-O/bXnzpb6MlQ8E2FVEg97GlGCszmzUEbG+fRwKuP1Vg=";
+    outputHash = "sha256-jAgKhUA8LBocKXcYgliujDVp+niy7UbfFWNbzM7j2dU=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
