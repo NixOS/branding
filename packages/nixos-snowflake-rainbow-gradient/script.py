@@ -1,31 +1,14 @@
 from pathlib import Path
 
 from nixoslogo.core import RAINBOW_COLORS, ColorStyle
-from nixoslogo.layout import Canvas
 from nixoslogo.logomark import Lambda, Logomark
 
-radius = 512
-
-canvas = Canvas(
-    min_x=-2.25 * radius,
-    min_y=-2.25 * radius,
-    width=4.5 * radius,
-    height=4.5 * radius,
-)
-
-ilambda = Lambda(
-    canvas=canvas,
-    radius=radius,
-    thickness=1 / 4,
-    gap=1 / 32,
-)
-
+ilambda = Lambda()
 snow_flake = Logomark(
     ilambda=ilambda,
     colors=RAINBOW_COLORS,
     color_style=ColorStyle.GRADIENT,
-    canvas=canvas,
 )
 
 with open(Path("nixos-snowflake-rainbow-gradient.svg"), "w") as file:
-    file.write(str(snow_flake.draw_snowflake()))
+    file.write(str(snow_flake.make_svg()))

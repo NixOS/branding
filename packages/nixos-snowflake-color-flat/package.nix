@@ -10,7 +10,7 @@ runCommandLocal "nixos-snowflake-color-flat"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-i5Iy9ci3s8FC4tIiVJdtEIOqZQMxmVGwnEYoSiLpg+g=";
+    outputHash = "sha256-jDhlR3EKt5zAGVWbUiiMrHfCY/984eduse6OWQJQVZM=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

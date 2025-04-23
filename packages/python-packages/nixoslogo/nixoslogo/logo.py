@@ -108,7 +108,7 @@ class NixosLogo(BaseRenderable):
         return self.logomark._get_clearspace()
 
     def make_svg_elements(self):
-        return self.make_svg_background() + (
+        return (
             self.logomark.make_svg_elements(),
             svg.G(
                 transform=[self.logotype_transform],

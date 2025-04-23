@@ -108,7 +108,7 @@ class BaseRenderable(ABC):
     def make_svg(self):
         return svg.SVG(
             viewBox=self.canvas.make_view_box(),
-            elements=self.make_svg_elements(),
+            elements=self.make_svg_background() + self.make_svg_elements(),
         )
 
     @property

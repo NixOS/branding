@@ -10,7 +10,7 @@ runCommandLocal "nixos-snowflake-rainbow-gradient"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-32quLnw8dYPmWDLb9avqUlqZkeKxcHW/FIvKpG4Runk=";
+    outputHash = "sha256-CXqLXJKrBPa3iNFxGZjQ9V897GwRwt1YyWk2y+hGzrU=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

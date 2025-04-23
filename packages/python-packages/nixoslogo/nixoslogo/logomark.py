@@ -196,16 +196,6 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception("Unknown ColorStyle")
 
-    # TODO: @djacu - use get_svg_elements and remove the two draw_clean_flake_* functions
-    def draw_snowflake(self):
-        match self.color_style:
-            case ColorStyle.FLAT:
-                return self.draw_clean_flake_flat()
-            case ColorStyle.GRADIENT:
-                return self.draw_clean_flake_gradient()
-            case _:
-                raise Exception("Unknown ColorStyle")
-
     def make_svg_elements(self):
         match self.color_style:
             case ColorStyle.FLAT:
@@ -233,6 +223,7 @@ class Logomark(BaseRenderable):
         ]
         return flake_points
 
+    # TODO - @djacu move to dimensioned
     def make_flake_polygons_for_dimensions(self):
         flake_points = self.make_flake_points()
 
@@ -249,7 +240,7 @@ class Logomark(BaseRenderable):
     def make_clean_flake_polygons_flat(self):
         flake_points = self.make_flake_points()
 
-        return [
+        return tuple(
             svg.Polygon(
                 points=lambda_points.to_list(),
                 fill=fill,
@@ -257,12 +248,6 @@ class Logomark(BaseRenderable):
             for lambda_points, fill in zip(
                 flake_points, itertools.cycle(self.color_names)
             )
-        ]
-
-    def draw_clean_flake_flat(self) -> svg.SVG:
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(self.make_clean_flake_polygons_flat()),
         )
 
     def make_gradient_end_points(self):
@@ -311,7 +296,7 @@ class Logomark(BaseRenderable):
 
     def make_clean_flake_polygons_gradient(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
-        return [
+        return tuple(
             svg.Polygon(
                 points=lambda_points_gap.to_list(),
                 fill=f"url(#{fill})",
@@ -328,13 +313,4 @@ class Logomark(BaseRenderable):
                 ],
             )
             for angle, fill in zip(range(0, 360, 60), itertools.cycle(self.color_names))
-        ]
-
-    def draw_clean_flake_gradient(self) -> svg.SVG:
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                self.make_flake_gradients_defs(),
-                self.make_clean_flake_polygons_gradient(),
-            ),
         )

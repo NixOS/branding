@@ -240,6 +240,4 @@ class Logotype(BaseRenderable):
         return with_lead_spacing
 
     def make_svg_elements(self):
-        return self.make_svg_background() + tuple(
-            elem.make_svg_element() for elem in self.characters
-        )
+        return tuple(elem.make_svg_element() for elem in self.characters)
