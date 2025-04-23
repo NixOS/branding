@@ -35,10 +35,7 @@ canvas = Canvas(
 )
 
 ilambda = DimensionedLambda(
-    canvas=canvas,
     radius=radius,
-    thickness=1 / 4,
-    gap=1 / 32,
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,

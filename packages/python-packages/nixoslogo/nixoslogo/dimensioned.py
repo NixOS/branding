@@ -29,24 +29,6 @@ class DimensionedLambda(Lambda):
                 height=4 * self.radius,
             )
 
-    def make_axis_lines(self):
-        return (
-            svg.Line(
-                x1=self.canvas.min_x,
-                x2=self.canvas.min_x + self.canvas.width,
-                y1=0,
-                y2=0,
-                stroke="black",
-            ),
-            svg.Line(
-                x1=0,
-                x2=0,
-                y1=self.canvas.min_y,
-                y2=self.canvas.min_y + self.canvas.height,
-                stroke="black",
-            ),
-        )
-
     def make_lambda_construction_lines(self):
         return (
             svg.Circle(
@@ -173,7 +155,7 @@ class DimensionedLambda(Lambda):
         )
 
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
-        axis_lines = self.make_axis_lines()
+        axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
@@ -193,7 +175,7 @@ class DimensionedLambda(Lambda):
         )
 
     def draw_lambda_angular_dimensions(self) -> svg.SVG:
-        axis_lines = self.make_axis_lines()
+        axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
@@ -221,10 +203,19 @@ class DimensionedLogomark(Logomark):
         dimension_lines: DimensionLines,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.object_lines = object_lines
         self.construction_lines = construction_lines
         self.dimension_lines = dimension_lines
+        super().__init__(**kwargs)
+
+    def _init_canvas(self):
+        if self.canvas is None:
+            self.canvas = Canvas(
+                min_x=-4 * self.ilambda.radius,
+                min_y=-4 * self.ilambda.radius,
+                width=8 * self.ilambda.radius,
+                height=8 * self.ilambda.radius,
+            )
 
     def make_flake_construction_lines(self):
         return (
@@ -285,7 +276,7 @@ class DimensionedLogomark(Logomark):
         )
 
     def draw_flake_linear_dimensions(self) -> svg.SVG:
-        axis_lines = self.ilambda.make_axis_lines()
+        axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         lambda_construction_lines = self.ilambda.make_lambda_construction_lines()
         construction_lines = self.make_flake_construction_lines()
@@ -376,7 +367,7 @@ class DimensionedLogomark(Logomark):
             + dimension_lines
         )
 
-        axis_lines = self.ilambda.make_axis_lines()
+        axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.ilambda.make_lambda_construction_lines()
         lambda_polygons = self.ilambda.make_lambda_polygons()
@@ -437,7 +428,7 @@ class DimensionedLogomark(Logomark):
         background = self.canvas.make_svg_background(
             fill=f"url(#{self.color_names[0]})"
         )
-        axis_lines = self.ilambda.make_axis_lines()
+        axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.ilambda.make_lambda_construction_lines()
         lambda_polygons = self.ilambda.make_lambda_polygons()

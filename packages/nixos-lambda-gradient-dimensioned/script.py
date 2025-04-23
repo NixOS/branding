@@ -37,10 +37,7 @@ ilambda = DimensionedLambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
-    canvas=canvas,
     radius=radius,
-    thickness=1 / 4,
-    gap=1 / 32,
 )
 
 snow_flake = DimensionedLogomark(

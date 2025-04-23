@@ -3,7 +3,6 @@ from pathlib import Path
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.core import ColorStyle
 from nixoslogo.dimensioned import DimensionedLambda, DimensionedLogomark
-from nixoslogo.layout import Canvas
 
 object_lines = LineGroup(
     name="object",
@@ -24,29 +23,15 @@ dimension_lines = DimensionLines(
     font_size="4rem",
 )
 
-radius = 512
-
-canvas = Canvas(
-    min_x=-4 * radius,
-    min_y=-4 * radius,
-    width=8 * radius,
-    height=8 * radius,
-)
-
 ilambda = DimensionedLambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
-    canvas=canvas,
-    radius=radius,
-    thickness=1 / 4,
-    gap=1 / 32,
 )
 
 snow_flake = DimensionedLogomark(
     ilambda=ilambda,
     color_style=ColorStyle.FLAT,
-    canvas=canvas,
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,

@@ -146,14 +146,17 @@ class Logomark(BaseRenderable):
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.ilambda = ilambda
         self.colors = colors
         self.color_style = color_style
-        self._make_color_names()
         self.clear_space = clear_space
+
+        self._make_color_names()
+
         self._gradient_stop_offsets = [0, 25, 100]
         self.snowflake_lambda_ratio = 9 / 4
+
+        super().__init__(**kwargs)
 
     @property
     def elements_bounding_box(self):

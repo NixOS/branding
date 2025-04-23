@@ -35,3 +35,21 @@ class Canvas:
                 fill=fill,
             ),
         )
+
+    def make_axis_lines(self, color: str = "black"):
+        return (
+            svg.Line(
+                x1=self.min_x,
+                x2=self.min_x + self.width,
+                y1=0,
+                y2=0,
+                stroke=color,
+            ),
+            svg.Line(
+                x1=0,
+                x2=0,
+                y1=self.min_y,
+                y2=self.min_y + self.height,
+                stroke=color,
+            ),
+        )
