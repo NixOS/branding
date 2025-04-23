@@ -1,5 +1,4 @@
 import os
-import string
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -7,23 +6,13 @@ from typing import Any
 import fontforge
 import svg
 
-from nixoslogo.colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE
-from nixoslogo.layout import Canvas, ClearSpace
-
-DEFAULT_CHARACTER_TRANSFORMS = {
-    "scale_x": 1,
-    "scale_y": -1,
-    "remove_bearing": True,
-}
-
-
-DEFAULT_FONT_TRANSFORMS = {
-    char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters
-} | {"i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1}}
-
-
-DEFAULT_LOGOTYPE_SPACINGS = (0, 90, 70, 50, 10)
-DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
+from nixoslogo.core import (
+    DEFAULT_FONT_TRANSFORMS,
+    NIXOS_DARK_BLUE,
+    NIXOS_LIGHT_BLUE,
+    BaseRenderable,
+    ClearSpace,
+)
 
 
 def _default_font_file() -> Path:
@@ -97,63 +86,22 @@ class FontLoader:
         )
 
 
-def make_view_box(viewport):
-    return svg.ViewBoxSpec(
-        min_x=viewport[0],
-        min_y=viewport[1],
-        width=viewport[2],
-        height=viewport[3],
-    )
+class Character(BaseRenderable):
+    def __init__(
+        self,
+        character: str | None,
+        loader: FontLoader,
+        color: str = "black",
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.character = character
+        self.loader = loader
+        self.color = color
 
-
-def make_svg_background(viewport, color="#8888ee"):  # TODO: delete
-    return [
-        svg.Rect(
-            x=viewport[0],
-            y=viewport[1],
-            width=viewport[2],
-            height=viewport[3],
-            fill=color,
-        ),
-    ]
-
-
-@dataclass(kw_only=True)
-class Character:
-    character: str | None
-    loader: FontLoader
-    color: str = "black"
-
-    def __post_init__(self):
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
-
-    @property
-    def width(self):
-        bbox = self.layer.boundingBox()
-        return bbox[2] - bbox[0]
-
-    @property
-    def height(self):
-        bbox = self.layer.boundingBox()
-        return bbox[3] - bbox[1]
-
-    @property
-    def xMin(self):
-        return self.layer.boundingBox()[0]
-
-    @property
-    def yMin(self):
-        return self.layer.boundingBox()[1]
-
-    @property
-    def xMax(self):
-        return self.layer.boundingBox()[2]
-
-    @property
-    def yMax(self):
-        return self.layer.boundingBox()[3]
 
     def get_path(self, layer):
         path = []
@@ -196,39 +144,36 @@ class Character:
 
         return path
 
-    def get_svg_element(self):
+    @property
+    def elements_bounding_box(self):
+        return self.layer.boundingBox()
+
+    def _get_clearspace(self):
+        match self.clear_space:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return self.loader.capHeight / 2
+            case ClearSpace.RECOMMENDED:
+                return self.loader.capHeight
+            case _:
+                raise Exception("Unknown ClearSpace")
+
+    def make_svg_element(self):
         return svg.Path(
             d=self.get_path(self.layer),
             fill=self.color,
         )
 
-    def make_svg(self):
-        viewport = (
-            self.xMin - self.width / 2,
-            self.yMin - self.height / 2,
-            self.width * 2,
-            self.height * 2,
-        )
-
-        return svg.SVG(
-            viewBox=make_view_box(viewport),
-            elements=(
-                make_svg_background(viewport)
-                + [
-                    self.get_svg_element(),
-                ]
-            ),
-        )
+    def make_svg_elements(self):
+        return (self.make_svg_element(),)
 
 
-@dataclass(kw_only=True)
 class ModifiedCharacterX(Character):
-    character: str = "x"
+    def __init__(self, **kwargs):
+        super().__init__(character="x", **kwargs)
 
-    def __post_init__(self):
-        super().__post_init__()
-
-    def get_svg_element(self):
+    def make_svg_element(self):
         upper = [self.layer[0][:2] + self.layer[0][10:]]
         lower = [self.layer[0][2:10]]
         return [
@@ -243,15 +188,19 @@ class ModifiedCharacterX(Character):
         ]
 
 
-@dataclass(kw_only=True)
-class Logotype:
-    characters: list[Character]
-    spacings: tuple[int]
-    canvas: Canvas | None = None
-    clear_space: ClearSpace = ClearSpace.RECOMMENDED
-    background_color: str | None = None
+class Logotype(BaseRenderable):
+    def __init__(
+        self,
+        characters: list[Character],
+        spacings: tuple[int],
+        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.characters = characters
+        self.spacings = spacings
+        self.clear_space = clear_space
 
-    def __post_init__(self):
         self.cap_height = self.characters[0].loader.capHeight
         self.scale = self.characters[0].loader.scale
         self._set_spacings()
@@ -262,30 +211,7 @@ class Logotype:
         for character, spacing in zip(self.characters, self.spacings):
             x_offset += spacing * self.scale
             character.layer.transform((1, 0, 0, 1, x_offset, 0))
-            character_width = (
-                character.layer.boundingBox()[2] - character.layer.boundingBox()[0]
-            )
-            x_offset += character_width
-
-    def _init_canvas(self):
-        if self.canvas is None:
-            min_x, min_y, max_x, max_y = self.elements_bounding_box
-
-            clear_space = self._get_clearspace()
-            min_x -= clear_space
-            min_y -= clear_space
-            max_x += clear_space
-            max_y += clear_space
-
-            width = max_x - min_x
-            height = max_y - min_y
-
-            self.canvas = Canvas(
-                min_x=min_x,
-                min_y=min_y,
-                width=width,
-                height=height,
-            )
+            x_offset += character.elements_width
 
     def _get_clearspace(self):
         match self.clear_space:
@@ -300,50 +226,17 @@ class Logotype:
 
     @property
     def elements_bounding_box(self):
-        characters_box = [
+        characters_box = tuple(
             f(elem)
             for f, elem in zip(
                 (min, min, max, max),
-                list(zip(*(elem.layer.boundingBox() for elem in self.characters))),
+                list(zip(*(elem.elements_bounding_box for elem in self.characters))),
             )
-        ]
-        with_lead_spacing = [characters_box[0] - self.spacings[0]] + characters_box[1:]
+        )
+        with_lead_spacing = (characters_box[0] - self.spacings[0],) + characters_box[1:]
         return with_lead_spacing
 
-    @property
-    def xMin(self):
-        return self.elements_bounding_box[0]
-
-    @property
-    def yMin(self):
-        return self.elements_bounding_box[1]
-
-    @property
-    def xMax(self):
-        return self.elements_bounding_box[2]
-
-    @property
-    def yMax(self):
-        return self.elements_bounding_box[3]
-
-    @property
-    def width(self):
-        return self.elements_bounding_box[2] - self.elements_bounding_box[0]
-
-    @property
-    def height(self):
-        return self.elements_bounding_box[3] - self.elements_bounding_box[1]
-
     def make_svg_elements(self):
-        background = (
-            ()
-            if self.background_color is None
-            else self.canvas.make_svg_background(fill=self.background_color)
-        )
-        return background + tuple(elem.get_svg_element() for elem in self.characters)
-
-    def make_svg(self):
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=self.make_svg_elements(),
+        return self.make_svg_background() + tuple(
+            elem.make_svg_element() for elem in self.characters
         )

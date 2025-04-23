@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 import svg
 
 from .annotations import ConstructionLines, DimensionLines, LineGroup
@@ -448,20 +446,23 @@ class DimensionedLogomark(Logomark):
         )
 
 
-@dataclass
 class DimensionedLogotype(Logotype):
-    construction_lines: ConstructionLines
-    dimension_lines: DimensionLines
-
-    def __post_init__(self):
-        super().__post_init__()
+    def __init__(
+        self,
+        construction_lines: ConstructionLines,
+        dimension_lines: DimensionLines,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.construction_lines = construction_lines
+        self.dimension_lines = dimension_lines
 
     def make_dimensioned_svg(self):
         viewport = (
-            self.xMin - self.cap_height / 2,
-            self.yMin - self.cap_height / 2,
-            self.width + self.cap_height,
-            self.height + self.cap_height,
+            self.elements_x_min - self.cap_height / 2,
+            self.elements_y_min - self.cap_height / 2,
+            self.elements_width + self.cap_height,
+            self.elements_height + self.cap_height,
         )
 
         return svg.SVG(
@@ -472,7 +473,7 @@ class DimensionedLogotype(Logotype):
                 + self.svg_bounding_box()
                 + self.dimension_cap_height()
                 + self.dimension_spacings()
-                + [elem.get_svg_element() for elem in self.characters],
+                + [elem.make_svg_element() for elem in self.characters],
             ),
         )
 
@@ -483,16 +484,16 @@ class DimensionedLogotype(Logotype):
             svg.Rect(
                 x=bbox[0],
                 y=bbox[1],
-                width=self.width,
-                height=self.height,
+                width=self.elements_width,
+                height=self.elements_height,
                 stroke=self.construction_lines.stroke,
                 stroke_width=self.construction_lines.stroke_width,
                 stroke_dasharray=self.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
             self.dimension_lines.make_dimension_line(
-                point1=Point((self.xMax, self.yMin)),
-                point2=Point((self.xMin, self.yMin)),
+                point1=Point((self.elements_x_max, self.elements_y_min)),
+                point2=Point((self.elements_x_min, self.elements_y_min)),
                 flip=False,
                 side="right",
                 offset=1 / 16,
@@ -500,8 +501,8 @@ class DimensionedLogotype(Logotype):
                 fractional=False,
             ),
             self.dimension_lines.make_dimension_line(
-                point1=Point((self.xMax, self.yMax)),
-                point2=Point((self.xMax, self.yMin)),
+                point1=Point((self.elements_x_max, self.elements_y_max)),
+                point2=Point((self.elements_x_max, self.elements_y_min)),
                 flip=False,
                 side="right",
                 offset=1 / 4,
@@ -511,8 +512,12 @@ class DimensionedLogotype(Logotype):
         ]
 
     def dimension_cap_height(self):
-        point1 = Point((self.characters[0].xMin, self.characters[0].yMin))
-        point2 = Point((self.characters[0].xMin, self.characters[0].yMax))
+        point1 = Point(
+            (self.characters[0].elements_x_min, self.characters[0].elements_y_min)
+        )
+        point2 = Point(
+            (self.characters[0].elements_x_min, self.characters[0].elements_y_max)
+        )
         return [
             self.dimension_lines.make_dimension_line(
                 point1=point1,
@@ -527,8 +532,8 @@ class DimensionedLogotype(Logotype):
     def dimension_spacings(self):
         points = [
             (
-                Point((self.characters[index + 0].xMax, self.yMin)),
-                Point((self.characters[index + 1].xMin, self.yMin)),
+                Point((self.characters[index + 0].elements_x_max, self.elements_y_min)),
+                Point((self.characters[index + 1].elements_x_min, self.elements_y_min)),
             )
             for index in range(4)
         ]

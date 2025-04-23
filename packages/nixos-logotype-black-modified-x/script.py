@@ -1,10 +1,10 @@
 from pathlib import Path
 
+from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS
 from nixoslogo.logotype import (
-    DEFAULT_LOGOTYPE_SPACINGS,
     Character,
-    Logotype,
     FontLoader,
+    Logotype,
     ModifiedCharacterX,
 )
 

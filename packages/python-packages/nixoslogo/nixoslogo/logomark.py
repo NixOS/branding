@@ -4,25 +4,39 @@ import math
 import svg
 from svg._types import Number
 
-from .colors import NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE, Color, ColorStyle
-from .geometry import Point, Points, Vector, cosd, sind
-from .layout import Canvas
+from nixoslogo.colors import Color
+from nixoslogo.core import (
+    NIXOS_DARK_BLUE,
+    NIXOS_LIGHT_BLUE,
+    BaseRenderable,
+    ClearSpace,
+    ColorStyle,
+)
+from nixoslogo.geometry import Point, Points, Vector, cosd, sind
 
 
-class Lambda:
+class Lambda(BaseRenderable):
     def __init__(
         self,
-        canvas: Canvas | None = None,
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.canvas = canvas
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
+
+    @property
+    def elements_bounding_box(self):
+        pass
+
+    def _get_clearspace(self):
+        pass
+
+    def make_svg_elements(self):
+        pass
 
     def make_hexagon_points(self, radius: Number) -> Points:
         angles = [math.radians(angle) for angle in range(0, 360, 60)]
@@ -102,12 +116,12 @@ class Lambda:
         )
 
 
-class Logomark:
+class Logomark(BaseRenderable):
     def __init__(
         self,
         ilambda: Lambda,
         color_style: ColorStyle,
-        canvas: Canvas | None = None,
+        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
     ):
@@ -116,44 +130,36 @@ class Logomark:
         self.colors = colors
         self.color_style = color_style
         self._make_color_names()
-        self.canvas = canvas
+        self.clear_space = clear_space
         self._gradient_stop_offsets = [0, 25, 100]
         self.snowflake_lambda_ratio = 9 / 4
 
     @property
-    def x_max(self):
-        """The maximum x-value."""
-        return self.ilambda.radius * self.snowflake_lambda_ratio
-
-    @property
-    def x_min(self):
-        """The minimum x-value."""
-        return -self.x_max
-
-    @property
-    def y_max(self):
-        """The maximum y-value."""
-        return self.x_max * math.sqrt(3) / 2
-
-    @property
-    def y_min(self):
-        """The minimum y-value."""
-        return -self.y_max
-
-    @property
-    def bounding_box(self):
-        """The bounding box."""
+    def elements_bounding_box(self):
+        long_radius = self.ilambda.radius * self.snowflake_lambda_ratio
+        short_radius = long_radius * math.sqrt(3) / 2
         return (
-            self.x_min,
-            self.y_min,
-            self.x_max,
-            self.y_max,
+            -long_radius,
+            -short_radius,
+            long_radius,
+            short_radius,
         )
 
     @property
     def radius(self):
         """The snowflake radius."""
         return self.x_max
+
+    def _get_clearspace(self):
+        match self.clear_space:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return self.elements_y_max / 2
+            case ClearSpace.RECOMMENDED:
+                return self.elements_y_max
+            case _:
+                raise Exception("Unknown ClearSpace")
 
     def _make_color_names(self):
         match self.color_style:
@@ -176,7 +182,7 @@ class Logomark:
             case _:
                 raise Exception("Unknown ColorStyle")
 
-    def get_svg_elements(self):
+    def make_svg_elements(self):
         match self.color_style:
             case ColorStyle.FLAT:
                 return self.make_clean_flake_polygons_flat()

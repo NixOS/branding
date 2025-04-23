@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from nixoslogo.colors import ColorStyle
-from nixoslogo.logomark import Lambda, Logomark
+from nixoslogo.core import ColorStyle
 from nixoslogo.layout import Canvas
+from nixoslogo.logomark import Lambda, Logomark
 
 radius = 512
 

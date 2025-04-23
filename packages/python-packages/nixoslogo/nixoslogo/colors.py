@@ -1,14 +1,8 @@
-from enum import Enum, auto
 from typing import Self
 
 from coloraide import Color as ColorBase
 
 from .helpers import stable_hash
-
-
-class ColorStyle(Enum):
-    FLAT = auto()
-    GRADIENT = auto()
 
 
 class Color(ColorBase):
@@ -28,7 +22,3 @@ class Color(ColorBase):
 
     def gradient_color_name(self) -> str:
         return f"linear-gradient-{stable_hash(self.to_string())}"
-
-
-NIXOS_DARK_BLUE = Color("oklch", (0.5774, 0.1248, 264))
-NIXOS_LIGHT_BLUE = Color("oklch", (0.7636, 0.0866, 240))

@@ -1,38 +1,51 @@
 import math
-from dataclasses import dataclass
 from pathlib import Path
 
 import svg
 
-from nixoslogo.colors import ColorStyle
-from nixoslogo.layout import Canvas, ClearSpace
+from nixoslogo.core import (
+    DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+    BaseRenderable,
+    ClearSpace,
+    ColorStyle,
+)
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
-    DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     Character,
     FontLoader,
     Logotype,
 )
 
 
-@dataclass(kw_only=True)
-class NixosLogo:
-    lambda_radius: int = 512
-    lambda_thickness: float = 1 / 4
-    lambda_gap: float = 1 / 32
-    logomark_color_style: ColorStyle = ColorStyle.GRADIENT
-    logotype_cap_height: float | None = None
-    logotype_color: str = "black"
-    logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
-    logotype_characters: str = "NixOS"
-    logotype_transform: svg.Translate | None = None
-    canvas: Canvas | None = None
-    clear_space: ClearSpace = ClearSpace.RECOMMENDED
-    background_color: str | None = None
+class NixosLogo(BaseRenderable):
+    def __init__(
+        self,
+        lambda_radius: int = 512,
+        lambda_thickness: float = 1 / 4,
+        lambda_gap: float = 1 / 32,
+        logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
+        logotype_cap_height: float | None = None,
+        logotype_color: str = "black",
+        logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+        logotype_characters: str = "NixOS",
+        logotype_transform: svg.Translate | None = None,
+        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.lambda_radius = lambda_radius
+        self.lambda_thickness = lambda_thickness
+        self.lambda_gap = lambda_gap
+        self.logomark_color_style = logomark_color_style
+        self.logotype_cap_height = logotype_cap_height
+        self.logotype_color = logotype_color
+        self.logotype_spacings = logotype_spacings
+        self.logotype_characters = logotype_characters
+        self.logotype_transform = logotype_transform
+        self.clear_space = clear_space
 
-    def __post_init__(self):
         self._init_snowflake()
-        self._init_capHeight()
+        self._init_cap_height()
         self._init_logotype()
         self._init_canvas()
 
@@ -45,9 +58,10 @@ class NixosLogo:
         self.logomark = Logomark(
             ilambda=self.ilambda,
             color_style=self.logomark_color_style,
+            clear_space=self.clear_space,
         )
 
-    def _init_capHeight(self):
+    def _init_cap_height(self):
         if self.logotype_cap_height is None:
             self.logotype_cap_height = (
                 self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
@@ -74,7 +88,7 @@ class NixosLogo:
 
     @property
     def elements_bounding_box(self):
-        logomark_box = self.logomark.bounding_box
+        logomark_box = self.logomark.elements_bounding_box
         logotype_box = self.logotype.elements_bounding_box
         logotype_box_translated = (
             logotype_box[0] + self.logotype_transform.x,
@@ -90,64 +104,16 @@ class NixosLogo:
             )
         ]
 
-    @property
-    def bounding_box(self):
-        return (
-            self.canvas.min_x,
-            self.canvas.min_y,
-            self.canvas.min_x + self.canvas.width,
-            self.canvas.min_y + self.canvas.height,
-        )
-
-    def _init_canvas(self):
-        if self.canvas is None:
-            min_x, min_y, max_x, max_y = self.elements_bounding_box
-
-            clear_space = self._get_clearspace()
-            min_x -= clear_space
-            min_y -= clear_space
-            max_x += clear_space
-            max_y += clear_space
-
-            width = max_x - min_x
-            height = max_y - min_y
-
-            self.canvas = Canvas(
-                min_x=min_x,
-                min_y=min_y,
-                width=width,
-                height=height,
-            )
-
     def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.logomark.radius * math.sqrt(3) / 4
-            case ClearSpace.RECOMMENDED:
-                return self.logomark.radius * math.sqrt(3) / 2
-            case _:
-                raise Exception("Unknown ClearSpace")
+        return self.logomark._get_clearspace()
 
     def make_svg_elements(self):
-        background = (
-            ()
-            if self.background_color is None
-            else self.canvas.make_svg_background(fill=self.background_color)
-        )
-        return background + (
-            self.logomark.get_svg_elements(),
+        return self.make_svg_background() + (
+            self.logomark.make_svg_elements(),
             svg.G(
                 transform=[self.logotype_transform],
                 elements=self.logotype.make_svg_elements(),
             ),
-        )
-
-    def make_svg(self):
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=self.make_svg_elements(),
         )
 
     def write_svg(self):

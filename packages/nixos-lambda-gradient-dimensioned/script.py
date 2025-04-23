@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from nixoslogo.colors import ColorStyle
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.core import ColorStyle
 from nixoslogo.dimensioned import DimensionedLambda, DimensionedLogomark
 from nixoslogo.layout import Canvas
 
