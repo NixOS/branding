@@ -1,9 +1,10 @@
 import svg
 
-from .annotations import ConstructionLines, DimensionLines, LineGroup
-from .geometry import Point
-from .logomark import Lambda, Logomark
-from .logotype import Logotype
+from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.geometry import Point
+from nixoslogo.layout import Canvas
+from nixoslogo.logomark import Lambda, Logomark
+from nixoslogo.logotype import Logotype
 
 
 class DimensionedLambda(Lambda):
@@ -14,10 +15,19 @@ class DimensionedLambda(Lambda):
         dimension_lines: DimensionLines,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.object_lines = object_lines
         self.construction_lines = construction_lines
         self.dimension_lines = dimension_lines
+        super().__init__(**kwargs)
+
+    def _init_canvas(self):
+        if self.canvas is None:
+            self.canvas = Canvas(
+                min_x=-2 * self.radius,
+                min_y=-2 * self.radius,
+                width=4 * self.radius,
+                height=4 * self.radius,
+            )
 
     def make_axis_lines(self):
         return (

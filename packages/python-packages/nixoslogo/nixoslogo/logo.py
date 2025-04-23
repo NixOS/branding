@@ -32,7 +32,6 @@ class NixosLogo(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.lambda_radius = lambda_radius
         self.lambda_thickness = lambda_thickness
         self.lambda_gap = lambda_gap
@@ -47,7 +46,8 @@ class NixosLogo(BaseRenderable):
         self._init_snowflake()
         self._init_cap_height()
         self._init_logotype()
-        self._init_canvas()
+
+        super().__init__(**kwargs)
 
     def _init_snowflake(self):
         self.ilambda = Lambda(

@@ -60,6 +60,7 @@ class BaseRenderable(ABC):
     ):
         self.canvas = canvas
         self.background_color = background_color
+        self._init_canvas()
 
     @property
     @abstractmethod

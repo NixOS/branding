@@ -92,16 +92,19 @@ class Character(BaseRenderable):
         character: str | None,
         loader: FontLoader,
         color: str = "black",
+        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.character = character
         self.loader = loader
         self.color = color
+        self.clear_space = clear_space
 
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
+
+        super().__init__(**kwargs)
 
     def get_path(self, layer):
         path = []
@@ -196,15 +199,15 @@ class Logotype(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.characters = characters
         self.spacings = spacings
         self.clear_space = clear_space
 
         self.cap_height = self.characters[0].loader.capHeight
         self.scale = self.characters[0].loader.scale
+
         self._set_spacings()
-        self._init_canvas()
+        super().__init__(**kwargs)
 
     def _set_spacings(self):
         x_offset = 0

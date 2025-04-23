@@ -2,7 +2,6 @@ from pathlib import Path
 
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
 from nixoslogo.dimensioned import DimensionedLambda
-from nixoslogo.layout import Canvas
 
 object_lines = LineGroup(
     name="object",
@@ -23,23 +22,10 @@ dimension_lines = DimensionLines(
     font_size="2rem",
 )
 
-radius = 512
-
-canvas = Canvas(
-    min_x=-2 * radius,
-    min_y=-2 * radius,
-    width=4 * radius,
-    height=4 * radius,
-)
-
 lambda_inst = DimensionedLambda(
     object_lines=object_lines,
     construction_lines=construction_lines,
     dimension_lines=dimension_lines,
-    canvas=canvas,
-    radius=radius,
-    thickness=1 / 4,
-    gap=1 / 32,
 )
 
 with open(Path("nixos-lambda-dimensioned-linear.svg"), "w") as file:

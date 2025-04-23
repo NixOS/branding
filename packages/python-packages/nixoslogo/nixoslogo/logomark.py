@@ -21,19 +21,43 @@ class Lambda(BaseRenderable):
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
+        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        super().__init__(**kwargs)
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
+        self.clear_space = clear_space
+        super().__init__(**kwargs)
 
     @property
     def elements_bounding_box(self):
-        pass
+        double_up = [
+            (
+                point.x,
+                point.y,
+            )
+            * 2
+            for point in self.make_lambda_points()
+        ]
+        return tuple(
+            predicate(elem)
+            for predicate, elem in zip(
+                (min, min, max, max),
+                list(zip(*double_up)),
+            )
+        )
 
     def _get_clearspace(self):
-        pass
+        match self.clear_space:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return self.elements_y_max / 2
+            case ClearSpace.RECOMMENDED:
+                return self.elements_y_max
+            case _:
+                raise Exception("Unknown ClearSpace")
 
     def make_svg_elements(self):
         pass
@@ -62,12 +86,9 @@ class Lambda(BaseRenderable):
         thickness: Number | None = None,
         gap: Number | None = None,
     ) -> Points:
-        if radius is None:
-            radius = self.radius
-        if thickness is None:
-            thickness = self.thickness
-        if gap is None:
-            gap = self.gap
+        radius = radius if radius is not None else self.radius
+        thickness = thickness if thickness is not None else self.thickness
+        gap = gap if gap is not None else self.gap
 
         hexagon_points = self.make_hexagon_points(radius)
         hex_top_left = hexagon_points[2]
