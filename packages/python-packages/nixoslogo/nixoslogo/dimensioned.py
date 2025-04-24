@@ -275,6 +275,19 @@ class DimensionedLogomark(Logomark):
             lin_flake_long_length,
         )
 
+    def make_flake_polygons_for_dimensions(self):
+        flake_points = self.make_flake_points()
+
+        return tuple(
+            svg.Polygon(
+                points=lambda_points.to_list(),
+                stroke=self.ilambda.object_lines.stroke,
+                stroke_width=self.ilambda.object_lines.stroke_width,
+                fill=self.ilambda.object_lines.fill,
+            )
+            for lambda_points in flake_points
+        )
+
     def draw_flake_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()

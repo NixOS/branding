@@ -223,20 +223,6 @@ class Logomark(BaseRenderable):
         ]
         return flake_points
 
-    # TODO - @djacu move to dimensioned
-    def make_flake_polygons_for_dimensions(self):
-        flake_points = self.make_flake_points()
-
-        return tuple(
-            svg.Polygon(
-                points=lambda_points.to_list(),
-                stroke=self.ilambda.object_lines.stroke,
-                stroke_width=self.ilambda.object_lines.stroke_width,
-                fill=self.ilambda.object_lines.fill,
-            )
-            for lambda_points in flake_points
-        )
-
     def make_clean_flake_polygons_flat(self):
         flake_points = self.make_flake_points()
 
