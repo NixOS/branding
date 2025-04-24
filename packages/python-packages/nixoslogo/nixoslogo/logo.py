@@ -4,10 +4,12 @@ from pathlib import Path
 import svg
 
 from nixoslogo.core import (
+    DEFAULT_LOGOTYPE_SPACINGS,
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     BaseRenderable,
     ClearSpace,
     ColorStyle,
+    LogoLayout,
 )
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
@@ -23,6 +25,7 @@ class NixosLogo(BaseRenderable):
         lambda_radius: int = 512,
         lambda_thickness: float = 1 / 4,
         lambda_gap: float = 1 / 32,
+        logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
         logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
         logotype_cap_height: float | None = None,
         logotype_color: str = "black",
@@ -35,6 +38,7 @@ class NixosLogo(BaseRenderable):
         self.lambda_radius = lambda_radius
         self.lambda_thickness = lambda_thickness
         self.lambda_gap = lambda_gap
+        self.logo_layout = logo_layout
         self.logomark_color_style = logomark_color_style
         self.logotype_cap_height = logotype_cap_height
         self.logotype_color = logotype_color
@@ -46,6 +50,7 @@ class NixosLogo(BaseRenderable):
         self._init_snowflake()
         self._init_cap_height()
         self._init_logotype()
+        self._init_layout()
 
         super().__init__(**kwargs)
 
@@ -81,10 +86,21 @@ class NixosLogo(BaseRenderable):
             spacings=self.logotype_spacings,
         )
 
+    def _init_layout(self):
         if self.logotype_transform is None:
-            self.logotype_transform = svg.Translate(
-                9 / 4 * self.lambda_radius, self.logotype_cap_height / 2
-            )
+            match self.logo_layout:
+                case LogoLayout.HORIZONTAL:
+                    self.logotype_transform = svg.Translate(
+                        self.logomark.radius,
+                        self.logotype_cap_height / 2,
+                    )
+                case LogoLayout.VERTICAL:
+                    self.logotype_transform = svg.Translate(
+                        -self.logotype.elements_width / 2,
+                        self.logomark.inradius + self.logotype_cap_height * 1.25,
+                    )
+                case _:
+                    raise Exception("Unknown LogoLayout")
 
     @property
     def elements_bounding_box(self):
