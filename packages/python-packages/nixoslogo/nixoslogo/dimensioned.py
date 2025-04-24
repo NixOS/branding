@@ -472,16 +472,8 @@ class DimensionedLogotype(Logotype):
         self.dimension_lines = dimension_lines
 
     def make_dimensioned_svg(self):
-        # TODO - @djacu clean this up; no more viewport and local make_view_box
-        viewport = (
-            self.elements_x_min - self.cap_height / 2,
-            self.elements_y_min - self.cap_height / 2,
-            self.elements_width + self.cap_height,
-            self.elements_height + self.cap_height,
-        )
-
         return svg.SVG(
-            viewBox=make_view_box(viewport),
+            viewBox=self.canvas.make_view_box(),
             elements=(
                 self.svg_bounding_box()
                 + self.dimension_cap_height()
@@ -567,12 +559,3 @@ class DimensionedLogotype(Logotype):
             )
             for (point1, point2), offset, side in zip(points, offsets, sides)
         ]
-
-
-def make_view_box(viewport):
-    return svg.ViewBoxSpec(
-        min_x=viewport[0],
-        min_y=viewport[1],
-        width=viewport[2],
-        height=viewport[3],
-    )
