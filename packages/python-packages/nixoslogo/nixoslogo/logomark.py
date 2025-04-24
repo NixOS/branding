@@ -76,10 +76,13 @@ class Lambda(BaseRenderable):
             ]
         )
 
+    # TODO - @djacu move to dimensioned.py and have DimensionedLogomark use DimensionedLambda
     def make_diagonal_line(self, radius: Number) -> list[Number]:
         hexagon_points = self.make_hexagon_points(radius)
         return Points([hexagon_points[1], hexagon_points[4]])
 
+    # TODO - @djacu make another function that creates a dict of all the points
+    # so they can be referenced by name. Then use dict values to make the Points list
     def make_lambda_points(
         self,
         radius: Number | None = None,
@@ -117,6 +120,7 @@ class Lambda(BaseRenderable):
         points = Points([Point((point.x, -point.y)) for point in points])
         return points
 
+    # TODO - @djacu move to dimensioned.py and have DimensionedLogomark use DimensionedLambda
     def make_lambda_polygons(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_lambda_points()
@@ -140,8 +144,8 @@ class Lambda(BaseRenderable):
 class Logomark(BaseRenderable):
     def __init__(
         self,
-        ilambda: Lambda,
-        color_style: ColorStyle,
+        ilambda: Lambda,  # TODO - @djacu see if you can set a default value of Lambda()
+        color_style: ColorStyle,  # TODO - @djacu think about a default value
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
@@ -154,10 +158,12 @@ class Logomark(BaseRenderable):
         self._make_color_names()
 
         self._gradient_stop_offsets = [0, 25, 100]
+        # TODO - @djacu see if this can be calculated
         self.snowflake_lambda_ratio = 9 / 4
 
         super().__init__(**kwargs)
 
+    # TODO - @djacu see if this can be calculated without snowflake_lambda_ratio so that it can be derived
     @property
     def elements_bounding_box(self):
         long_radius = self.ilambda.radius * self.snowflake_lambda_ratio
@@ -169,6 +175,7 @@ class Logomark(BaseRenderable):
             short_radius,
         )
 
+    # TODO - @djacu this seems wrong
     @property
     def radius(self):
         """The snowflake radius."""
@@ -208,6 +215,7 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception("Unknown ColorStyle")
 
+    # TODO - @djacu see the other todo about the dict of points
     def make_flake_points(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
         lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
@@ -236,6 +244,7 @@ class Logomark(BaseRenderable):
             )
         )
 
+    # TODO - @djacu see the other todo about the dict of points
     def make_gradient_end_points(self):
         lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
         stop_point = lambda_points_no_gap[
