@@ -163,23 +163,25 @@ class Logomark(BaseRenderable):
 
         super().__init__(**kwargs)
 
-    # TODO - @djacu see if this can be calculated without snowflake_lambda_ratio so that it can be derived
     @property
     def elements_bounding_box(self):
-        long_radius = self.ilambda.radius * self.snowflake_lambda_ratio
-        short_radius = long_radius * math.sqrt(3) / 2
         return (
-            -long_radius,
-            -short_radius,
-            long_radius,
-            short_radius,
+            -self.circumradius,
+            -self.inradius,
+            self.circumradius,
+            self.inradius,
         )
 
-    # TODO - @djacu this seems wrong
+    # TODO - @djacu see if snowflake lambda ratio can be calculated without snowflake_lambda_ratio so that it can be derived
     @property
-    def radius(self):
-        """The snowflake radius."""
-        return self.x_max
+    def circumradius(self):
+        """The logomark circumradius."""
+        return self.ilambda.radius * self.snowflake_lambda_ratio
+
+    @property
+    def inradius(self):
+        """The logomark inradius."""
+        return self.circumradius * math.sqrt(3) / 2
 
     def _get_clearspace(self):
         match self.clear_space:
