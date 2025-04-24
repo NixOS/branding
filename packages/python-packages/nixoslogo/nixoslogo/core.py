@@ -21,6 +21,11 @@ class ColorStyle(Enum):
     GRADIENT = auto()
 
 
+class LogoLayout(Enum):
+    HORIZONTAL = auto()
+    VERTICAL = auto()
+
+
 # === Constants ===
 
 
