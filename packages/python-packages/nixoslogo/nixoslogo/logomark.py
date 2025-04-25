@@ -158,8 +158,6 @@ class Logomark(BaseRenderable):
         self._make_color_names()
 
         self._gradient_stop_offsets = [0, 25, 100]
-        # TODO - @djacu see if this can be calculated
-        self.snowflake_lambda_ratio = 9 / 4
 
         super().__init__(**kwargs)
 
@@ -172,16 +170,20 @@ class Logomark(BaseRenderable):
             self.inradius,
         )
 
-    # TODO - @djacu see if snowflake lambda ratio can be calculated without snowflake_lambda_ratio so that it can be derived
     @property
     def circumradius(self):
         """The logomark circumradius."""
-        return self.ilambda.radius * self.snowflake_lambda_ratio
+        return max(point.x for points in self.make_flake_points() for point in points)
 
     @property
     def inradius(self):
         """The logomark inradius."""
         return self.circumradius * math.sqrt(3) / 2
+
+    @property
+    def snowflake_lambda_ratio(self):
+        """The ratio between the snowflake and lambda radius."""
+        return self.circumradius / self.ilambda.radius
 
     def _get_clearspace(self):
         match self.clear_space:
