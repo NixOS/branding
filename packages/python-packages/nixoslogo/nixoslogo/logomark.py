@@ -1,5 +1,6 @@
 import itertools
 import math
+from pathlib import Path
 
 import svg
 from svg._types import Number
@@ -144,8 +145,8 @@ class Lambda(BaseRenderable):
 class Logomark(BaseRenderable):
     def __init__(
         self,
-        ilambda: Lambda,  # TODO - @djacu see if you can set a default value of Lambda()
-        color_style: ColorStyle,  # TODO - @djacu think about a default value
+        ilambda: Lambda = Lambda(),
+        color_style: ColorStyle = ColorStyle.GRADIENT,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         **kwargs,
@@ -313,3 +314,11 @@ class Logomark(BaseRenderable):
             )
             for angle, fill in zip(range(0, 360, 60), itertools.cycle(self.color_names))
         )
+
+    def write_svg(self):
+        with open(Path("test-logomark.svg"), "w") as file:
+            file.write(str(self.make_svg()))
+
+
+if __name__ == "__main__":
+    Logomark(background_color="#dddddd").write_svg()
