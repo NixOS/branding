@@ -77,11 +77,6 @@ class Lambda(BaseRenderable):
             ]
         )
 
-    # TODO - @djacu move to dimensioned.py and have DimensionedLogomark use DimensionedLambda
-    def make_diagonal_line(self, radius: Number) -> list[Number]:
-        hexagon_points = self.make_hexagon_points(radius)
-        return Points([hexagon_points[1], hexagon_points[4]])
-
     # TODO - @djacu make another function that creates a dict of all the points
     # so they can be referenced by name. Then use dict values to make the Points list
     def make_lambda_points(
@@ -120,26 +115,6 @@ class Lambda(BaseRenderable):
         # Need to negate the y-axis so the lambda is not upside down
         points = Points([Point((point.x, -point.y)) for point in points])
         return points
-
-    # TODO - @djacu move to dimensioned.py and have DimensionedLogomark use DimensionedLambda
-    def make_lambda_polygons(self):
-        lambda_points_no_gap = self.make_lambda_points(gap=0)
-        lambda_points_gap = self.make_lambda_points()
-        return (
-            svg.Polygon(
-                points=lambda_points_no_gap.to_list(),
-                stroke=self.object_lines.stroke,
-                stroke_width=self.object_lines.stroke_width,
-                fill=self.object_lines.fill,
-                stroke_dasharray=4,
-            ),
-            svg.Polygon(
-                points=lambda_points_gap.to_list(),
-                stroke=self.object_lines.stroke,
-                stroke_width=self.object_lines.stroke_width,
-                fill=self.object_lines.fill,
-            ),
-        )
 
 
 class Logomark(BaseRenderable):

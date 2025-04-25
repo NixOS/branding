@@ -1,12 +1,14 @@
 import svg
+from svg._types import Number
 
 from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
-from nixoslogo.geometry import Point
+from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Logotype
 
 
+# TODO - @djacu add default lines
 class DimensionedLambda(Lambda):
     def __init__(
         self,
@@ -28,6 +30,10 @@ class DimensionedLambda(Lambda):
                 width=4 * self.radius,
                 height=4 * self.radius,
             )
+
+    def make_diagonal_line(self, radius: Number) -> list[Number]:
+        hexagon_points = self.make_hexagon_points(radius)
+        return Points([hexagon_points[1], hexagon_points[4]])
 
     def make_lambda_construction_lines(self):
         return (
@@ -154,6 +160,25 @@ class DimensionedLambda(Lambda):
             for index, opts in enumerate(options)
         )
 
+    def make_lambda_polygons(self):
+        lambda_points_no_gap = self.make_lambda_points(gap=0)
+        lambda_points_gap = self.make_lambda_points()
+        return (
+            svg.Polygon(
+                points=lambda_points_no_gap.to_list(),
+                stroke=self.object_lines.stroke,
+                stroke_width=self.object_lines.stroke_width,
+                fill=self.object_lines.fill,
+                stroke_dasharray=4,
+            ),
+            svg.Polygon(
+                points=lambda_points_gap.to_list(),
+                stroke=self.object_lines.stroke,
+                stroke_width=self.object_lines.stroke_width,
+                fill=self.object_lines.fill,
+            ),
+        )
+
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
@@ -195,6 +220,8 @@ class DimensionedLambda(Lambda):
         )
 
 
+# TODO - @djacu add default lines
+# TODO - @djacu add default ilambda
 class DimensionedLogomark(Logomark):
     def __init__(
         self,
