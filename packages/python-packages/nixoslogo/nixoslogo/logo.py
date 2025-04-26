@@ -148,6 +148,9 @@ class NixosLogo(BaseRenderable):
             + list(extras)
         )
 
+    def close(self):
+        self.loader.font.close()
+
 
 if __name__ == "__main__":
     logo = NixosLogo(background_color="#dddddd")
