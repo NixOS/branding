@@ -8,6 +8,7 @@ import svg
 
 from nixoslogo.core import (
     DEFAULT_FONT_TRANSFORMS,
+    DEFAULT_LOGOTYPE_SPACINGS,
     NIXOS_DARK_BLUE,
     NIXOS_LIGHT_BLUE,
     BaseRenderable,
@@ -195,7 +196,7 @@ class Logotype(BaseRenderable):
     def __init__(
         self,
         characters: list[Character],
-        spacings: tuple[int],
+        spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
