@@ -91,7 +91,7 @@ class NixosLogo(BaseRenderable):
             match self.logo_layout:
                 case LogoLayout.HORIZONTAL:
                     self.logotype_transform = svg.Translate(
-                        self.logomark.radius,
+                        self.logomark.circumradius,
                         self.logotype_cap_height / 2,
                     )
                 case LogoLayout.VERTICAL:
