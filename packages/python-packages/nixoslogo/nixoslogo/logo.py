@@ -3,9 +3,11 @@ from pathlib import Path
 
 import svg
 
+from nixoslogo.colors import Color
 from nixoslogo.core import (
-    DEFAULT_LOGOTYPE_SPACINGS,
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+    NIXOS_DARK_BLUE,
+    NIXOS_LIGHT_BLUE,
     BaseRenderable,
     ClearSpace,
     ColorStyle,
@@ -26,6 +28,7 @@ class NixosLogo(BaseRenderable):
         lambda_thickness: float = 1 / 4,
         lambda_gap: float = 1 / 32,
         logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
+        logomark_colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
         logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
         logotype_cap_height: float | None = None,
         logotype_color: str = "black",
@@ -39,6 +42,7 @@ class NixosLogo(BaseRenderable):
         self.lambda_thickness = lambda_thickness
         self.lambda_gap = lambda_gap
         self.logo_layout = logo_layout
+        self.logomark_colors = logomark_colors
         self.logomark_color_style = logomark_color_style
         self.logotype_cap_height = logotype_cap_height
         self.logotype_color = logotype_color
@@ -62,6 +66,7 @@ class NixosLogo(BaseRenderable):
         )
         self.logomark = Logomark(
             ilambda=self.ilambda,
+            colors=self.logomark_colors,
             color_style=self.logomark_color_style,
             clear_space=self.clear_space,
         )
@@ -132,10 +137,27 @@ class NixosLogo(BaseRenderable):
             ),
         )
 
-    def write_svg(self):
-        with open(Path("test-logo.svg"), "w") as file:
+    def make_filename(self, colors="default", extras=("",)):
+        return "-".join(
+            [
+                "nixos",
+                "logo",
+                colors,  # TODO @djacu make a enum class for color combos
+                self.logomark_color_style.name.lower(),
+                self.logotype_color,
+                self.logo_layout.name.lower(),
+                self.clear_space.name.lower(),
+            ]
+            + list(extras)
+        )
+
+    def write_svg(self, filename=None):
+        if filename is None:
+            filename = self.make_filename()
+        with open(Path(filename + ".svg"), "w") as file:
             file.write(str(self.make_svg()))
 
 
 if __name__ == "__main__":
-    NixosLogo(background_color="#dddddd").write_svg()
+    logo = NixosLogo(background_color="#dddddd")
+    logo.write_svg(filename=logo.make_filename(extras=("test",)))

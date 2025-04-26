@@ -1,3 +1,4 @@
+import fractions
 import itertools
 import math
 from pathlib import Path
@@ -148,8 +149,23 @@ class Lambda(BaseRenderable):
         )
         return {name: point for name, point in zip(names, points)}
 
-    def write_svg(self):
-        with open(Path("test-lambda.svg"), "w") as file:
+    def make_filename(self, colors="default", extras=("",)):
+        return "-".join(
+            [
+                "nixos",
+                "lambda",
+                f"R{fractions.Fraction(self.radius)}".replace("/", "_"),
+                f"T{fractions.Fraction(self.thickness)}".replace("/", "_"),
+                f"G{fractions.Fraction(self.gap)}".replace("/", "_"),
+                self.clear_space.name.lower(),
+            ]
+            + list(extras)
+        )
+
+    def write_svg(self, filename=None):
+        if filename is None:
+            filename = self.make_filename()
+        with open(Path(filename + ".svg"), "w") as file:
             file.write(str(self.make_svg()))
 
 
@@ -324,11 +340,27 @@ class Logomark(BaseRenderable):
             for angle, fill in zip(range(0, 360, 60), itertools.cycle(self.color_names))
         )
 
-    def write_svg(self):
-        with open(Path("test-logomark.svg"), "w") as file:
+    def make_filename(self, colors="default", extras=("",)):
+        return "-".join(
+            [
+                "nixos",
+                "logomark",
+                colors,
+                self.color_style.name.lower(),
+                self.clear_space.name.lower(),
+            ]
+            + list(extras)
+        )
+
+    def write_svg(self, filename=None):
+        if filename is None:
+            filename = self.make_filename()
+        with open(Path(filename + ".svg"), "w") as file:
             file.write(str(self.make_svg()))
 
 
 if __name__ == "__main__":
-    Lambda().write_svg()
-    Logomark(background_color="#dddddd").write_svg()
+    ilambda = Lambda(background_color="#dddddd")
+    ilambda.write_svg(filename=ilambda.make_filename(extras=("test",)))
+    logomark = Logomark(background_color="#dddddd")
+    logomark.write_svg(filename=logomark.make_filename(extras=("test",)))
