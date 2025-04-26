@@ -8,25 +8,6 @@ import svg
 from nixoslogo.colors import Color
 from nixoslogo.layout import Canvas
 
-# === Enums ===
-
-
-class ClearSpace(Enum):
-    NONE = auto()
-    MINIMAL = auto()
-    RECOMMENDED = auto()
-
-
-class ColorStyle(Enum):
-    FLAT = auto()
-    GRADIENT = auto()
-
-
-class LogoLayout(Enum):
-    HORIZONTAL = auto()
-    VERTICAL = auto()
-
-
 # === Constants ===
 
 
@@ -52,6 +33,32 @@ RAINBOW_COLORS = (
     Color("oklch", (0.60, 0.141400, 241.38)),
     Color("oklch", (0.46, 0.194300, 288.71)),
 )
+
+
+# === Enums ===
+
+
+class ClearSpace(Enum):
+    NONE = auto()
+    MINIMAL = auto()
+    RECOMMENDED = auto()
+
+
+class ColorStyle(Enum):
+    FLAT = auto()
+    GRADIENT = auto()
+
+
+class LogoLayout(Enum):
+    HORIZONTAL = auto()
+    VERTICAL = auto()
+
+
+class LogomarkColors(Enum):
+    DEFAULT = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE)
+    RAINBOW = RAINBOW_COLORS
+    BLACK = (Color("oklch", (0, 0, 0)),)
+    WHITE = (Color("oklch", (1, 0, 0)),)
 
 
 # === Base Classes ===

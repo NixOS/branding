@@ -470,7 +470,7 @@ class DimensionedLogomark(Logomark):
         )
 
         background = self.canvas.make_svg_background(
-            fill=f"url(#{self.color_names[0]})"
+            fill=f"url(#{self.css_color_names[0]})"
         )
         axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()

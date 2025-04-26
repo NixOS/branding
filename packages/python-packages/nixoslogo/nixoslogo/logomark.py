@@ -7,11 +7,10 @@ from svg._types import Number
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
-    NIXOS_DARK_BLUE,
-    NIXOS_LIGHT_BLUE,
     BaseRenderable,
     ClearSpace,
     ColorStyle,
+    LogomarkColors,
 )
 from nixoslogo.geometry import Point, Points, Vector, cosd, sind
 
@@ -168,15 +167,16 @@ class Logomark(BaseRenderable):
         ilambda: Lambda = Lambda(),
         color_style: ColorStyle = ColorStyle.GRADIENT,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
+        colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
         **kwargs,
     ):
         self.ilambda = ilambda
-        self.colors = colors
+        self.colors_name = getattr(colors, "name", "custom")
+        self.colors_value = getattr(colors, "value", colors)
         self.color_style = color_style
         self.clear_space = clear_space
 
-        self._make_color_names()
+        self._make_css_color_names()
 
         self._gradient_stop_offsets = [0, 25, 100]
 
@@ -217,13 +217,15 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception("Unknown ClearSpace")
 
-    def _make_color_names(self):
+    def _make_css_color_names(self):
         match self.color_style:
             case ColorStyle.FLAT:
-                self.color_names = tuple(color.to_string() for color in self.colors)
+                self.css_color_names = tuple(
+                    color.to_string() for color in self.colors_value
+                )
             case ColorStyle.GRADIENT:
-                self.color_names = tuple(
-                    color.gradient_color_name() for color in self.colors
+                self.css_color_names = tuple(
+                    color.gradient_color_name() for color in self.colors_value
                 )
             case _:
                 raise Exception("Unknown ColorStyle")
@@ -264,7 +266,7 @@ class Logomark(BaseRenderable):
                 fill=fill,
             )
             for lambda_points, fill in zip(
-                flake_points, itertools.cycle(self.color_names)
+                flake_points, itertools.cycle(self.css_color_names)
             )
         )
 
@@ -284,7 +286,7 @@ class Logomark(BaseRenderable):
         gradient_end_points = self.make_gradient_end_points()
 
         linear_gradients = []
-        for color, color_name in zip(self.colors, self.color_names):
+        for color, color_name in zip(self.colors_value, self.css_color_names):
             color_original = color.convert("srgb").to_string(hex=True)
             color_midpoint = color.darken(1).convert("srgb").to_string(hex=True)
             color_dark = color.darken(2).convert("srgb").to_string(hex=True)
@@ -330,7 +332,9 @@ class Logomark(BaseRenderable):
                     ),
                 ],
             )
-            for angle, fill in zip(range(0, 360, 60), itertools.cycle(self.color_names))
+            for angle, fill in zip(
+                range(0, 360, 60), itertools.cycle(self.css_color_names)
+            )
         )
 
     def make_filename(self, colors="default", extras=("",)):
@@ -338,7 +342,7 @@ class Logomark(BaseRenderable):
             [
                 "nixos",
                 "logomark",
-                colors,
+                self.colors_name.lower(),
                 self.color_style.name.lower(),
                 self.clear_space.name.lower(),
             ]
