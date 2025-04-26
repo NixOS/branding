@@ -242,3 +242,29 @@ class Logotype(BaseRenderable):
 
     def make_svg_elements(self):
         return tuple(elem.make_svg_element() for elem in self.characters)
+
+    def make_filename(self, extras=("",)):
+        return "-".join(
+            [
+                "nixos",
+                "logotype",
+                self.characters[0].color,
+                self.clear_space.name.lower(),
+            ]
+            + list(extras)
+        )
+
+    def write_svg(self, filename=None):
+        if filename is None:
+            filename = self.make_filename()
+        with open(Path(filename + ".svg"), "w") as file:
+            file.write(str(self.make_svg()))
+
+
+if __name__ == "__main__":
+    loader = FontLoader()
+    logotype = Logotype(
+        characters=[Character(loader=loader, character=char) for char in "NixOS"],
+        background_color="#dddddd",
+    )
+    logotype.write_svg(filename=logotype.make_filename(extras=("test",)))
