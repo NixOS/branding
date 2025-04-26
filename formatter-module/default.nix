@@ -14,9 +14,14 @@ inputs.self.library.defaultSystems (
           mdformat.enable = true;
           mdsh.enable = true;
           nixfmt.enable = true;
+          ruff-check.enable = true;
+          ruff-format.enable = true;
           shellcheck.enable = true;
         };
         settings.global.excludes = [
+          "**/pyproject.toml"
+          "*.gitignore"
+          "*.zip"
           ".git-blame-ignore-revs"
         ];
       };

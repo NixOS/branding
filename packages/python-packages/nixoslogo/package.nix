@@ -20,7 +20,7 @@ in
 
 buildPythonPackage {
 
- inherit (pyproject.project) name version;
+  inherit (pyproject.project) name version;
 
   pyproject = true;
 

@@ -19,4 +19,3 @@ runCommandLocal "nixos-snowflake-dimensioned-linear"
     mkdir $out
     cp nixos-snowflake-dimensioned-linear.svg $out/
   ''
-
