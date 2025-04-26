@@ -101,7 +101,7 @@ class NixosLogo(BaseRenderable):
                         self.logomark.inradius + self.logotype_cap_height * 1.25,
                     )
                 case _:
-                    raise Exception("Unknown LogoLayout")
+                    raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
 
     @property
     def elements_bounding_box(self):
