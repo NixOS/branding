@@ -15,9 +15,18 @@ class Color(ColorBase):
             self.clone()
             .set(
                 "lightness",
-                lambda lightness: lightness + scale * self.GRADIENT_LIGHTNESS_DELTA,
+                lambda lightness: max(
+                    0,
+                    lightness + scale * self.GRADIENT_LIGHTNESS_DELTA,
+                ),
             )
-            .set("chroma", lambda chroma: chroma + scale * self.GRADIENT_CHROMA_DELTA)
+            .set(
+                "chroma",
+                lambda chroma: max(
+                    0,
+                    chroma + scale * self.GRADIENT_CHROMA_DELTA,
+                ),
+            )
         )
 
     def gradient_color_name(self) -> str:
