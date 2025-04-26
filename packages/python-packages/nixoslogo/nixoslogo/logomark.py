@@ -61,7 +61,12 @@ class Lambda(BaseRenderable):
                 raise Exception("Unknown ClearSpace")
 
     def make_svg_elements(self):
-        pass
+        return (
+            svg.Polygon(
+                points=self.make_lambda_points().to_list(),
+                fill="black",
+            ),
+        )
 
     def make_hexagon_points(self, radius: Number) -> Points:
         angles = [math.radians(angle) for angle in range(0, 360, 60)]
@@ -77,8 +82,6 @@ class Lambda(BaseRenderable):
             ]
         )
 
-    # TODO - @djacu make another function that creates a dict of all the points
-    # so they can be referenced by name. Then use dict values to make the Points list
     def make_lambda_points(
         self,
         radius: Number | None = None,
@@ -115,6 +118,39 @@ class Lambda(BaseRenderable):
         # Need to negate the y-axis so the lambda is not upside down
         points = Points([Point((point.x, -point.y)) for point in points])
         return points
+
+    def make_named_lambda_points(
+        self,
+        radius: Number | None = None,
+        thickness: Number | None = None,
+        gap: Number | None = None,
+    ) -> dict[str, Point]:
+        radius = radius if radius is not None else self.radius
+        thickness = thickness if thickness is not None else self.thickness
+        gap = gap if gap is not None else self.gap
+
+        points = self.make_lambda_points(
+            radius=radius,
+            thickness=thickness,
+            gap=gap,
+        )
+
+        names = (
+            "upper_notch",
+            "upper_apex",
+            "forward_tip",
+            "forward_heel",
+            "joint_crotch",
+            "rear_heel",
+            "rear_foot",
+            "rear_notch",
+            "midpoint_join",
+        )
+        return {name: point for name, point in zip(names, points)}
+
+    def write_svg(self):
+        with open(Path("test-lambda.svg"), "w") as file:
+            file.write(str(self.make_svg()))
 
 
 class Logomark(BaseRenderable):
@@ -195,12 +231,11 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception("Unknown ColorStyle")
 
-    # TODO - @djacu see the other todo about the dict of points
     def make_flake_points(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
-        lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
+        lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
 
-        translation_to_tip = Vector(tuple(-x for x in lambda_points_no_gap[1]))
+        translation_to_tip = -Vector(tuple(lambda_points_no_gap["upper_apex"]))
         translation_left = Vector((-self.ilambda.radius, 0))
         translation = translation_to_tip + translation_left
 
@@ -224,15 +259,14 @@ class Logomark(BaseRenderable):
             )
         )
 
-    # TODO - @djacu see the other todo about the dict of points
     def make_gradient_end_points(self):
-        lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
+        lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
         stop_point = lambda_points_no_gap[
-            4
+            "joint_crotch"
         ] + self.ilambda.radius * self.ilambda.thickness * Vector((1, 0))
         return {
-            "x1": lambda_points_no_gap[0].x,
-            "y1": lambda_points_no_gap[1].y,
+            "x1": lambda_points_no_gap["upper_notch"].x,
+            "y1": lambda_points_no_gap["upper_apex"].y,
             "x2": stop_point.x,
             "y2": stop_point.y,
         }
@@ -296,4 +330,5 @@ class Logomark(BaseRenderable):
 
 
 if __name__ == "__main__":
+    Lambda().write_svg()
     Logomark(background_color="#dddddd").write_svg()

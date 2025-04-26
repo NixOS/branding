@@ -69,7 +69,7 @@ class DimensionedLambda(Lambda):
     def make_lambda_linear_dimensions(self):
         hexagon_points = self.make_hexagon_points(radius=self.radius)
         lambda_points_no_gap = self.make_lambda_points(gap=0)
-        lambda_points_gap = self.make_lambda_points()
+        lambda_points_gap = self.make_named_lambda_points()
 
         dim_main_diagonal = self.dimension_lines.make_dimension_line(
             point1=hexagon_points[1],
@@ -81,24 +81,28 @@ class DimensionedLambda(Lambda):
         )
 
         dim_gap_diagonal = self.dimension_lines.make_dimension_line(
-            point1=(lambda_points_gap[2] + lambda_points_gap[3]) / 2,
-            point2=(lambda_points_gap[0] + lambda_points_gap[1]) / 2,
+            point1=(
+                lambda_points_gap["forward_tip"] + lambda_points_gap["forward_heel"]
+            )
+            / 2,
+            point2=(lambda_points_gap["upper_notch"] + lambda_points_gap["upper_apex"])
+            / 2,
             flip=False,
             side="right",
             offset=15 / 32,
             reference=2 * self.radius,
         )
         dim_gap_long_edge = self.dimension_lines.make_dimension_line(
-            point1=lambda_points_gap[1],
-            point2=lambda_points_gap[2],
+            point1=lambda_points_gap["upper_apex"],
+            point2=lambda_points_gap["forward_tip"],
             flip=True,
             side="right",
             offset=7 / 16,
             reference=2 * self.radius,
         )
         dim_gap_left_top = self.dimension_lines.make_dimension_line(
-            point1=lambda_points_gap[8],
-            point2=lambda_points_gap[0],
+            point1=lambda_points_gap["midpoint_join"],
+            point2=lambda_points_gap["upper_notch"],
             flip=False,
             side="right",
             offset=1 / 8,
@@ -344,10 +348,10 @@ class DimensionedLogomark(Logomark):
             for offset in self._gradient_stop_offsets
         ]
 
-        lambda_points_no_gap = self.ilambda.make_lambda_points(gap=0)
+        lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
         dimension_lines = [
             self.dimension_lines.make_dimension_line(
-                point1=lambda_points_no_gap[0],
+                point1=lambda_points_no_gap["upper_notch"],
                 point2=point_start,
                 flip=False,
                 side="left",
@@ -356,7 +360,7 @@ class DimensionedLogomark(Logomark):
                 text="V",
             ),
             self.dimension_lines.make_dimension_line(
-                point1=lambda_points_no_gap[1],
+                point1=lambda_points_no_gap["upper_apex"],
                 point2=point_start,
                 flip=False,
                 side="left",
@@ -365,7 +369,7 @@ class DimensionedLogomark(Logomark):
                 text="H",
             ),
             self.dimension_lines.make_dimension_line(
-                point1=lambda_points_no_gap[4],
+                point1=lambda_points_no_gap["joint_crotch"],
                 point2=point_stop,
                 flip=False,
                 side="left",
