@@ -1,6 +1,7 @@
 import string
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+from pathlib import Path
 
 import svg
 
@@ -77,6 +78,9 @@ class BaseRenderable(ABC):
     @abstractmethod
     def make_svg_elements(self): ...
 
+    @abstractmethod
+    def make_filename(self, extras: tuple[str]) -> str: ...
+
     def _init_canvas(self):
         if self.canvas is None:
             min_x, min_y, max_x, max_y = self.elements_bounding_box
@@ -115,6 +119,12 @@ class BaseRenderable(ABC):
             viewBox=self.canvas.make_view_box(),
             elements=self.make_svg_background() + self.make_svg_elements(),
         )
+
+    def write_svg(self, filename=None):
+        if filename is None:
+            filename = self.make_filename()
+        with open(Path(filename + ".svg"), "w") as file:
+            file.write(str(self.make_svg()))
 
     @property
     def elements_x_min(self):

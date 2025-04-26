@@ -172,6 +172,18 @@ class Character(BaseRenderable):
     def make_svg_elements(self):
         return (self.make_svg_element(),)
 
+    def make_filename(self, extras=("",)):
+        return "-".join(
+            [
+                "nixos",
+                "glyph",
+                self.character,
+                self.color,
+                self.clear_space.name.lower(),
+            ]
+            + list(extras)
+        )
+
 
 class ModifiedCharacterX(Character):
     def __init__(self, **kwargs):
@@ -254,15 +266,13 @@ class Logotype(BaseRenderable):
             + list(extras)
         )
 
-    def write_svg(self, filename=None):
-        if filename is None:
-            filename = self.make_filename()
-        with open(Path(filename + ".svg"), "w") as file:
-            file.write(str(self.make_svg()))
-
 
 if __name__ == "__main__":
     loader = FontLoader()
+
+    character = Character(loader=loader, character="x", background_color="#dddddd")
+    character.write_svg(filename=character.make_filename(extras=("test",)))
+
     logotype = Logotype(
         characters=[Character(loader=loader, character=char) for char in "NixOS"],
         background_color="#dddddd",

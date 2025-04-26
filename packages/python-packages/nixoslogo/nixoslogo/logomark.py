@@ -1,7 +1,6 @@
 import fractions
 import itertools
 import math
-from pathlib import Path
 
 import svg
 from svg._types import Number
@@ -161,12 +160,6 @@ class Lambda(BaseRenderable):
             ]
             + list(extras)
         )
-
-    def write_svg(self, filename=None):
-        if filename is None:
-            filename = self.make_filename()
-        with open(Path(filename + ".svg"), "w") as file:
-            file.write(str(self.make_svg()))
 
 
 class Logomark(BaseRenderable):
@@ -351,12 +344,6 @@ class Logomark(BaseRenderable):
             ]
             + list(extras)
         )
-
-    def write_svg(self, filename=None):
-        if filename is None:
-            filename = self.make_filename()
-        with open(Path(filename + ".svg"), "w") as file:
-            file.write(str(self.make_svg()))
 
 
 if __name__ == "__main__":
