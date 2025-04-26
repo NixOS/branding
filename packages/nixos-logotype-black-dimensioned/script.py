@@ -4,7 +4,6 @@ from nixoslogo.annotations import ConstructionLines, DimensionLines
 from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS, ClearSpace
 from nixoslogo.dimensioned import DimensionedLogotype
 from nixoslogo.logotype import (
-    Character,
     FontLoader,
 )
 
@@ -25,13 +24,7 @@ dimension_lines = DimensionLines(
 loader = FontLoader(capHeight=512)
 
 my_char_dim = DimensionedLogotype(
-    characters=[
-        Character(character="N", loader=loader),
-        Character(character="i", loader=loader),
-        Character(character="x", loader=loader),
-        Character(character="O", loader=loader),
-        Character(character="S", loader=loader),
-    ],
+    loader=loader,
     spacings=DEFAULT_LOGOTYPE_SPACINGS,
     clear_space=ClearSpace.MINIMAL,
     construction_lines=construction_lines,

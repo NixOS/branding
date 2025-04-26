@@ -509,7 +509,7 @@ class DimensionedLogotype(Logotype):
                 self.svg_bounding_box()
                 + self.dimension_cap_height()
                 + self.dimension_spacings()
-                + [elem.make_svg_element() for elem in self.characters],
+                + [elem.make_svg_element() for elem in self.glyphs],
             ),
         )
 
@@ -548,12 +548,8 @@ class DimensionedLogotype(Logotype):
         ]
 
     def dimension_cap_height(self):
-        point1 = Point(
-            (self.characters[0].elements_x_min, self.characters[0].elements_y_min)
-        )
-        point2 = Point(
-            (self.characters[0].elements_x_min, self.characters[0].elements_y_max)
-        )
+        point1 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_min))
+        point2 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_max))
         return [
             self.dimension_lines.make_dimension_line(
                 point1=point1,
@@ -568,8 +564,8 @@ class DimensionedLogotype(Logotype):
     def dimension_spacings(self):
         points = [
             (
-                Point((self.characters[index + 0].elements_x_max, self.elements_y_min)),
-                Point((self.characters[index + 1].elements_x_min, self.elements_y_min)),
+                Point((self.glyphs[index + 0].elements_x_max, self.elements_y_min)),
+                Point((self.glyphs[index + 1].elements_x_min, self.elements_y_min)),
             )
             for index in range(4)
         ]

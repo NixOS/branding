@@ -13,6 +13,7 @@ from nixoslogo.core import (
     NIXOS_LIGHT_BLUE,
     BaseRenderable,
     ClearSpace,
+    LogotypeStyle,
 )
 
 
@@ -87,25 +88,32 @@ class FontLoader:
         )
 
 
-class Character(BaseRenderable):
+class Glyph(BaseRenderable):
     def __init__(
         self,
         character: str | None,
-        loader: FontLoader,
+        loader: FontLoader | None = None,
         color: str = "black",
+        style: LogotypeStyle = LogotypeStyle.REGULAR,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
         self.character = character
         self.loader = loader
         self.color = color
+        self.style = style
         self.clear_space = clear_space
 
+        self._init_loader()
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
 
         super().__init__(**kwargs)
+
+    def _init_loader(self):
+        if self.loader is None:
+            self.loader = FontLoader()
 
     def get_path(self, layer):
         path = []
@@ -164,10 +172,33 @@ class Character(BaseRenderable):
                 raise Exception("Unknown ClearSpace")
 
     def make_svg_element(self):
-        return svg.Path(
-            d=self.get_path(self.layer),
-            fill=self.color,
-        )
+        match self.style:
+            case LogotypeStyle.REGULAR:
+                return svg.Path(
+                    d=self.get_path(self.layer),
+                    fill=self.color,
+                )
+            case LogotypeStyle.COLOREDX:
+                if self.character == "x":
+                    upper = [self.layer[0][:2] + self.layer[0][10:]]
+                    lower = [self.layer[0][2:10]]
+                    return [
+                        svg.Path(
+                            d=self.get_path(upper),
+                            fill=NIXOS_LIGHT_BLUE.to_string(),
+                        ),
+                        svg.Path(
+                            d=self.get_path(lower),
+                            fill=NIXOS_DARK_BLUE.to_string(),
+                        ),
+                    ]
+                else:
+                    return svg.Path(
+                        d=self.get_path(self.layer),
+                        fill=self.color,
+                    )
+            case _:
+                raise Exception("Unknown LogotypeStyle")
 
     def make_svg_elements(self):
         return (self.make_svg_element(),)
@@ -179,52 +210,58 @@ class Character(BaseRenderable):
                 "glyph",
                 self.character,
                 self.color,
+                self.style.name.lower(),
                 self.clear_space.name.lower(),
             ]
             + list(extras)
         )
 
 
-class ModifiedCharacterX(Character):
-    def __init__(self, **kwargs):
-        super().__init__(character="x", **kwargs)
-
-    def make_svg_element(self):
-        upper = [self.layer[0][:2] + self.layer[0][10:]]
-        lower = [self.layer[0][2:10]]
-        return [
-            svg.Path(
-                d=self.get_path(upper),
-                fill=NIXOS_LIGHT_BLUE.to_string(),
-            ),
-            svg.Path(
-                d=self.get_path(lower),
-                fill=NIXOS_DARK_BLUE.to_string(),
-            ),
-        ]
-
-
 class Logotype(BaseRenderable):
     def __init__(
         self,
-        characters: list[Character],
+        characters: str = "NixOS",
+        loader: FontLoader | None = None,
+        color: str = "black",
+        style: LogotypeStyle = LogotypeStyle.REGULAR,
         spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
+        self.loader = loader
         self.characters = characters
+        self.loader = loader
+        self.color = color
+        self.style = style
         self.spacings = spacings
         self.clear_space = clear_space
 
-        self.cap_height = self.characters[0].loader.capHeight
-        self.scale = self.characters[0].loader.scale
-
+        self._init_loader()
+        self._load_glyphs()
+        self.cap_height = self.glyphs[0].loader.capHeight
+        self.scale = self.glyphs[0].loader.scale
         self._set_spacings()
+
         super().__init__(**kwargs)
+
+    def _init_loader(self):
+        if self.loader is None:
+            self.loader = FontLoader()
+
+    def _load_glyphs(self):
+        self.glyphs = tuple(
+            Glyph(
+                loader=self.loader,
+                character=character,
+                color=self.color,
+                style=self.style,
+            )
+            for character in self.characters
+        )
 
     def _set_spacings(self):
         x_offset = 0
-        for character, spacing in zip(self.characters, self.spacings):
+        for character, spacing in zip(self.glyphs, self.spacings):
             x_offset += spacing * self.scale
             character.layer.transform((1, 0, 0, 1, x_offset, 0))
             x_offset += character.elements_width
@@ -246,21 +283,22 @@ class Logotype(BaseRenderable):
             f(elem)
             for f, elem in zip(
                 (min, min, max, max),
-                list(zip(*(elem.elements_bounding_box for elem in self.characters))),
+                list(zip(*(elem.elements_bounding_box for elem in self.glyphs))),
             )
         )
         with_lead_spacing = (characters_box[0] - self.spacings[0],) + characters_box[1:]
         return with_lead_spacing
 
     def make_svg_elements(self):
-        return tuple(elem.make_svg_element() for elem in self.characters)
+        return tuple(elem.make_svg_element() for elem in self.glyphs)
 
     def make_filename(self, extras=("",)):
         return "-".join(
             [
-                "nixos",
+                self.characters.lower(),
                 "logotype",
-                self.characters[0].color,
+                self.color,
+                self.style.name.lower(),
                 self.clear_space.name.lower(),
             ]
             + list(extras)
@@ -270,11 +308,10 @@ class Logotype(BaseRenderable):
 if __name__ == "__main__":
     loader = FontLoader()
 
-    character = Character(loader=loader, character="x", background_color="#dddddd")
+    character = Glyph(loader=loader, character="x", background_color="#dddddd")
     character.write_svg(filename=character.make_filename(extras=("test",)))
 
-    logotype = Logotype(
-        characters=[Character(loader=loader, character=char) for char in "NixOS"],
-        background_color="#dddddd",
-    )
+    logotype = Logotype(loader=loader, background_color="#dddddd")
     logotype.write_svg(filename=logotype.make_filename(extras=("test",)))
+
+    loader.font.close()

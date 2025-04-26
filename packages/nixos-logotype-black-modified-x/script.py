@@ -1,28 +1,14 @@
 from pathlib import Path
 
-from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS
+from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS, LogotypeStyle
 from nixoslogo.logotype import (
-    Character,
-    FontLoader,
     Logotype,
-    ModifiedCharacterX,
 )
 
-loader = FontLoader()
-
 my_char = Logotype(
-    characters=[
-        Character(character="N", loader=loader),
-        Character(character="i", loader=loader),
-        ModifiedCharacterX(loader=loader),
-        Character(character="O", loader=loader),
-        Character(character="S", loader=loader),
-    ],
+    style=LogotypeStyle.COLOREDX,
     spacings=DEFAULT_LOGOTYPE_SPACINGS,
 )
 
 with open(Path("nixos-logotype-black-modified-x.svg"), "w") as file:
     file.write(str(my_char.make_svg()))
-
-# close out font because it retains state
-loader.font.close()

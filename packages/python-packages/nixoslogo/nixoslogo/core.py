@@ -61,6 +61,11 @@ class LogomarkColors(Enum):
     WHITE = (Color("oklch", (1, 0, 0)),)
 
 
+class LogotypeStyle(Enum):
+    REGULAR = auto()
+    COLOREDX = auto()
+
+
 # === Base Classes ===
 
 

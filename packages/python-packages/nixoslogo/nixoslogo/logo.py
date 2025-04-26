@@ -5,16 +5,15 @@ import svg
 from nixoslogo.colors import Color
 from nixoslogo.core import (
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
-    NIXOS_DARK_BLUE,
-    NIXOS_LIGHT_BLUE,
     BaseRenderable,
     ClearSpace,
     ColorStyle,
     LogoLayout,
+    LogomarkColors,
+    LogotypeStyle,
 )
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
-    Character,
     FontLoader,
     Logotype,
 )
@@ -27,10 +26,11 @@ class NixosLogo(BaseRenderable):
         lambda_thickness: float = 1 / 4,
         lambda_gap: float = 1 / 32,
         logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
-        logomark_colors: tuple[Color] = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE),
+        logomark_colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
         logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
         logotype_cap_height: float | None = None,
         logotype_color: str = "black",
+        logotype_style: LogotypeStyle = LogotypeStyle.REGULAR,
         logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
         logotype_characters: str = "NixOS",
         logotype_transform: svg.Translate | None = None,
@@ -45,6 +45,7 @@ class NixosLogo(BaseRenderable):
         self.logomark_color_style = logomark_color_style
         self.logotype_cap_height = logotype_cap_height
         self.logotype_color = logotype_color
+        self.logotype_style = logotype_style
         self.logotype_spacings = logotype_spacings
         self.logotype_characters = logotype_characters
         self.logotype_transform = logotype_transform
@@ -79,14 +80,10 @@ class NixosLogo(BaseRenderable):
     def _init_logotype(self):
         self.loader = FontLoader(capHeight=self.logotype_cap_height)
         self.logotype = Logotype(
-            characters=[
-                Character(
-                    character=letter,
-                    loader=self.loader,
-                    color=self.logotype_color,
-                )
-                for letter in self.logotype_characters
-            ],
+            characters=self.logotype_characters,
+            loader=self.loader,
+            color=self.logotype_color,
+            style=self.logotype_style,
             spacings=self.logotype_spacings,
         )
 
@@ -139,11 +136,12 @@ class NixosLogo(BaseRenderable):
     def make_filename(self, colors="default", extras=("",)):
         return "-".join(
             [
-                "nixos",
+                self.logotype_characters.lower(),
                 "logo",
-                colors,  # TODO @djacu make a enum class for color combos
+                self.logomark.colors_name.lower(),
                 self.logomark_color_style.name.lower(),
                 self.logotype_color,
+                self.logotype_style.name.lower(),
                 self.logo_layout.name.lower(),
                 self.clear_space.name.lower(),
             ]
