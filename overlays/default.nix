@@ -52,6 +52,15 @@ let
     }
   );
 
+  localEditablePackages = listToAttrs (
+    map (dir: {
+      name = "${dir}-editable";
+      value = final: prev: {
+        "${dir}-editable" = final.callPackage ../packages/${dir}/editable.nix { };
+      };
+    }) (getDirectoriesAndFilter ../packages "editable.nix")
+  );
+
   pythonExtensions = genAttrs (getDirectories ../packages/python-packages) (
     dir: final: prev: {
       pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
@@ -78,9 +87,17 @@ let
   default = composeManyExtensions (
     (attrValues allLocalOverlays)
     ++ (attrValues allLocalPackages)
+    ++ (attrValues localEditablePackages)
     ++ (attrValues pythonExtensions)
     ++ (attrValues pythonEditable)
   );
 
 in
-allLocalOverlays // allLocalPackages // pythonExtensions // pythonEditable // { inherit default; }
+allLocalOverlays
+// allLocalPackages
+// localEditablePackages
+// pythonExtensions
+// pythonEditable
+// {
+  inherit default;
+}

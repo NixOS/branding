@@ -13,6 +13,8 @@
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    typix.url = "github:loqusion/typix";
+    typix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs: {
