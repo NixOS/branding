@@ -1,6 +1,8 @@
+import os
 import string
 from abc import ABC, abstractmethod
 from enum import Enum, auto
+from functools import partial
 from pathlib import Path
 
 import svg
@@ -64,6 +66,31 @@ class LogomarkColors(Enum):
 class LogotypeStyle(Enum):
     REGULAR = auto()
     COLOREDX = auto()
+
+
+# === Functions ===
+
+
+def get_path_from_envvar(envvar) -> Path:
+    path = os.getenv(envvar)
+    if not path:
+        raise EnvironmentError(
+            f"{envvar} is not set. "
+            "Please provide a font path explicitly or set the environment variable."
+        )
+    return Path(path)
+
+
+get_nixos_logotype_font_file = partial(
+    get_path_from_envvar,
+    "NIXOS_LOGOTYPE_FONT_FILE",
+)
+
+
+get_nixos_annotation_font_file = partial(
+    get_path_from_envvar,
+    "NIXOS_ANNOTATION_FONT_FILE",
+)
 
 
 # === Base Classes ===

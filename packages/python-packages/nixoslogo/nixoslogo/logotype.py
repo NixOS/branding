@@ -1,4 +1,3 @@
-import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -14,35 +13,26 @@ from nixoslogo.core import (
     BaseRenderable,
     ClearSpace,
     LogotypeStyle,
+    get_nixos_logotype_font_file,
 )
-
-
-def _default_font_file() -> Path:
-    path = os.getenv("NIXOS_LOGOTYPE_FONT_FILE")
-    if not path:
-        raise EnvironmentError(
-            "NIXOS_LOGOTYPE_FONT_FILE is not set. "
-            "Please provide a font path explicitly or set the environment variable."
-        )
-    return Path(path)
 
 
 class FontLoader:
     def __init__(
         self,
-        font_file: Callable[[], Path] = _default_font_file,
+        get_font_file: Callable[[], Path] = get_nixos_logotype_font_file,
         transforms_map: dict[str, Any] = DEFAULT_FONT_TRANSFORMS,
         capHeight: int | None = None,
         scale_glyph: bool = True,
         offset_glyph: bool = True,
     ):
-        self.font_file = font_file
+        self.get_font_file = get_font_file
         self.transforms_map = transforms_map
         self.capHeight = capHeight
         self.scale_glyph = scale_glyph
         self.offset_glyph = offset_glyph
 
-        self.font = fontforge.open(str(self.font_file()))
+        self.font = fontforge.open(str(self.get_font_file()))
         self._set_ref_size()
 
         for character, transforms in self.transforms_map.items():
