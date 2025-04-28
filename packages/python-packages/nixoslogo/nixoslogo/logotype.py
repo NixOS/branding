@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass, field
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -27,21 +27,29 @@ def _default_font_file() -> Path:
     return Path(path)
 
 
-@dataclass(kw_only=True)
 class FontLoader:
-    font_file: Path = field(default_factory=_default_font_file)
-    transforms_map: dict[str, Any] = field(
-        default_factory=lambda: DEFAULT_FONT_TRANSFORMS
-    )
-    capHeight: int | None = None
+    def __init__(
+        self,
+        font_file: Callable[[], Path] = _default_font_file,
+        transforms_map: dict[str, Any] = DEFAULT_FONT_TRANSFORMS,
+        capHeight: int | None = None,
+        scale_glyph: bool = True,
+        offset_glyph: bool = True,
+    ):
+        self.font_file = font_file
+        self.transforms_map = transforms_map
+        self.capHeight = capHeight
+        self.scale_glyph = scale_glyph
+        self.offset_glyph = offset_glyph
 
-    def __post_init__(self):
-        self.font = fontforge.open(str(self.font_file))
+        self.font = fontforge.open(str(self.font_file()))
         self._set_ref_size()
 
         for character, transforms in self.transforms_map.items():
-            self._scale_glyph(character, transforms)
-            self._offset_glyph(character, transforms)
+            if self.scale_glyph:
+                self._scale_glyph(character, transforms)
+            if self.offset_glyph:
+                self._offset_glyph(character, transforms)
 
     def _set_ref_size(self):
         """
