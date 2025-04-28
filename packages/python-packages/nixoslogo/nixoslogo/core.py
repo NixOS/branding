@@ -16,9 +16,8 @@ from nixoslogo.layout import Canvas
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
     "scale_y": -1,
-    "remove_bearing": True,
 }
-DEFAULT_FONT_TRANSFORMS = {
+DEFAULT_ROUTE159_TRANSFORMS = {
     char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters
 } | {"i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1}}
 

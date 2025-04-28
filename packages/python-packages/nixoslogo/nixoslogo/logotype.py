@@ -6,8 +6,8 @@ import fontforge
 import svg
 
 from nixoslogo.core import (
-    DEFAULT_FONT_TRANSFORMS,
     DEFAULT_LOGOTYPE_SPACINGS,
+    DEFAULT_ROUTE159_TRANSFORMS,
     NIXOS_DARK_BLUE,
     NIXOS_LIGHT_BLUE,
     BaseRenderable,
@@ -21,7 +21,7 @@ class FontLoader:
     def __init__(
         self,
         get_font_file: Callable[[], Path] = get_nixos_logotype_font_file,
-        transforms_map: dict[str, Any] = DEFAULT_FONT_TRANSFORMS,
+        transforms_map: dict[str, Any] = DEFAULT_ROUTE159_TRANSFORMS,
         capHeight: int | None = None,
         scale_glyph: bool = True,
         offset_glyph: bool = True,
@@ -70,17 +70,13 @@ class FontLoader:
 
     def _offset_glyph(self, character, transforms):
         """Offset a glyph; primarily used to remove the left side bearing."""
-        x_offset = 0
-        if transforms["remove_bearing"]:
-            x_offset = -self.font[character].left_side_bearing
-
         self.font[character].transform(
             (
                 1,
                 0,
                 0,
                 1,
-                x_offset,
+                -self.font[character].left_side_bearing,
                 0,
             )
         )
