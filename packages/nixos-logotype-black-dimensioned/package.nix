@@ -11,7 +11,7 @@ runCommandLocal "nixos-logotype-black-dimensioned"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/Route159-Regular.otf";
+    env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
 
     outputHash = "sha256-XbXbuFiLpM0n4JW/AW52RxvXbIX3JJoR51Ms0a3bSrI=";
     outputHashAlgo = "sha256";

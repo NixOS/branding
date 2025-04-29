@@ -28,7 +28,7 @@ buildTypstProject {
   typstSource = "main.typ";
 
   fontPaths = [
-    "${route159}/share/fonts/opentype"
+    "${route159}/share/fonts/opentype/route159"
   ];
 
   virtualPaths = [

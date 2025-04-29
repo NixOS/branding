@@ -21,7 +21,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    install -D -m444 -t $out/share/fonts/opentype *.otf
+    install -D -m444 -t $out/share/fonts/opentype/${finalAttrs.pname} *.otf
 
     runHook postInstall
   '';
