@@ -28,6 +28,7 @@ inputs.self.library.defaultSystems (
 
     nixoslogo-dev = pkgs.callPackage (
       {
+        jura,
         mkShell,
         poetry,
         python3,
@@ -46,6 +47,7 @@ inputs.self.library.defaultSystems (
         shellHook = ''
           export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/packages/python-packages/nixoslogo
           export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/Route159-Regular.otf";
+          export NIXOS_ANNOTATIONS_FONT_FILE="${jura}/share/fonts/truetype/jura/Jura-Regular.ttf"
         '';
 
       }
