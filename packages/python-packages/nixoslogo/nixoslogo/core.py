@@ -13,13 +13,35 @@ from nixoslogo.layout import Canvas
 # === Constants ===
 
 
+CHARACTER_GLYPHNAME_MAP = {
+    "0": "zero",
+    "1": "one",
+    "2": "two",
+    "3": "three",
+    "4": "four",
+    "5": "five",
+    "6": "six",
+    "7": "seven",
+    "8": "eight",
+    "9": "nine",
+    " ": "space",
+    "/": "slash",
+}
+
 DEFAULT_CHARACTER_TRANSFORMS = {
     "scale_x": 1,
     "scale_y": -1,
 }
+DEFAULT_CHARACTER_SET = list(string.ascii_letters) + list(
+    CHARACTER_GLYPHNAME_MAP.values()
+)
+
 DEFAULT_ROUTE159_TRANSFORMS = {
-    char: DEFAULT_CHARACTER_TRANSFORMS for char in string.ascii_letters
+    char: DEFAULT_CHARACTER_TRANSFORMS for char in DEFAULT_CHARACTER_SET
 } | {"i": DEFAULT_CHARACTER_TRANSFORMS | {"scale_x": -1}}
+DEFAULT_JURA_TRANSFORMS = {
+    char: DEFAULT_CHARACTER_TRANSFORMS for char in DEFAULT_CHARACTER_SET
+}
 
 DEFAULT_LOGOTYPE_SPACINGS = (0, 90, 70, 50, 10)
 DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
@@ -88,7 +110,7 @@ get_nixos_logotype_font_file = partial(
 
 get_nixos_annotation_font_file = partial(
     get_path_from_envvar,
-    "NIXOS_ANNOTATION_FONT_FILE",
+    "NIXOS_ANNOTATIONS_FONT_FILE",
 )
 
 
