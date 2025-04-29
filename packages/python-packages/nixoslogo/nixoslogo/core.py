@@ -161,6 +161,7 @@ class BaseRenderable(ABC):
     def write_svg(self, filename=None):
         if filename is None:
             filename = self.make_filename()
+        filename = filename.replace("/", "_")
         with open(Path(filename + ".svg"), "w") as file:
             file.write(str(self.make_svg()))
 
