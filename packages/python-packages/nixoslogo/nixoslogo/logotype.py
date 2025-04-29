@@ -134,9 +134,22 @@ class Glyph(BaseRenderable):
                     element = svg.LineTo(point.x, point.y)
                     path.append(element)
                     continue
+                if not points[0].on_curve and points[1].on_curve:
+                    # If the next point is off curve and the following point is on curve,
+                    # it is a quadratic Bézier curve. So take the next 2 points.
+                    points_bezier = [
+                        elem
+                        for pair in (
+                            (point.x, point.y)
+                            for point in (points.pop(0) for _ in range(2))
+                        )
+                        for elem in pair
+                    ]
+                    element = svg.QuadraticBezier(*points_bezier)
+                    path.append(element)
                 else:
-                    # If the next point is off curve, it is a control point and so the next 3 points make a Bézier curve.
-                    # lol
+                    # If the next two points are off curve, it is a cubic Bézier curve.
+                    # So take the next 3 points.
                     points_bezier = [
                         elem
                         for pair in (
