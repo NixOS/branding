@@ -1,40 +1,19 @@
 from pathlib import Path
 
-from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.annotations import Annotations
 from nixoslogo.core import ColorStyle
 from nixoslogo.dimensioned import DimensionedLambda, DimensionedLogomark
 
-object_lines = LineGroup(
-    name="object",
-    stroke="green",
-    stroke_width=8,
-    font_size="4rem",
-)
-construction_lines = ConstructionLines(
-    name="construction",
-    stroke="blue",
-    stroke_width=4,
-    font_size="4rem",
-)
-dimension_lines = DimensionLines(
-    name="dimension",
-    stroke="red",
-    stroke_width=2,
-    font_size="4rem",
-)
+annotations = Annotations.medium()
 
 ilambda = DimensionedLambda(
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+    annotations=annotations,
 )
 
 snow_flake = DimensionedLogomark(
     ilambda=ilambda,
     color_style=ColorStyle.FLAT,
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+    annotations=annotations,
 )
 
 with open(Path("nixos-snowflake-dimensioned-linear.svg"), "w") as file:

@@ -1,4 +1,5 @@
 {
+  jura,
   python3,
   runCommandLocal,
 }:
@@ -10,7 +11,9 @@ runCommandLocal "nixos-lambda-dimensioned-linear"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-PO5WI3/VQcJbEHLicrPORc0/Cfrx/7RD4JHZaAxRjFo=";
+    env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
+
+    outputHash = "sha256-sKjQrq0bPYkblEC6qjDTZFIz7wbLCU961Mb6XpWD27I=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

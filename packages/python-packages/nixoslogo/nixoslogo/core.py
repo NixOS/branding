@@ -14,6 +14,10 @@ from nixoslogo.layout import Canvas
 
 
 CHARACTER_GLYPHNAME_MAP = {
+    " ": "space",
+    "%": "percent",
+    ".": "period",
+    "/": "slash",
     "0": "zero",
     "1": "one",
     "2": "two",
@@ -24,8 +28,6 @@ CHARACTER_GLYPHNAME_MAP = {
     "7": "seven",
     "8": "eight",
     "9": "nine",
-    " ": "space",
-    "/": "slash",
 }
 
 DEFAULT_CHARACTER_TRANSFORMS = {

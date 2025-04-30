@@ -30,6 +30,9 @@ class Point(Sequence):
     def __repr__(self):
         return f"Point{self.value}"
 
+    def __neg__(self):
+        return Point(tuple(-elem for elem in self))
+
     def __add__(self, other: Self | "Vector") -> Self:
         if isinstance(other, Point):
             return Point((self.x + other.x, self.y + other.y))
@@ -83,6 +86,9 @@ class Point(Sequence):
             )
         )
         return Point(rotation_matrix @ self)
+
+    def to_vector(self) -> "Vector":
+        return Vector(self.value)
 
 
 class Points(Sequence):

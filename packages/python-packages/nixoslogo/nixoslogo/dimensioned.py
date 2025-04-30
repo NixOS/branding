@@ -1,25 +1,22 @@
 import svg
 from svg._types import Number
 
-from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
+from nixoslogo.annotations import (
+    Annotations,
+)
 from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Logotype
 
 
-# TODO - @djacu add default lines
 class DimensionedLambda(Lambda):
     def __init__(
         self,
-        object_lines: LineGroup,
-        construction_lines: ConstructionLines,
-        dimension_lines: DimensionLines,
+        annotations: Annotations,
         **kwargs,
     ):
-        self.object_lines = object_lines
-        self.construction_lines = construction_lines
-        self.dimension_lines = dimension_lines
+        self.annotations = annotations
         super().__init__(**kwargs)
 
     def _init_canvas(self):
@@ -41,17 +38,17 @@ class DimensionedLambda(Lambda):
                 cx=0,
                 cy=0,
                 r=self.radius,
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
             svg.Polygon(
                 points=self.make_hexagon_points(radius=self.radius).to_list(),
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
         )
 
@@ -59,10 +56,10 @@ class DimensionedLambda(Lambda):
         return (
             svg.Polyline(
                 points=self.make_diagonal_line(radius=self.radius).to_list(),
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
         )
 
@@ -71,7 +68,7 @@ class DimensionedLambda(Lambda):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_named_lambda_points()
 
-        dim_main_diagonal = self.dimension_lines.make_dimension_line(
+        dim_main_diagonal = self.annotations.dimension_lines.make_dimension_line(
             point1=hexagon_points[1],
             point2=hexagon_points[4],
             flip=False,
@@ -80,7 +77,7 @@ class DimensionedLambda(Lambda):
             reference=2 * self.radius,
         )
 
-        dim_gap_diagonal = self.dimension_lines.make_dimension_line(
+        dim_gap_diagonal = self.annotations.dimension_lines.make_dimension_line(
             point1=(
                 lambda_points_gap["forward_tip"] + lambda_points_gap["forward_heel"]
             )
@@ -92,7 +89,7 @@ class DimensionedLambda(Lambda):
             offset=15 / 32,
             reference=2 * self.radius,
         )
-        dim_gap_long_edge = self.dimension_lines.make_dimension_line(
+        dim_gap_long_edge = self.annotations.dimension_lines.make_dimension_line(
             point1=lambda_points_gap["upper_apex"],
             point2=lambda_points_gap["forward_tip"],
             flip=True,
@@ -100,7 +97,7 @@ class DimensionedLambda(Lambda):
             offset=7 / 16,
             reference=2 * self.radius,
         )
-        dim_gap_left_top = self.dimension_lines.make_dimension_line(
+        dim_gap_left_top = self.annotations.dimension_lines.make_dimension_line(
             point1=lambda_points_gap["midpoint_join"],
             point2=lambda_points_gap["upper_notch"],
             flip=False,
@@ -129,7 +126,7 @@ class DimensionedLambda(Lambda):
             dim_gap_long_edge,
             dim_gap_left_top,
         ) + tuple(
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 1) % 9],
                 reference=2 * self.radius,
@@ -155,7 +152,7 @@ class DimensionedLambda(Lambda):
         # fmt: on
 
         return tuple(
-            self.dimension_lines.make_dimension_angle(
+            self.annotations.dimension_lines.make_dimension_angle(
                 point1=lambda_points_no_gap[(index + 0) % 9],
                 point2=lambda_points_no_gap[(index + 2) % 9],
                 reference=lambda_points_no_gap[(index + 1) % 9],
@@ -170,22 +167,22 @@ class DimensionedLambda(Lambda):
         return (
             svg.Polygon(
                 points=lambda_points_no_gap.to_list(),
-                stroke=self.object_lines.stroke,
-                stroke_width=self.object_lines.stroke_width,
-                fill=self.object_lines.fill,
+                stroke=self.annotations.object_lines.stroke,
+                stroke_width=self.annotations.object_lines.stroke_width,
+                fill=self.annotations.object_lines.fill,
                 stroke_dasharray=4,
             ),
             svg.Polygon(
                 points=lambda_points_gap.to_list(),
-                stroke=self.object_lines.stroke,
-                stroke_width=self.object_lines.stroke_width,
-                fill=self.object_lines.fill,
+                stroke=self.annotations.object_lines.stroke,
+                stroke_width=self.annotations.object_lines.stroke_width,
+                fill=self.annotations.object_lines.fill,
             ),
         )
 
     def draw_lambda_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
@@ -205,7 +202,7 @@ class DimensionedLambda(Lambda):
 
     def draw_lambda_angular_dimensions(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
         main_diagonal = self.make_lambda_main_diagonal()
         lambda_polygons = self.make_lambda_polygons()
@@ -224,19 +221,13 @@ class DimensionedLambda(Lambda):
         )
 
 
-# TODO - @djacu add default lines
-# TODO - @djacu add default ilambda
 class DimensionedLogomark(Logomark):
     def __init__(
         self,
-        object_lines: LineGroup,
-        construction_lines: ConstructionLines,
-        dimension_lines: DimensionLines,
+        annotations: Annotations,
         **kwargs,
     ):
-        self.object_lines = object_lines
-        self.construction_lines = construction_lines
-        self.dimension_lines = dimension_lines
+        self.annotations = annotations
         super().__init__(**kwargs)
 
     def _init_canvas(self):
@@ -254,28 +245,28 @@ class DimensionedLogomark(Logomark):
                 cx=0,
                 cy=0,
                 r=self.ilambda.radius * 2.25,
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
             svg.Polygon(
                 points=self.ilambda.make_hexagon_points(
                     radius=self.ilambda.radius * 2.25
                 ).to_list(),
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
             svg.Polyline(
                 points=self.ilambda.make_diagonal_line(
                     radius=self.ilambda.radius * 2.25
                 ).to_list(),
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
-                fill=self.construction_lines.fill,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                fill=self.annotations.construction_lines.fill,
             ),
         )
 
@@ -283,16 +274,18 @@ class DimensionedLogomark(Logomark):
         flake_points = self.make_flake_points()
         hexagon_points = self.ilambda.make_hexagon_points(radius=self.ilambda.radius)
 
-        lin_inner_hex_long_length = self.dimension_lines.make_dimension_line(
-            point1=hexagon_points[1],
-            point2=hexagon_points[4],
-            flip=False,
-            side="right",
-            offset=1 / 8,
-            reference=2 * self.ilambda.radius,
+        lin_inner_hex_long_length = (
+            self.annotations.dimension_lines.make_dimension_line(
+                point1=hexagon_points[1],
+                point2=hexagon_points[4],
+                flip=False,
+                side="right",
+                offset=1 / 8,
+                reference=2 * self.ilambda.radius,
+            )
         )
 
-        lin_flake_long_length = self.dimension_lines.make_dimension_line(
+        lin_flake_long_length = self.annotations.dimension_lines.make_dimension_line(
             point1=flake_points[2][6],
             point2=flake_points[5][6],
             flip=True,
@@ -312,16 +305,16 @@ class DimensionedLogomark(Logomark):
         return tuple(
             svg.Polygon(
                 points=lambda_points.to_list(),
-                stroke=self.ilambda.object_lines.stroke,
-                stroke_width=self.ilambda.object_lines.stroke_width,
-                fill=self.ilambda.object_lines.fill,
+                stroke=self.ilambda.annotations.object_lines.stroke,
+                stroke_width=self.ilambda.annotations.object_lines.stroke_width,
+                fill=self.ilambda.annotations.object_lines.fill,
             )
             for lambda_points in flake_points
         )
 
     def draw_flake_linear_dimensions(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         lambda_construction_lines = self.ilambda.make_lambda_construction_lines()
         construction_lines = self.make_flake_construction_lines()
         linear_dimensions = self.make_flake_linear_dimensions()
@@ -350,7 +343,7 @@ class DimensionedLogomark(Logomark):
 
         lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
         dimension_lines = [
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap["upper_notch"],
                 point2=point_start,
                 flip=False,
@@ -359,7 +352,7 @@ class DimensionedLogomark(Logomark):
                 reference=2 * self.ilambda.radius,
                 text="V",
             ),
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap["upper_apex"],
                 point2=point_start,
                 flip=False,
@@ -368,7 +361,7 @@ class DimensionedLogomark(Logomark):
                 reference=2 * self.ilambda.radius,
                 text="H",
             ),
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap["joint_crotch"],
                 point2=point_stop,
                 flip=False,
@@ -379,40 +372,47 @@ class DimensionedLogomark(Logomark):
             ),
         ]
 
+        text_annotations = [
+            self.annotations.make_annotation(text=f"{offset}%")
+            for offset in self._gradient_stop_offsets
+        ]
+
         gradient_lines = tuple(
             [
                 svg.Line(
                     **gradient_end_points,
-                    stroke=self.construction_lines.stroke,
-                    stroke_width=self.construction_lines.stroke_width,
-                    stroke_dasharray=self.construction_lines.stroke_dasharray,
+                    stroke=self.annotations.construction_lines.stroke,
+                    stroke_width=self.annotations.construction_lines.stroke_width,
+                    stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
                 ),
             ]
             + [
                 svg.Circle(
                     cx=stop_point.x,
                     cy=stop_point.y,
-                    r=2 * self.construction_lines.stroke_width,
-                    fill=self.construction_lines.stroke,
+                    r=2 * self.annotations.construction_lines.stroke_width,
+                    fill=self.annotations.construction_lines.stroke,
                 )
                 for stop_point in stop_points
             ]
             + [
-                svg.Text(
-                    x=stop_point.x,
-                    y=stop_point.y,
-                    dx=f"{0.01 * self.ilambda.radius}",
-                    dy=f"-{0.01 * self.ilambda.radius}",
-                    elements=[f"{offset}%"],
-                    font_size=self.construction_lines.font_size,
+                svg.G(
+                    transform=[
+                        svg.Translate(stop_point.x, stop_point.y),
+                        svg.Translate(
+                            text_annotation.elements_height / 4,
+                            -text_annotation.elements_height / 4,
+                        ),
+                    ],
+                    elements=text_annotation.make_svg_elements(),
                 )
-                for stop_point, offset in zip(stop_points, self._gradient_stop_offsets)
+                for stop_point, text_annotation in zip(stop_points, text_annotations)
             ]
             + dimension_lines
         )
 
         axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.ilambda.make_lambda_construction_lines()
         lambda_polygons = self.ilambda.make_lambda_polygons()
 
@@ -438,34 +438,41 @@ class DimensionedLogomark(Logomark):
             for offset in self._gradient_stop_offsets
         ]
 
+        text_annotations = [
+            self.annotations.make_annotation(text=f"{offset}%")
+            for offset in self._gradient_stop_offsets
+        ]
+
         gradient_lines = tuple(
             [
                 svg.Line(
                     **gradient_end_points,
-                    stroke=self.construction_lines.stroke,
-                    stroke_width=self.construction_lines.stroke_width,
-                    stroke_dasharray=self.construction_lines.stroke_dasharray,
+                    stroke=self.annotations.construction_lines.stroke,
+                    stroke_width=self.annotations.construction_lines.stroke_width,
+                    stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
                 ),
             ]
             + [
                 svg.Circle(
                     cx=stop_point.x,
                     cy=stop_point.y,
-                    r=2 * self.construction_lines.stroke_width,
-                    fill=self.construction_lines.stroke,
+                    r=2 * self.annotations.construction_lines.stroke_width,
+                    fill=self.annotations.construction_lines.stroke,
                 )
                 for stop_point in stop_points
             ]
             + [
-                svg.Text(
-                    x=stop_point.x,
-                    y=stop_point.y,
-                    dx=f"{0.01 * self.ilambda.radius}",
-                    dy=f"-{0.01 * self.ilambda.radius}",
-                    elements=[f"{offset}%"],
-                    font_size=self.construction_lines.font_size,
+                svg.G(
+                    transform=[
+                        svg.Translate(stop_point.x, stop_point.y),
+                        svg.Translate(
+                            text_annotation.elements_height / 4,
+                            -text_annotation.elements_height / 4,
+                        ),
+                    ],
+                    elements=text_annotation.make_svg_elements(),
                 )
-                for stop_point, offset in zip(stop_points, self._gradient_stop_offsets)
+                for stop_point, text_annotation in zip(stop_points, text_annotations)
             ]
         )
 
@@ -473,7 +480,7 @@ class DimensionedLogomark(Logomark):
             fill=f"url(#{self.css_color_names[0]})"
         )
         axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.dimension_lines.make_dimension_arrow_defs()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.ilambda.make_lambda_construction_lines()
         lambda_polygons = self.ilambda.make_lambda_polygons()
 
@@ -494,13 +501,11 @@ class DimensionedLogomark(Logomark):
 class DimensionedLogotype(Logotype):
     def __init__(
         self,
-        construction_lines: ConstructionLines,
-        dimension_lines: DimensionLines,
+        annotations: Annotations,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.construction_lines = construction_lines
-        self.dimension_lines = dimension_lines
+        self.annotations = annotations
 
     def make_dimensioned_svg(self):
         return svg.SVG(
@@ -522,12 +527,12 @@ class DimensionedLogotype(Logotype):
                 y=bbox[1],
                 width=self.elements_width,
                 height=self.elements_height,
-                stroke=self.construction_lines.stroke,
-                stroke_width=self.construction_lines.stroke_width,
-                stroke_dasharray=self.construction_lines.stroke_dasharray,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
                 fill="transparent",
             ),
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=Point((self.elements_x_max, self.elements_y_min)),
                 point2=Point((self.elements_x_min, self.elements_y_min)),
                 flip=False,
@@ -536,7 +541,7 @@ class DimensionedLogotype(Logotype):
                 reference=self.cap_height,
                 fractional=False,
             ),
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=Point((self.elements_x_max, self.elements_y_max)),
                 point2=Point((self.elements_x_max, self.elements_y_min)),
                 flip=False,
@@ -551,7 +556,7 @@ class DimensionedLogotype(Logotype):
         point1 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_min))
         point2 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_max))
         return [
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
                 flip=False,
@@ -574,7 +579,7 @@ class DimensionedLogotype(Logotype):
         ]
         sides = ["left", "right", "right", "right"]
         return [
-            self.dimension_lines.make_dimension_line(
+            self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
                 flip=False,

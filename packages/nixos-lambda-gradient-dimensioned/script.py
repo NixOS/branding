@@ -1,28 +1,11 @@
 from pathlib import Path
 
-from nixoslogo.annotations import ConstructionLines, DimensionLines, LineGroup
-from nixoslogo.core import ColorStyle
+from nixoslogo.annotations import Annotations
+from nixoslogo.core import (
+    ColorStyle,
+)
 from nixoslogo.dimensioned import DimensionedLambda, DimensionedLogomark
 from nixoslogo.layout import Canvas
-
-object_lines = LineGroup(
-    name="object",
-    stroke="green",
-    stroke_width=4,
-    font_size="2rem",
-)
-construction_lines = ConstructionLines(
-    name="construction",
-    stroke="blue",
-    stroke_width=2,
-    font_size="2rem",
-)
-dimension_lines = DimensionLines(
-    name="dimension",
-    stroke="red",
-    stroke_width=1,
-    font_size="2rem",
-)
 
 radius = 512
 
@@ -33,20 +16,18 @@ canvas = Canvas(
     height=4 * radius,
 )
 
+annotations = Annotations.small()
+
 ilambda = DimensionedLambda(
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
     radius=radius,
+    annotations=annotations,
 )
 
 snow_flake = DimensionedLogomark(
     ilambda=ilambda,
     color_style=ColorStyle.GRADIENT,
     canvas=canvas,
-    object_lines=object_lines,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+    annotations=annotations,
 )
 
 with open(Path("nixos-lambda-gradient-dimensioned.svg"), "w") as file:

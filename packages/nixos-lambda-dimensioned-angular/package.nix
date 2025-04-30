@@ -1,4 +1,5 @@
 {
+  jura,
   python3,
   runCommandLocal,
 }:
@@ -10,7 +11,9 @@ runCommandLocal "nixos-lambda-dimensioned-angular"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-VzxhRyVCEzVC92LoHiocQb/fedQypOqMVl7Zkx8JXJk=";
+    env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
+
+    outputHash = "sha256-rGl12pX+0eOIPd9jIudGq/HUeWu9GJN/sJeUSTIuVLo=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

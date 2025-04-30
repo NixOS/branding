@@ -1,4 +1,5 @@
 {
+  jura,
   python3,
   runCommandLocal,
 }:
@@ -10,7 +11,9 @@ runCommandLocal "nixos-lambda-gradient-background"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-EwcfnpSVi920TTbuRkPbAXGxM6eIUMIbAXklzoAAFDI=";
+    env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
+
+    outputHash = "sha256-XkGuaCGYN4ExrKTFJAF/uE1+oZhfTjcK7yaLxaXYYZU=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

@@ -1,4 +1,5 @@
 {
+  jura,
   python3,
   runCommandLocal,
 }:
@@ -10,7 +11,9 @@ runCommandLocal "nixos-snowflake-dimensioned-linear"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-snfh5XqnROCxKFETR81842SPi16sS5RNZ+Xgrjq+HSA=";
+    env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
+
+    outputHash = "sha256-h3KboPp7K0hTzqFIBvpieDcK62PYz0b8W4iteR1JrPA=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

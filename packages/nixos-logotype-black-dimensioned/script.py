@@ -1,25 +1,16 @@
 from pathlib import Path
 
-from nixoslogo.annotations import ConstructionLines, DimensionLines
+from nixoslogo.annotations import Annotations
 from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS, ClearSpace
 from nixoslogo.dimensioned import DimensionedLogotype
 from nixoslogo.logotype import (
     FontLoader,
 )
 
-construction_lines = ConstructionLines(
-    name="construction",
-    stroke="black",
-    stroke_width=2,
-    stroke_dasharray=16,
-    font_size="2rem",
-)
-dimension_lines = DimensionLines(
-    name="dimension",
-    stroke="red",
-    stroke_width=1,
-    font_size="2rem",
-)
+# TODO @djacu see if this can be better
+annotations = Annotations.small()
+annotations.construction_lines.stroke = "black"
+annotations.construction_lines.stroke_dasharray = 16
 
 loader = FontLoader(capHeight=512)
 
@@ -27,8 +18,7 @@ my_char_dim = DimensionedLogotype(
     loader=loader,
     spacings=DEFAULT_LOGOTYPE_SPACINGS,
     clear_space=ClearSpace.MINIMAL,
-    construction_lines=construction_lines,
-    dimension_lines=dimension_lines,
+    annotations=annotations,
 )
 
 with open(Path("nixos-logotype-black-dimensioned.svg"), "w") as file:
