@@ -2,7 +2,7 @@
   python3,
   runCommandLocal,
 }:
-runCommandLocal "nixos-snowflake-color-gradient"
+runCommandLocal "nixos-logomark"
   {
     script = ./script.py;
 
