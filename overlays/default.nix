@@ -37,6 +37,7 @@ let
     x:
     !elem x [
       "python-packages" # this is a package set
+      "fonts"
     ]
   );
 
@@ -59,6 +60,12 @@ let
         "${dir}-editable" = final.callPackage ../packages/${dir}/editable.nix { };
       };
     }) (getDirectoriesAndFilter ../packages "editable.nix")
+  );
+
+  localFontPackages = genAttrs (removedDirectories (getDirectories ../packages/fonts)) (
+    dir: final: prev: {
+      "${dir}" = final.callPackage ../packages/fonts/${dir}/package.nix { };
+    }
   );
 
   pythonExtensions = genAttrs (getDirectories ../packages/python-packages) (
@@ -88,9 +95,11 @@ let
     (attrValues allLocalOverlays)
     ++ (attrValues allLocalPackages)
     ++ (attrValues localEditablePackages)
+    ++ (attrValues localFontPackages)
     ++ (attrValues pythonExtensions)
     ++ (attrValues pythonEditable)
   );
+  fonts = composeManyExtensions (attrValues localFontPackages);
 
 in
 allLocalOverlays
@@ -99,5 +108,8 @@ allLocalOverlays
 // pythonExtensions
 // pythonEditable
 // {
-  inherit default;
+  inherit
+    default
+    fonts
+    ;
 }
