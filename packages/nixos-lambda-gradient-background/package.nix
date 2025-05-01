@@ -13,7 +13,7 @@ runCommandLocal "nixos-lambda-gradient-background"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-XkGuaCGYN4ExrKTFJAF/uE1+oZhfTjcK7yaLxaXYYZU=";
+    outputHash = "sha256-RI+Y5gMmHEoy1LDbCwie12lFmewvJbj31rhVPK8SJ04=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

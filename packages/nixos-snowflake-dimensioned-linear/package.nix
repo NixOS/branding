@@ -13,7 +13,7 @@ runCommandLocal "nixos-snowflake-dimensioned-linear"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-h3KboPp7K0hTzqFIBvpieDcK62PYz0b8W4iteR1JrPA=";
+    outputHash = "sha256-13c4Yls20wuf4SQV5BjIV4dBkDaGPCqowpZAbjqO3bA=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

@@ -23,17 +23,21 @@ class TextAnnotations(BaseRenderable):
         characters: str,
         loader: FontLoader,
         color: str = "black",
+        scale: float | None = None,
+        cap_height: float | None = None,
         **kwargs,
     ):
-        self.loader = loader
         self.characters = characters
         self.loader = loader
         self.color = color
+        self.scale = scale
+        self.cap_height = cap_height
 
         self._load_glyphs()
-        self.cap_height = self.glyphs[0].loader.capHeight
-        self.scale = self.glyphs[0].loader.scale
+        self.original_cap_height = self.loader.capHeight
+        self.original_scale = self.loader.scale
         self._set_spacings()
+        self._scale_glyphs()
 
         super().__init__(**kwargs)
 
@@ -71,6 +75,21 @@ class TextAnnotations(BaseRenderable):
 
             glyph.layer.transform((1, 0, 0, 1, x_offset, 0))
             x_offset += glyph.glyph.width
+
+    def _scale_glyphs(self):
+        if self.scale is None and self.cap_height is None:
+            return
+
+        if self.scale is not None and self.cap_height is not None:
+            raise ValueError("Only one of scale or cap_height can be set.")
+
+        if self.cap_height is not None:
+            self.scale = self.original_cap_height / self.cap_height
+        else:
+            self.cap_height = self.original_cap_height / self.scale
+
+        for glyph in self.glyphs:
+            glyph.layer.transform((1 / self.scale, 0, 0, 1 / self.scale, 0, 0))
 
     def _get_clearspace(self):
         return 0
@@ -112,12 +131,12 @@ class DimensionLines(LineGroup):
     def __init__(
         self,
         font_loader: FontLoader,
-        font_color: "str" = "black",
+        font_config: dict,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.font_loader = font_loader
-        self.font_color = font_color
+        self.font_config = font_config
 
     def make_dimension_line(
         self,
@@ -155,9 +174,9 @@ class DimensionLines(LineGroup):
                 text = round(measured_line.length() / reference, precision)
 
         text_annotation = TextAnnotations(
-            loader=self.font_loader,
-            color=self.font_color,
             characters=str(text),
+            loader=self.font_loader,
+            **self.font_config,
         )
         annotation_center = Point(
             (text_annotation.elements_width / 2, -text_annotation.elements_height / 2)
@@ -269,9 +288,9 @@ class DimensionLines(LineGroup):
         )
 
         text_annotation = TextAnnotations(
-            loader=self.font_loader,
-            color=self.font_color,
             characters=str(text),
+            loader=self.font_loader,
+            **self.font_config,
         )
         annotation_center = Point(
             (text_annotation.elements_width / 2, -text_annotation.elements_height / 2)
@@ -343,31 +362,29 @@ class Annotations:
         object_lines_config: dict,
         construction_lines_config: dict,
         dimension_lines_config: dict,
-        capHeight: int,
-        font_color: "str" = "black",
+        font_config: dict,
         get_font_file: Callable[[], Path] = get_nixos_annotation_font_file,
         transforms_map: dict = DEFAULT_JURA_TRANSFORMS,
     ):
         self.font_loader = FontLoader(
             get_font_file=get_font_file,
             transforms_map=transforms_map,
-            capHeight=capHeight,
             offset_glyph=False,
         )
-        self.font_color = font_color
+        self.font_config = font_config
         self.object_lines = ObjectLines(**object_lines_config)
         self.construction_lines = ConstructionLines(**construction_lines_config)
         self.dimension_lines = DimensionLines(
             **dimension_lines_config,
             font_loader=self.font_loader,
-            font_color=self.font_color,
+            font_config=self.font_config,
         )
 
     def make_annotation(self, text):
         return TextAnnotations(
-            loader=self.font_loader,
-            color=self.font_color,
             characters=str(text),
+            loader=self.font_loader,
+            **self.font_config,
         )
 
     @classmethod
@@ -388,7 +405,11 @@ class Annotations:
                 "stroke": "red",
                 "stroke_width": 1,
             },
-            capHeight=24,
+            font_config={
+                "scale": None,
+                "cap_height": 24,
+                "color": "black",
+            },
         )
 
     @classmethod
@@ -409,7 +430,11 @@ class Annotations:
                 "stroke": "red",
                 "stroke_width": 2,
             },
-            capHeight=48,
+            font_config={
+                "scale": None,
+                "cap_height": 48,
+                "color": "black",
+            },
         )
 
 
