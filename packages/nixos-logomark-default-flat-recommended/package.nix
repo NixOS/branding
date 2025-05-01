@@ -2,7 +2,7 @@
   python3,
   runCommandLocal,
 }:
-runCommandLocal "nixos-snowflake-color-flat"
+runCommandLocal "nixos-logomark"
   {
     script = ./script.py;
 
@@ -10,12 +10,12 @@ runCommandLocal "nixos-snowflake-color-flat"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-jDhlR3EKt5zAGVWbUiiMrHfCY/984eduse6OWQJQVZM=";
+    outputHash = "sha256-WC0sTcM4/WtNb508h1nQ0PZdOGXgXanLVbRbJkfAiWw=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
   ''
     python $script
     mkdir $out
-    cp nixos-snowflake-color-flat.svg $out/
+    cp *.svg $out/
   ''
