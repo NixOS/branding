@@ -19,13 +19,13 @@ IMAGERY=(
   "nixos-lambda-dimensioned-linear"
   "nixos-lambda-gradient-background"
   "nixos-lambda-gradient-dimensioned"
-  "nixos-logotype-black-regular-recommended"
-  "nixos-logotype-black-dimensioned"
-  "nixos-logotype-black-modified-x"
   "nixos-logomark-default-flat-recommended"
   "nixos-logomark-default-gradient-recommended"
+  "nixos-logomark-rainbow-gradient-recommended"
+  "nixos-logotype-black-dimensioned"
+  "nixos-logotype-black-modified-x"
+  "nixos-logotype-black-regular-recommended"
   "nixos-snowflake-dimensioned-linear"
-  "nixos-snowflake-rainbow-gradient"
 )
 
 for IMAGE in "${IMAGERY[@]}"; do
