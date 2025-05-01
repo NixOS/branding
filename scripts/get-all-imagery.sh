@@ -14,22 +14,43 @@ if ! python -c "import nixoslogo"; then
   exit 1
 fi
 
+# external
+
+IMAGERY=(
+  "nixos-logomark-default-flat-recommended"
+  "nixos-logomark-default-gradient-recommended"
+  "nixos-logomark-rainbow-gradient-recommended"
+  "nixos-logotype-black-coloredx-recommended"
+  "nixos-logotype-black-regular-recommended"
+)
+
+for IMAGE in "${IMAGERY[@]}"; do
+  python ../packages/external-artifacts/"$IMAGE"/script.py
+done
+
+for IMAGE in "${IMAGERY[@]}"; do
+  nix build ..#"${IMAGE}" --option warn-dirty false
+  nix build ..#"${IMAGE}" --option warn-dirty false --rebuild
+  if cmp -s "${IMAGE}.svg" "./result/${IMAGE}.svg"; then
+    echo "SAME ${IMAGE}"
+  else
+    echo "NOT SAME ${IMAGE}"
+  fi
+done
+
+# internal
+
 IMAGERY=(
   "nixos-lambda-dimensioned-angular"
   "nixos-lambda-dimensioned-linear"
   "nixos-lambda-gradient-background"
   "nixos-lambda-gradient-dimensioned"
-  "nixos-logomark-default-flat-recommended"
-  "nixos-logomark-default-gradient-recommended"
-  "nixos-logomark-rainbow-gradient-recommended"
-  "nixos-logotype-black-coloredx-recommended"
   "nixos-logotype-black-dimensioned"
-  "nixos-logotype-black-regular-recommended"
   "nixos-snowflake-dimensioned-linear"
 )
 
 for IMAGE in "${IMAGERY[@]}"; do
-  python ../packages/"$IMAGE"/script.py
+  python ../packages/internal-artifacts/"$IMAGE"/script.py
 done
 
 for IMAGE in "${IMAGERY[@]}"; do

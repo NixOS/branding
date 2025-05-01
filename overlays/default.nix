@@ -21,8 +21,6 @@ let
     ;
 
   inherit (lib.lists)
-    elem
-    filter
     map
     ;
 
@@ -31,38 +29,49 @@ let
     getDirectoriesAndFilter
     ;
 
-  # helpers
-
-  removedDirectories = filter (
-    x:
-    !elem x [
-      "python-packages" # this is a package set
-      "fonts"
-    ]
-  );
-
   # overlays
 
-  allLocalOverlays = genAttrs (getDirectories ../overlays) (
+  localOverlays = genAttrs (getDirectories ../overlays) (
     dir: import ../overlays/${dir}/overlay.nix inputs
   );
 
-  allLocalPackages = genAttrs (removedDirectories (getDirectories ../packages)) (
-    dir: final: prev: {
-      "${dir}" = final.callPackage ../packages/${dir}/package.nix { };
-    }
-  );
+  externalPackages =
+    let
+      parent = "../packages/external-artifacts";
+    in
+    (listToAttrs (
+      map (dir: {
+        name = "${dir}-editable";
+        value = final: prev: {
+          "${dir}-editable" = final.callPackage ./${parent}/${dir}/editable.nix { };
+        };
+      }) (getDirectoriesAndFilter ./${parent} "editable.nix")
+    ))
+    // genAttrs (getDirectories ./${parent}) (
+      dir: final: prev: {
+        "${dir}" = final.callPackage ./${parent}/${dir}/package.nix { };
+      }
+    );
 
-  localEditablePackages = listToAttrs (
-    map (dir: {
-      name = "${dir}-editable";
-      value = final: prev: {
-        "${dir}-editable" = final.callPackage ../packages/${dir}/editable.nix { };
-      };
-    }) (getDirectoriesAndFilter ../packages "editable.nix")
-  );
+  internalPackages =
+    let
+      parent = "../packages/internal-artifacts";
+    in
+    (listToAttrs (
+      map (dir: {
+        name = "${dir}-editable";
+        value = final: prev: {
+          "${dir}-editable" = final.callPackage ./${parent}/${dir}/editable.nix { };
+        };
+      }) (getDirectoriesAndFilter ./${parent} "editable.nix")
+    ))
+    // genAttrs (getDirectories ./${parent}) (
+      dir: final: prev: {
+        "${dir}" = final.callPackage ./${parent}/${dir}/package.nix { };
+      }
+    );
 
-  localFontPackages = genAttrs (removedDirectories (getDirectories ../packages/fonts)) (
+  localFontPackages = genAttrs (getDirectories ../packages/fonts) (
     dir: final: prev: {
       "${dir}" = final.callPackage ../packages/fonts/${dir}/package.nix { };
     }
@@ -92,24 +101,22 @@ let
   );
 
   default = composeManyExtensions (
-    (attrValues allLocalOverlays)
-    ++ (attrValues allLocalPackages)
-    ++ (attrValues localEditablePackages)
+    (attrValues localOverlays)
+    ++ (attrValues externalPackages)
+    ++ (attrValues internalPackages)
     ++ (attrValues localFontPackages)
     ++ (attrValues pythonExtensions)
     ++ (attrValues pythonEditable)
   );
   fonts = composeManyExtensions (attrValues localFontPackages);
+  python-extensions = composeManyExtensions (attrValues pythonExtensions);
 
 in
-allLocalOverlays
-// allLocalPackages
-// localEditablePackages
-// pythonExtensions
-// pythonEditable
+localOverlays
 // {
   inherit
     default
     fonts
+    python-extensions
     ;
 }
