@@ -33,7 +33,8 @@ for IMAGE in "${IMAGERY[@]}"; do
 done
 
 for IMAGE in "${IMAGERY[@]}"; do
-  nix build ..#"${IMAGE}" --rebuild --option warn-dirty false
+  nix build ..#"${IMAGE}" --option warn-dirty false
+  nix build ..#"${IMAGE}" --option warn-dirty false --rebuild
   if cmp -s "${IMAGE}.svg" "./result/${IMAGE}.svg"; then
     echo "SAME ${IMAGE}"
   else
