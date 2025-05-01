@@ -22,8 +22,8 @@ IMAGERY=(
   "nixos-logomark-default-flat-recommended"
   "nixos-logomark-default-gradient-recommended"
   "nixos-logomark-rainbow-gradient-recommended"
+  "nixos-logotype-black-coloredx-recommended"
   "nixos-logotype-black-dimensioned"
-  "nixos-logotype-black-modified-x"
   "nixos-logotype-black-regular-recommended"
   "nixos-snowflake-dimensioned-linear"
 )

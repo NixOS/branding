@@ -3,7 +3,7 @@
   route159,
   runCommandLocal,
 }:
-runCommandLocal "nixos-logotype-black-modified-x"
+runCommandLocal "nixos-logotype"
   {
     script = ./script.py;
 
@@ -13,12 +13,12 @@ runCommandLocal "nixos-logotype-black-modified-x"
 
     env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
 
-    outputHash = "sha256-hfRsqRhfkD33Z5+kCaQJi4UEXhVr3uuLO/hatPrzIGw=";
+    outputHash = "sha256-SGiTIn9r2JH5uK3PSwBzb7cpf6Nede1fc67DuBFo3DI=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
   ''
     python $script
     mkdir $out
-    cp nixos-logotype-black-modified-x.svg $out/
+    cp *.svg $out/
   ''
