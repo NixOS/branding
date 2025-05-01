@@ -19,7 +19,7 @@ IMAGERY=(
   "nixos-lambda-dimensioned-linear"
   "nixos-lambda-gradient-background"
   "nixos-lambda-gradient-dimensioned"
-  "nixos-logotype-black"
+  "nixos-logotype-black-regular-recommended"
   "nixos-logotype-black-dimensioned"
   "nixos-logotype-black-modified-x"
   "nixos-logomark-default-flat-recommended"
