@@ -210,7 +210,7 @@ class Glyph(BaseRenderable):
     def make_svg_elements(self):
         return (self.make_svg_element(),)
 
-    def make_filename(self, extras=("",)):
+    def make_filename(self, extras: tuple[str] = ()):
         return "-".join(
             [
                 "nixos",
@@ -299,7 +299,7 @@ class Logotype(BaseRenderable):
     def make_svg_elements(self):
         return tuple(elem.make_svg_element() for elem in self.glyphs)
 
-    def make_filename(self, extras=("",)):
+    def make_filename(self, extras: tuple[str] = ()):
         return "-".join(
             [
                 self.characters.lower(),

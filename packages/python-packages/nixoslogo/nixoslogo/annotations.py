@@ -97,7 +97,7 @@ class TextAnnotations(BaseRenderable):
     def make_svg_elements(self):
         return tuple(elem.make_svg_element() for elem in self.glyphs)
 
-    def make_filename(self, extras=("",)):
+    def make_filename(self, extras: tuple[str] = ()):
         return "-".join(
             [
                 self.characters.lower(),
