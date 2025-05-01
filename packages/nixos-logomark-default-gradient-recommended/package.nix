@@ -10,12 +10,12 @@ runCommandLocal "nixos-snowflake-color-gradient"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-bnzRw6ed/w65rTUtMHZZxTr0fgPCXoadwM8MkBIsYjs=";
+    outputHash = "sha256-O/WYV6hFjlf7vErrQfqKTAX1tz+4buxh4zZvYtnuYeA=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
   ''
     python $script
     mkdir $out
-    cp nixos-snowflake-color-gradient.svg $out/
+    cp *.svg $out/
   ''

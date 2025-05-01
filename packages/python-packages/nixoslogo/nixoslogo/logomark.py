@@ -337,7 +337,7 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_filename(self, colors="default", extras=("",)):
+    def make_filename(self, colors="default", extras=()):
         return "-".join(
             [
                 "nixos",
