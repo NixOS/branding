@@ -100,6 +100,12 @@ let
     }) (getDirectoriesAndFilter ../packages/python-packages "editable.nix")
   );
 
+  verificationPackages = genAttrs (getDirectories ../packages/verification) (
+    dir: final: prev: {
+      "${dir}" = final.callPackage ../packages/verification/${dir}/package.nix { };
+    }
+  );
+
   default = composeManyExtensions (
     (attrValues localOverlays)
     ++ (attrValues externalPackages)
@@ -107,6 +113,7 @@ let
     ++ (attrValues localFontPackages)
     ++ (attrValues pythonExtensions)
     ++ (attrValues pythonEditable)
+    ++ (attrValues verificationPackages)
   );
   fonts = composeManyExtensions (attrValues localFontPackages);
   python-extensions = composeManyExtensions (attrValues pythonExtensions);

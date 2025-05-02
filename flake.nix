@@ -22,6 +22,7 @@
     devShells = import ./dev-shells inputs;
     formatter = import ./formatter inputs;
     formatterModule = import ./formatter-module inputs;
+    hydraJobs = import ./hydra-jobs inputs;
     legacyPackages = import ./legacy-packages inputs;
     library = import ./library inputs;
     overlays = import ./overlays inputs;
