@@ -47,7 +47,7 @@ IMAGERY=(
   "nixos-logomark-dimensioned-gradient-annotated"
   "nixos-logomark-dimensioned-gradient-background"
   "nixos-logomark-dimensioned-linear"
-  "nixos-logotype-black-dimensioned"
+  "nixos-logotype-dimensioned"
 )
 
 for IMAGE in "${IMAGERY[@]}"; do

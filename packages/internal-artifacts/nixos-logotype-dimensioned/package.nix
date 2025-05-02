@@ -4,7 +4,7 @@
   route159,
   runCommandLocal,
 }:
-runCommandLocal "nixos-logotype-black-dimensioned"
+runCommandLocal "nixos-logotype-dimensioned"
   {
     script = ./script.py;
 
@@ -15,7 +15,7 @@ runCommandLocal "nixos-logotype-black-dimensioned"
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
     env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
 
-    outputHash = "sha256-awCOlj73NHC3qcfsUo2Y2gwIHHk5Romrz7isSOgnCj4=";
+    outputHash = "sha256-qvrPhs9kROI+fH3zx9wCuicPbFCzImtNzr3uLvIF51g=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

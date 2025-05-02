@@ -612,7 +612,6 @@ class DimensionedLogotype(Logotype):
             [
                 "nixos",
                 "logotype",
-                "black",
                 "dimensioned",
             ]
             + list(extras)
