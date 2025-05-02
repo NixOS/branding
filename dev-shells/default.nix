@@ -24,6 +24,10 @@ inputs.self.library.defaultSystems (
             ps.fontforge
           ]))
 
+        ];
+
+        buildInputs = [
+
           inputs.self.checks.${system}.pre-commit-check.enabledPackages
 
         ];
