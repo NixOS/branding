@@ -358,7 +358,26 @@ class DimensionedLogomark(Logomark):
             ),
         )
 
-    def draw_lambda_with_gradients_line(self) -> svg.SVG:
+
+class DimensionedLogomarkGradient(Logomark):
+    def __init__(
+        self,
+        annotations: Annotations,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.annotations = annotations
+
+    def _init_canvas(self):
+        if self.canvas is None:
+            self.canvas = Canvas(
+                min_x=-2 * self.ilambda.radius,
+                min_y=-2 * self.ilambda.radius,
+                width=4 * self.ilambda.radius,
+                height=4 * self.ilambda.radius,
+            )
+
+    def make_dimensioned_gradient_lines(self):
         gradient_end_points = self.make_gradient_end_points()
         point_start = Point((gradient_end_points["x1"], gradient_end_points["y1"]))
         point_stop = Point((gradient_end_points["x2"], gradient_end_points["y2"]))
@@ -368,8 +387,62 @@ class DimensionedLogomark(Logomark):
             for offset in self._gradient_stop_offsets
         ]
 
+        text_annotations = [
+            self.annotations.make_annotation(text=f"{offset}%")
+            for offset in self._gradient_stop_offsets
+        ]
+
+        return tuple(
+            [
+                svg.Line(
+                    **gradient_end_points,
+                    stroke=self.annotations.construction_lines.stroke,
+                    stroke_width=self.annotations.construction_lines.stroke_width,
+                    stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+                ),
+            ]
+            + [
+                svg.Circle(
+                    cx=stop_point.x,
+                    cy=stop_point.y,
+                    r=2 * self.annotations.construction_lines.stroke_width,
+                    fill=self.annotations.construction_lines.stroke,
+                )
+                for stop_point in stop_points
+            ]
+            + [
+                svg.G(
+                    transform=[
+                        svg.Translate(stop_point.x, stop_point.y),
+                        svg.Translate(
+                            text_annotation.elements_height / 4,
+                            -text_annotation.elements_height / 4,
+                        ),
+                    ],
+                    elements=text_annotation.make_svg_elements(),
+                )
+                for stop_point, text_annotation in zip(stop_points, text_annotations)
+            ]
+        )
+
+    def make_svg_elements(self):
+        return (
+            self.canvas.make_axis_lines()
+            + self.annotations.dimension_lines.make_dimension_arrow_defs()
+            + self.ilambda.make_lambda_construction_lines()
+            + self.ilambda.make_lambda_polygons()
+            + self.make_dimensioned_gradient_lines()
+        )
+
+
+class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
+    def make_gradient_annotations(self):
+        gradient_end_points = self.make_gradient_end_points()
+        point_start = Point((gradient_end_points["x1"], gradient_end_points["y1"]))
+        point_stop = Point((gradient_end_points["x2"], gradient_end_points["y2"]))
+
         lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
-        dimension_lines = [
+        return (
             self.annotations.dimension_lines.make_dimension_line(
                 point1=lambda_points_no_gap["upper_notch"],
                 point2=point_start,
@@ -397,130 +470,31 @@ class DimensionedLogomark(Logomark):
                 reference=2 * self.ilambda.radius,
                 text="H",
             ),
-        ]
-
-        text_annotations = [
-            self.annotations.make_annotation(text=f"{offset}%")
-            for offset in self._gradient_stop_offsets
-        ]
-
-        gradient_lines = tuple(
-            [
-                svg.Line(
-                    **gradient_end_points,
-                    stroke=self.annotations.construction_lines.stroke,
-                    stroke_width=self.annotations.construction_lines.stroke_width,
-                    stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-                ),
-            ]
-            + [
-                svg.Circle(
-                    cx=stop_point.x,
-                    cy=stop_point.y,
-                    r=2 * self.annotations.construction_lines.stroke_width,
-                    fill=self.annotations.construction_lines.stroke,
-                )
-                for stop_point in stop_points
-            ]
-            + [
-                svg.G(
-                    transform=[
-                        svg.Translate(stop_point.x, stop_point.y),
-                        svg.Translate(
-                            text_annotation.elements_height / 4,
-                            -text_annotation.elements_height / 4,
-                        ),
-                    ],
-                    elements=text_annotation.make_svg_elements(),
-                )
-                for stop_point, text_annotation in zip(stop_points, text_annotations)
-            ]
-            + dimension_lines
         )
 
-        axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
-        construction_lines = self.ilambda.make_lambda_construction_lines()
-        lambda_polygons = self.ilambda.make_lambda_polygons()
-
+    def draw_lambda_with_gradients_line(self) -> svg.SVG:
         return svg.SVG(
             viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_gradients_defs()
-                + axis_lines
-                + dimension_arrows
-                + construction_lines
-                + lambda_polygons
-                + gradient_lines
+                + super().make_svg_elements()
+                + self.make_gradient_annotations()
             ),
         )
 
+
+class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
     def draw_lambda_with_gradients_background(self) -> svg.SVG:
-        gradient_end_points = self.make_gradient_end_points()
-        point_start = Point((gradient_end_points["x1"], gradient_end_points["y1"]))
-        point_stop = Point((gradient_end_points["x2"], gradient_end_points["y2"]))
-        point_vector = point_stop - point_start
-        stop_points = [
-            point_start + offset / 100 * point_vector
-            for offset in self._gradient_stop_offsets
-        ]
-
-        text_annotations = [
-            self.annotations.make_annotation(text=f"{offset}%")
-            for offset in self._gradient_stop_offsets
-        ]
-
-        gradient_lines = tuple(
-            [
-                svg.Line(
-                    **gradient_end_points,
-                    stroke=self.annotations.construction_lines.stroke,
-                    stroke_width=self.annotations.construction_lines.stroke_width,
-                    stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-                ),
-            ]
-            + [
-                svg.Circle(
-                    cx=stop_point.x,
-                    cy=stop_point.y,
-                    r=2 * self.annotations.construction_lines.stroke_width,
-                    fill=self.annotations.construction_lines.stroke,
-                )
-                for stop_point in stop_points
-            ]
-            + [
-                svg.G(
-                    transform=[
-                        svg.Translate(stop_point.x, stop_point.y),
-                        svg.Translate(
-                            text_annotation.elements_height / 4,
-                            -text_annotation.elements_height / 4,
-                        ),
-                    ],
-                    elements=text_annotation.make_svg_elements(),
-                )
-                for stop_point, text_annotation in zip(stop_points, text_annotations)
-            ]
-        )
-
         background = self.canvas.make_svg_background(
             fill=f"url(#{self.css_color_names[0]})"
         )
-        axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
-        construction_lines = self.ilambda.make_lambda_construction_lines()
-        lambda_polygons = self.ilambda.make_lambda_polygons()
 
         return svg.SVG(
             viewBox=self.canvas.make_view_box(),
             elements=(
                 self.make_flake_gradients_defs()
                 + background
-                + axis_lines
-                + dimension_arrows
-                + construction_lines
-                + lambda_polygons
-                + gradient_lines
+                + super().make_svg_elements()
             ),
         )
 
