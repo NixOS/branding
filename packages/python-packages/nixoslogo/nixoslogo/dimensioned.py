@@ -436,6 +436,17 @@ class DimensionedLogomarkGradient(Logomark):
             + self.make_dimensioned_gradient_lines()
         )
 
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                "nixos",
+                "logomark",
+                "dimensioned",
+                "gradient",
+            ]
+            + list(extras)
+        )
+
 
 class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
     def make_gradient_annotations(self):
@@ -474,26 +485,34 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
             ),
         )
 
-    def draw_lambda_with_gradients_line(self) -> svg.SVG:
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(super().make_svg_elements() + self.make_gradient_annotations()),
+    def make_svg_elements(self):
+        return super().make_svg_elements() + self.make_gradient_annotations()
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "annotated",
+            ]
+            + list(extras)
         )
 
 
 class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
-    def draw_lambda_with_gradients_background(self) -> svg.SVG:
-        background = self.canvas.make_svg_background(
-            fill=f"url(#{self.css_color_names[0]})"
+    def make_svg_elements(self):
+        return (
+            self.make_flake_gradients_defs()
+            + self.canvas.make_svg_background(fill=f"url(#{self.css_color_names[0]})")
+            + super().make_svg_elements()
         )
 
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                self.make_flake_gradients_defs()
-                + background
-                + super().make_svg_elements()
-            ),
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "background",
+            ]
+            + list(extras)
         )
 
 

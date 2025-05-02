@@ -3,7 +3,7 @@
   python3,
   runCommandLocal,
 }:
-runCommandLocal "nixos-lambda-gradient-dimensioned"
+runCommandLocal "nixos-logomark-dimensioned-gradient-background"
   {
     script = ./script.py;
 
@@ -13,12 +13,12 @@ runCommandLocal "nixos-lambda-gradient-dimensioned"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-uw8AWrlNBa/6gJe/lBCi5VEdNXNVFjIffsWD2T0fEGw=";
+    outputHash = "sha256-UipvKVIwLsR2rB1wV0gZm5+VK/BOtOYBVcx9DEG+V0U=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
   ''
     python $script
     mkdir $out
-    cp nixos-lambda-gradient-dimensioned.svg $out/
+    cp *.svg $out/
   ''

@@ -44,8 +44,8 @@ done
 IMAGERY=(
   "nixos-lambda-dimensioned-angular"
   "nixos-lambda-dimensioned-linear"
-  "nixos-lambda-gradient-background"
-  "nixos-lambda-gradient-dimensioned"
+  "nixos-logomark-dimensioned-gradient-annotated"
+  "nixos-logomark-dimensioned-gradient-background"
   "nixos-logomark-dimensioned-linear"
   "nixos-logotype-black-dimensioned"
 )
