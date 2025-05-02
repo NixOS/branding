@@ -525,21 +525,10 @@ class DimensionedLogotype(Logotype):
         super().__init__(**kwargs)
         self.annotations = annotations
 
-    def make_dimensioned_svg(self):
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                self.svg_bounding_box()
-                + self.dimension_cap_height()
-                + self.dimension_spacings()
-                + [elem.make_svg_element() for elem in self.glyphs],
-            ),
-        )
-
     def svg_bounding_box(self):
         bbox = self.elements_bounding_box
 
-        return [
+        return (
             svg.Rect(
                 x=bbox[0],
                 y=bbox[1],
@@ -568,12 +557,12 @@ class DimensionedLogotype(Logotype):
                 reference=self.cap_height,
                 fractional=False,
             ),
-        ]
+        )
 
     def dimension_cap_height(self):
         point1 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_min))
         point2 = Point((self.glyphs[0].elements_x_min, self.glyphs[0].elements_y_max))
-        return [
+        return (
             self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
@@ -581,8 +570,8 @@ class DimensionedLogotype(Logotype):
                 side="right",
                 offset=1 / 4,
                 reference=self.cap_height,
-            )
-        ]
+            ),
+        )
 
     def dimension_spacings(self):
         points = [
@@ -596,7 +585,7 @@ class DimensionedLogotype(Logotype):
             self.cap_height / (point1 - point2).length() for point1, point2 in points
         ]
         sides = ["left", "right", "right", "right"]
-        return [
+        return tuple(
             self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
                 point2=point2,
@@ -608,4 +597,23 @@ class DimensionedLogotype(Logotype):
                 fractional=False,
             )
             for (point1, point2), offset, side in zip(points, offsets, sides)
-        ]
+        )
+
+    def make_svg_elements(self):
+        return (
+            self.svg_bounding_box()
+            + self.dimension_cap_height()
+            + self.dimension_spacings()
+            + super().make_svg_elements()
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                "nixos",
+                "logotype",
+                "black",
+                "dimensioned",
+            ]
+            + list(extras)
+        )
