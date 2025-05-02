@@ -3,7 +3,7 @@
   python3,
   runCommandLocal,
 }:
-runCommandLocal "nixos-snowflake-dimensioned-linear"
+runCommandLocal "nixos-logomark-dimensioned-linear"
   {
     script = ./script.py;
 
@@ -20,5 +20,5 @@ runCommandLocal "nixos-snowflake-dimensioned-linear"
   ''
     python $script
     mkdir $out
-    cp nixos-snowflake-dimensioned-linear.svg $out/
+    cp *.svg $out/
   ''

@@ -254,8 +254,8 @@ class DimensionedLogomark(Logomark):
         annotations: Annotations,
         **kwargs,
     ):
-        self.annotations = annotations
         super().__init__(**kwargs)
+        self.annotations = annotations
 
     def _init_canvas(self):
         if self.canvas is None:
@@ -339,23 +339,25 @@ class DimensionedLogomark(Logomark):
             for lambda_points in flake_points
         )
 
-    def draw_flake_linear_dimensions(self) -> svg.SVG:
-        axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
-        lambda_construction_lines = self.ilambda.make_lambda_construction_lines()
-        construction_lines = self.make_flake_construction_lines()
-        linear_dimensions = self.make_flake_linear_dimensions()
+    def make_svg_elements(self):
+        return (
+            self.make_flake_polygons_for_dimensions()
+            + self.canvas.make_axis_lines()
+            + self.annotations.dimension_lines.make_dimension_arrow_defs()
+            + self.ilambda.make_lambda_construction_lines()
+            + self.make_flake_construction_lines()
+            + self.make_flake_linear_dimensions()
+        )
 
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                self.make_flake_polygons_for_dimensions()
-                + axis_lines
-                + dimension_arrows
-                + lambda_construction_lines
-                + construction_lines
-                + linear_dimensions
-            ),
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                "nixos",
+                "snowflake",
+                "dimensioned",
+                "linear",
+            ]
+            + list(extras)
         )
 
 
