@@ -13,7 +13,7 @@ runCommandLocal "nixos-logomark-dimensioned-linear"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-13c4Yls20wuf4SQV5BjIV4dBkDaGPCqowpZAbjqO3bA=";
+    outputHash = "sha256-zfKw7ctBiU5oBoCHbCe/QviefBUk0YznHXoxTDLTbqo=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

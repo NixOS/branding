@@ -46,8 +46,8 @@ IMAGERY=(
   "nixos-lambda-dimensioned-linear"
   "nixos-lambda-gradient-background"
   "nixos-lambda-gradient-dimensioned"
+  "nixos-logomark-dimensioned-linear"
   "nixos-logotype-black-dimensioned"
-  "nixos-snowflake-dimensioned-linear"
 )
 
 for IMAGE in "${IMAGERY[@]}"; do

@@ -353,7 +353,7 @@ class DimensionedLogomark(Logomark):
         return "-".join(
             [
                 "nixos",
-                "snowflake",
+                "logomark",
                 "dimensioned",
                 "linear",
             ]
