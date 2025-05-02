@@ -13,4 +13,15 @@ inputs:
       ;
   });
 
+  dimensioned-logos = inputs.self.library.defaultSystems (system: {
+    inherit (inputs.self.legacyPackages.${system})
+      nixos-lambda-dimensioned-angular
+      nixos-lambda-dimensioned-linear
+      nixos-logomark-dimensioned-gradient-annotated
+      nixos-logomark-dimensioned-gradient-background
+      nixos-logomark-dimensioned-linear
+      nixos-logotype-dimensioned
+      ;
+  });
+
 }
