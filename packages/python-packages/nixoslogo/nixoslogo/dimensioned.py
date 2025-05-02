@@ -475,11 +475,7 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
     def draw_lambda_with_gradients_line(self) -> svg.SVG:
         return svg.SVG(
             viewBox=self.canvas.make_view_box(),
-            elements=(
-                self.make_flake_gradients_defs()
-                + super().make_svg_elements()
-                + self.make_gradient_annotations()
-            ),
+            elements=(super().make_svg_elements() + self.make_gradient_annotations()),
         )
 
 
