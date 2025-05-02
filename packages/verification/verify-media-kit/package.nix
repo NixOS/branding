@@ -18,7 +18,8 @@ writeShellApplication {
       | \
       jq \
       -cr \
-      '.constituents + [.drvPath] | .[] | select(.!=null) + "^*"' | \
+      '.constituents + [.drvPath] | .[] | select(.!=null) + "^*"' \
+      | \
       nom \
       build \
       --keep-going \
