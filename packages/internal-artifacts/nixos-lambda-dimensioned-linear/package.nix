@@ -20,5 +20,5 @@ runCommandLocal "nixos-lambda-dimensioned-linear"
   ''
     python $script
     mkdir $out
-    cp nixos-lambda-dimensioned-linear.svg $out/
+    cp *.svg $out/
   ''

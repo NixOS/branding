@@ -1,9 +1,8 @@
 import svg
 from svg._types import Number
 
-from nixoslogo.annotations import (
-    Annotations,
-)
+from nixoslogo.annotations import Annotations
+from nixoslogo.core import ClearSpace
 from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
 from nixoslogo.logomark import Lambda, Logomark
@@ -14,10 +13,12 @@ class DimensionedLambda(Lambda):
     def __init__(
         self,
         annotations: Annotations,
+        clear_space: ClearSpace = ClearSpace.NONE,
         **kwargs,
     ):
-        self.annotations = annotations
         super().__init__(**kwargs)
+        self.annotations = annotations
+        self.clear_space = clear_space
 
     def _init_canvas(self):
         if self.canvas is None:
@@ -63,6 +64,37 @@ class DimensionedLambda(Lambda):
             ),
         )
 
+    def make_lambda_polygons(self):
+        lambda_points_no_gap = self.make_lambda_points(gap=0)
+        lambda_points_gap = self.make_lambda_points()
+        return (
+            svg.Polygon(
+                points=lambda_points_no_gap.to_list(),
+                stroke=self.annotations.object_lines.stroke,
+                stroke_width=self.annotations.object_lines.stroke_width,
+                fill=self.annotations.object_lines.fill,
+                stroke_dasharray=4,
+            ),
+            svg.Polygon(
+                points=lambda_points_gap.to_list(),
+                stroke=self.annotations.object_lines.stroke,
+                stroke_width=self.annotations.object_lines.stroke_width,
+                fill=self.annotations.object_lines.fill,
+            ),
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                "nixos",
+                "lambda",
+                "dimensioned",
+            ]
+            + list(extras)
+        )
+
+
+class DimensionedLambdaLinear(DimensionedLambda):
     def make_lambda_linear_dimensions(self):
         hexagon_points = self.make_hexagon_points(radius=self.radius)
         lambda_points_no_gap = self.make_lambda_points(gap=0)
@@ -135,6 +167,34 @@ class DimensionedLambda(Lambda):
             for index, opts in enumerate(options)
         )
 
+    def make_svg_elements(self):
+        axis_lines = self.canvas.make_axis_lines()
+        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
+        construction_lines = self.make_lambda_construction_lines()
+        main_diagonal = self.make_lambda_main_diagonal()
+        lambda_polygons = self.make_lambda_polygons()
+        lambda_linear_dimensions = self.make_lambda_linear_dimensions()
+
+        return (
+            axis_lines
+            + dimension_arrows
+            + construction_lines
+            + main_diagonal
+            + lambda_polygons
+            + lambda_linear_dimensions
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "linear",
+            ]
+            + list(extras)
+        )
+
+
+class DimensionedLambdaAngular(DimensionedLambda):
     def make_lambda_angular_dimensions(self):
         lambda_points_no_gap = self.make_lambda_points()
         # fmt: off
@@ -161,46 +221,7 @@ class DimensionedLambda(Lambda):
             for index, opts in enumerate(options)
         )
 
-    def make_lambda_polygons(self):
-        lambda_points_no_gap = self.make_lambda_points(gap=0)
-        lambda_points_gap = self.make_lambda_points()
-        return (
-            svg.Polygon(
-                points=lambda_points_no_gap.to_list(),
-                stroke=self.annotations.object_lines.stroke,
-                stroke_width=self.annotations.object_lines.stroke_width,
-                fill=self.annotations.object_lines.fill,
-                stroke_dasharray=4,
-            ),
-            svg.Polygon(
-                points=lambda_points_gap.to_list(),
-                stroke=self.annotations.object_lines.stroke,
-                stroke_width=self.annotations.object_lines.stroke_width,
-                fill=self.annotations.object_lines.fill,
-            ),
-        )
-
-    def draw_lambda_linear_dimensions(self) -> svg.SVG:
-        axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
-        construction_lines = self.make_lambda_construction_lines()
-        main_diagonal = self.make_lambda_main_diagonal()
-        lambda_polygons = self.make_lambda_polygons()
-        lambda_linear_dimensions = self.make_lambda_linear_dimensions()
-
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                axis_lines
-                + dimension_arrows
-                + construction_lines
-                + main_diagonal
-                + lambda_polygons
-                + lambda_linear_dimensions
-            ),
-        )
-
-    def draw_lambda_angular_dimensions(self) -> svg.SVG:
+    def make_svg_elements(self) -> svg.SVG:
         axis_lines = self.canvas.make_axis_lines()
         dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
         construction_lines = self.make_lambda_construction_lines()
@@ -208,16 +229,22 @@ class DimensionedLambda(Lambda):
         lambda_polygons = self.make_lambda_polygons()
         lambda_angular_dimensions = self.make_lambda_angular_dimensions()
 
-        return svg.SVG(
-            viewBox=self.canvas.make_view_box(),
-            elements=(
-                axis_lines
-                + dimension_arrows
-                + construction_lines
-                + main_diagonal
-                + lambda_polygons
-                + lambda_angular_dimensions
-            ),
+        return (
+            axis_lines
+            + dimension_arrows
+            + construction_lines
+            + main_diagonal
+            + lambda_polygons
+            + lambda_angular_dimensions
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "angular",
+            ]
+            + list(extras)
         )
 
 

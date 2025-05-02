@@ -20,5 +20,5 @@ runCommandLocal "nixos-lambda-dimensioned-angular"
   ''
     python $script
     mkdir $out
-    cp nixos-lambda-dimensioned-angular.svg $out/
+    cp *.svg $out/
   ''

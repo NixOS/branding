@@ -1,11 +1,7 @@
-from pathlib import Path
-
 from nixoslogo.annotations import Annotations
-from nixoslogo.dimensioned import DimensionedLambda
+from nixoslogo.dimensioned import DimensionedLambdaLinear
 
-lambda_inst = DimensionedLambda(
+ilambda = DimensionedLambdaLinear(
     annotations=Annotations.small(),
 )
-
-with open(Path("nixos-lambda-dimensioned-linear.svg"), "w") as file:
-    file.write(str(lambda_inst.draw_lambda_linear_dimensions()))
+ilambda.write_svg()
