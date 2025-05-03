@@ -5,3 +5,7 @@ result/
 
 # Python
 __pycache__
+
+# Artifacts
+*.svg
+*.pdf

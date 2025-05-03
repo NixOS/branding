@@ -43,5 +43,20 @@ inputs.self.library.defaultSystems (
       }
     ) { };
 
+    nixos-branding-guide-dev = pkgs.callPackage (
+      {
+        mkShell,
+        nixos-branding-guide-editable,
+      }:
+      mkShell {
+
+        shellHook = ''
+          cd $(git rev-parse --show-toplevel)/packages/internal-artifacts/nixos-branding-guide
+          ${nixos-branding-guide-editable}/bin/typst-watch
+        '';
+
+      }
+    ) { };
+
   }
 )

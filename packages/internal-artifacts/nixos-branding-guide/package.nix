@@ -1,6 +1,6 @@
 {
-  all-developed-imagery,
   lib,
+  nixos-branding-dimensioned-images,
   route159,
   typix-lib,
 }:
@@ -33,8 +33,8 @@ buildTypstProject {
 
   virtualPaths = [
     {
-      dest = "images";
-      src = "${all-developed-imagery}";
+      dest = "dimensioned-images";
+      src = "${nixos-branding-dimensioned-images}";
     }
   ];
 

@@ -4,6 +4,11 @@
 
 = Logo
 
-#image("images/nixos-lambda-dimensioned-linear.svg")
+== Anatomy
 
-#image("images/nixos-lambda-dimensioned-angular.svg")
+=== Lambda (λ)
+
+#image("./dimensioned-images/nixos-lambda-dimensioned-linear.svg")
+#image("./dimensioned-images/nixos-lambda-dimensioned-angular.svg")
+//
+// #image("images/nixos-lambda-dimensioned-angular.svg")
