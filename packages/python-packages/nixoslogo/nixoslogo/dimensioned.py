@@ -1,3 +1,5 @@
+import math
+
 import svg
 from svg._types import Number
 
@@ -243,6 +245,225 @@ class DimensionedLambdaAngular(DimensionedLambda):
             [
                 super().make_filename(),
                 "angular",
+            ]
+            + list(extras)
+        )
+
+
+class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
+    def make_dotted_lambda_vertices(self):
+        return tuple(
+            svg.Circle(
+                cx=point.x,
+                cy=point.y,
+                r=self.radius / 96,
+                fill=self.annotations.construction_lines.stroke,
+            )
+            for point in self.make_lambda_points()
+        )
+
+    def make_named_lambda_vertices(self):
+        named_points = self.make_named_lambda_points()
+        translations = [
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width - elem.elements_height / 2,
+                    +elem.elements_height / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    +elem.elements_height / 2,
+                    +elem.elements_height / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    +elem.elements_height / 4,
+                    +elem.elements_height / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width / 4,
+                    +elem.elements_height * 5 / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width - elem.elements_height / 2,
+                    +elem.elements_height / 2,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width / 4,
+                    +elem.elements_height * 5 / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width - elem.elements_height / 4,
+                    +elem.elements_height * 5 / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width - elem.elements_height / 2,
+                    +elem.elements_height / 4,
+                )
+            ],
+            lambda elem: [
+                svg.Translate(
+                    -elem.elements_width - elem.elements_height * 3 / 4,
+                    -elem.elements_height / 4,
+                )
+            ],
+        ]
+        named_annotations = {
+            name: (
+                point,
+                self.annotations.make_annotation(text=(f"{name}").replace("_", " ")),
+                translation,
+            )
+            for (name, point), translation in zip(named_points.items(), translations)
+        }
+        return tuple(
+            svg.G(
+                transform=[
+                    svg.Translate(point.x, point.y),
+                ]
+                + translation(annotation),
+                elements=annotation.make_svg_elements(),
+            )
+            for point, annotation, translation in named_annotations.values()
+        )
+
+    def make_svg_elements(self) -> svg.SVG:
+        return (
+            self.canvas.make_axis_lines()
+            + self.annotations.dimension_lines.make_dimension_arrow_defs()
+            + self.make_lambda_construction_lines()
+            + self.make_lambda_main_diagonal()
+            + self.make_lambda_polygons()
+            + self.make_dotted_lambda_vertices()
+            + self.make_named_lambda_vertices()
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "annotated",
+                "vertices",
+            ]
+            + list(extras)
+        )
+
+
+class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
+    def make_parametric_annotations(self):
+        hexagon_points = self.make_hexagon_points(radius=self.radius)
+        lambda_points_no_gap = self.make_named_lambda_points(gap=0)
+        lambda_points_gap = self.make_named_lambda_points()
+
+        radius = self.annotations.dimension_lines.make_dimension_line(
+            point1=Point((0, 0)),
+            point2=hexagon_points[5],
+            flip=False,
+            side="left",
+            offset=0,
+            text="radius",
+        )
+
+        thickness_points = [
+            Point((0, 0)),
+            Point((self.radius * self.thickness, 0)),
+            Point(
+                (
+                    self.radius * self.thickness * math.cos(math.radians(60)),
+                    self.radius * self.thickness * math.sin(math.radians(60)),
+                )
+            ),
+            Point(lambda_points_gap["joint_crotch"]),
+            (lambda_points_gap["midpoint_join"] + lambda_points_gap["joint_crotch"])
+            / 2,
+            Point(lambda_points_gap["midpoint_join"]),
+        ]
+        thickness_annotation = self.annotations.make_annotation(text="thickness")
+        thickness = tuple(
+            self.annotations.dimension_lines.make_dimension_line(
+                point1=thickness_points[(index + 0) % len(thickness_points)],
+                point2=thickness_points[(index + 1) % len(thickness_points)],
+                flip=False,
+                side="left",
+                offset=0,
+                text=" ",
+            )
+            for index in range(len(thickness_points))
+        ) + (
+            svg.G(
+                transform=[
+                    svg.Translate(*thickness_points[2]),
+                    svg.Translate(
+                        +thickness_annotation.elements_height / 2,
+                        +thickness_annotation.elements_height / 2,
+                    ),
+                ],
+                elements=thickness_annotation.make_svg_elements(),
+            ),
+        )
+
+        gap_annotation = self.annotations.make_annotation(text="gap")
+        gap = (
+            svg.G(
+                transform=[
+                    svg.Translate(
+                        *(
+                            lambda_points_no_gap["upper_notch"]
+                            + lambda_points_no_gap["upper_apex"]
+                        )
+                        / 2
+                    ),
+                    svg.Translate(
+                        -gap_annotation.elements_width
+                        - gap_annotation.elements_height / 4,
+                        -gap_annotation.elements_height / 2,
+                    ),
+                ],
+                elements=gap_annotation.make_svg_elements(),
+            ),
+        ) + self.annotations.dimension_lines.make_dimension_line(
+            point1=(lambda_points_gap["upper_notch"] + lambda_points_gap["upper_apex"])
+            / 2,
+            point2=(
+                lambda_points_no_gap["upper_notch"] + lambda_points_no_gap["upper_apex"]
+            )
+            / 2,
+            flip=False,
+            side="left",
+            offset=0,
+            text=" ",
+        )
+
+        return radius + thickness + gap
+
+    def make_svg_elements(self) -> svg.SVG:
+        return (
+            self.canvas.make_axis_lines()
+            + self.annotations.dimension_lines.make_dimension_arrow_defs()
+            + self.make_lambda_construction_lines()
+            + self.make_lambda_main_diagonal()
+            + self.make_lambda_polygons()
+            + self.make_parametric_annotations()
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                super().make_filename(),
+                "annotated",
+                "parameters",
             ]
             + list(extras)
         )
