@@ -66,6 +66,20 @@ class DimensionedLambda(Lambda):
             ),
         )
 
+    def make_lambda_off_diagonal(self):
+        lambda_points_gap = self.make_named_lambda_points()
+        return (
+            svg.Line(
+                x1=Point((0, 0)).x,
+                y1=Point((0, 0)).y,
+                x2=lambda_points_gap["rear_foot"].x,
+                y2=lambda_points_gap["rear_foot"].y,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+            ),
+        )
+
     def make_lambda_polygons(self):
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_lambda_points()
@@ -398,15 +412,16 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
                 flip=False,
                 side="left",
                 offset=0,
-                text=" ",
+                text="",
             )
             for index in range(len(thickness_points))
         ) + (
             svg.G(
                 transform=[
-                    svg.Translate(*thickness_points[2]),
+                    svg.Translate(*thickness_points[3]),
                     svg.Translate(
-                        +thickness_annotation.elements_height / 2,
+                        -thickness_annotation.elements_width
+                        - thickness_annotation.elements_height / 2,
                         +thickness_annotation.elements_height / 2,
                     ),
                 ],
@@ -414,36 +429,18 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
             ),
         )
 
-        gap_annotation = self.annotations.make_annotation(text="gap")
-        gap = (
-            svg.G(
-                transform=[
-                    svg.Translate(
-                        *(
-                            lambda_points_no_gap["upper_notch"]
-                            + lambda_points_no_gap["upper_apex"]
-                        )
-                        / 2
-                    ),
-                    svg.Translate(
-                        -gap_annotation.elements_width
-                        - gap_annotation.elements_height / 4,
-                        -gap_annotation.elements_height / 2,
-                    ),
-                ],
-                elements=gap_annotation.make_svg_elements(),
-            ),
-        ) + self.annotations.dimension_lines.make_dimension_line(
+        gap = self.annotations.dimension_lines.make_dimension_line_outer(
             point1=(lambda_points_gap["upper_notch"] + lambda_points_gap["upper_apex"])
             / 2,
             point2=(
                 lambda_points_no_gap["upper_notch"] + lambda_points_no_gap["upper_apex"]
             )
             / 2,
-            flip=False,
+            flip=True,
             side="left",
             offset=0,
-            text=" ",
+            text="gap",
+            text_offset=True,
         )
 
         return radius + thickness + gap
@@ -454,6 +451,7 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
             + self.annotations.dimension_lines.make_dimension_arrow_defs()
             + self.make_lambda_construction_lines()
             + self.make_lambda_main_diagonal()
+            + self.make_lambda_off_diagonal()
             + self.make_lambda_polygons()
             + self.make_parametric_annotations()
         )

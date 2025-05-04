@@ -167,53 +167,61 @@ class DimensionLines(LineGroup):
         point1_text = point1 + text_offset_scale * distance * normal
         point2_text = point2 + text_offset_scale * distance * normal
 
-        if text is None:
-            if fractional:
-                text = fractions.Fraction(round(measured_line.length()), reference)
-            else:
-                text = round(measured_line.length() / reference, precision)
-
-        text_annotation = TextAnnotations(
-            characters=str(text),
-            loader=self.font_loader,
-            **self.font_config,
-        )
-        annotation_center = Point(
-            (text_annotation.elements_width / 2, -text_annotation.elements_height / 2)
-        )
-
-        # TODO @djacu simplify transforms
-        if text_offset:
-            translate_to = (point1_end + point2_end) / 2
-            text_element = (
-                svg.G(
-                    transform=[
-                        svg.Translate(*(-annotation_center)),
-                        svg.Translate(*translate_to),
-                        svg.Translate(0, -annotation_center.y * 3 / 2),
-                    ],
-                    elements=(text_annotation.make_svg_elements()),
-                ),
-            )
+        if text == "":
+            text_element = ()
         else:
-            translate_to = (point1_dim + point2_dim) / 2
-            text_element = (
-                svg.G(
-                    transform=[
-                        svg.Translate(*(-annotation_center)),
-                        svg.Translate(*translate_to),
-                        svg.Rotate(
-                            -math.degrees(
-                                math.atan2(*(point2_dim - point1_dim).normal())
-                            ),
-                            *annotation_center,
-                        ),
-                        svg.Rotate(180 if side == "left" else 0, *annotation_center),
-                        svg.Translate(0, annotation_center.y * 5 / 4),
-                    ],
-                    elements=(text_annotation.make_svg_elements()),
-                ),
+            if text is None:
+                if fractional:
+                    text = fractions.Fraction(round(measured_line.length()), reference)
+                else:
+                    text = round(measured_line.length() / reference, precision)
+
+            text_annotation = TextAnnotations(
+                characters=str(text),
+                loader=self.font_loader,
+                **self.font_config,
             )
+            annotation_center = Point(
+                (
+                    text_annotation.elements_width / 2,
+                    -text_annotation.elements_height / 2,
+                )
+            )
+
+            # TODO @djacu simplify transforms
+            if text_offset:
+                translate_to = (point1_end + point2_end) / 2
+                text_element = (
+                    svg.G(
+                        transform=[
+                            svg.Translate(*(-annotation_center)),
+                            svg.Translate(*translate_to),
+                            svg.Translate(0, -annotation_center.y * 3 / 2),
+                        ],
+                        elements=(text_annotation.make_svg_elements()),
+                    ),
+                )
+            else:
+                translate_to = (point1_dim + point2_dim) / 2
+                text_element = (
+                    svg.G(
+                        transform=[
+                            svg.Translate(*(-annotation_center)),
+                            svg.Translate(*translate_to),
+                            svg.Rotate(
+                                -math.degrees(
+                                    math.atan2(*(point2_dim - point1_dim).normal())
+                                ),
+                                *annotation_center,
+                            ),
+                            svg.Rotate(
+                                180 if side == "left" else 0, *annotation_center
+                            ),
+                            svg.Translate(0, annotation_center.y * 5 / 4),
+                        ],
+                        elements=(text_annotation.make_svg_elements()),
+                    ),
+                )
 
         return (
             svg.Line(
@@ -242,11 +250,136 @@ class DimensionLines(LineGroup):
                 marker_start="url(#dimension-arrow-head)",
                 marker_end="url(#dimension-arrow-head)",
             ),
-            svg.Path(
+            svg.Path(  # TODO @djacu get rid of this; it was used for text elements on path
                 d=[
                     svg.M(point1_text.x, point1_text.y),
                     svg.L(point2_text.x, point2_text.y),
                 ],
+            ),
+            text_element,
+        )
+
+    def make_dimension_line_outer(
+        self,
+        point1,
+        point2,
+        flip=False,
+        side="left",
+        offset=1,
+        reference=1,
+        text=None,
+        text_offset=False,
+        fractional=True,
+        precision=3,
+    ):
+        if flip:
+            point1, point2 = point2, point1
+
+        measured_line = point1 - point2
+        normal = measured_line.normal()
+        distance = offset * measured_line.length()
+
+        point1_end = point1 + 1.25 * distance * normal
+        point2_end = point2 + 1.25 * distance * normal
+        point1_dim = point1 + 1.20 * distance * normal
+        point2_dim = point2 + 1.20 * distance * normal
+        point1_dim_tail = (
+            point1_dim
+            + max(40, measured_line.length() / 10) * measured_line.normalize()
+        )
+        point2_dim_tail = (
+            point2_dim
+            - max(40, measured_line.length() / 10) * measured_line.normalize()
+        )
+
+        if text == "":
+            text_element = ()
+        else:
+            if text is None:
+                if fractional:
+                    text = fractions.Fraction(round(measured_line.length()), reference)
+                else:
+                    text = round(measured_line.length() / reference, precision)
+
+            text_annotation = TextAnnotations(
+                characters=str(text),
+                loader=self.font_loader,
+                **self.font_config,
+            )
+            annotation_center = Point(
+                (
+                    text_annotation.elements_width / 2,
+                    -text_annotation.elements_height / 2,
+                )
+            )
+
+            if text_offset:
+                translate_to = (
+                    point1_dim_tail
+                    + (
+                        text_annotation.elements_width / 2
+                        + text_annotation.elements_height / 2
+                    )
+                    * measured_line.normalize()
+                )
+            else:
+                translate_to = (point1_dim + point2_dim) / 2
+
+            text_element = (
+                svg.G(
+                    transform=[
+                        svg.Translate(*(-annotation_center)),
+                        svg.Translate(*translate_to),
+                        svg.Rotate(
+                            -math.degrees(
+                                math.atan2(*(point2_dim - point1_dim).normal())
+                            ),
+                            *annotation_center,
+                        ),
+                        svg.Rotate(180 if side == "left" else 0, *annotation_center),
+                    ],
+                    elements=(text_annotation.make_svg_elements()),
+                ),
+            )
+
+        return (
+            # side line
+            svg.Line(
+                x1=point1.x,
+                y1=point1.y,
+                x2=point1_end.x,
+                y2=point1_end.y,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
+            ),
+            # side line
+            svg.Line(
+                x1=point2.x,
+                y1=point2.y,
+                x2=point2_end.x,
+                y2=point2_end.y,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
+            ),
+            # dimension line
+            svg.Line(
+                x1=point1_dim.x,
+                y1=point1_dim.y,
+                x2=point1_dim_tail.x,
+                y2=point1_dim_tail.y,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
+                marker_start="url(#dimension-arrow-head)",
+            ),
+            # dimension line
+            svg.Line(
+                x1=point2_dim.x,
+                y1=point2_dim.y,
+                x2=point2_dim_tail.x,
+                y2=point2_dim_tail.y,
+                stroke=self.stroke,
+                stroke_width=self.stroke_width,
+                marker_start="url(#dimension-arrow-head)",
             ),
             text_element,
         )
