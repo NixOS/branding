@@ -341,9 +341,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
     def make_svg_elements(self) -> svg.SVG:
         return (
             self.canvas.make_axis_lines()
-            + self.annotations.dimension_lines.make_dimension_arrow_defs()
             + self.make_lambda_construction_lines()
-            + self.make_lambda_main_diagonal()
             + self.make_lambda_polygons()
             + self.make_dotted_lambda_vertices()
             + self.make_named_lambda_vertices()
