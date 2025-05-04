@@ -184,20 +184,13 @@ class DimensionedLambdaLinear(DimensionedLambda):
         )
 
     def make_svg_elements(self):
-        axis_lines = self.canvas.make_axis_lines()
-        dimension_arrows = self.annotations.dimension_lines.make_dimension_arrow_defs()
-        construction_lines = self.make_lambda_construction_lines()
-        main_diagonal = self.make_lambda_main_diagonal()
-        lambda_polygons = self.make_lambda_polygons()
-        lambda_linear_dimensions = self.make_lambda_linear_dimensions()
-
         return (
-            axis_lines
-            + dimension_arrows
-            + construction_lines
-            + main_diagonal
-            + lambda_polygons
-            + lambda_linear_dimensions
+            self.canvas.make_axis_lines()
+            + self.annotations.dimension_lines.make_dimension_arrow_defs()
+            + self.make_lambda_construction_lines()
+            + self.make_lambda_main_diagonal()
+            + self.make_lambda_polygons()
+            + self.make_lambda_linear_dimensions()
         )
 
     def make_filename(self, extras: tuple[str] = ()) -> str:
