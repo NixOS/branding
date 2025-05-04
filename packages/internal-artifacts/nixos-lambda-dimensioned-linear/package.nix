@@ -13,7 +13,7 @@ runCommandLocal "nixos-lambda-dimensioned-linear"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-cVZA0BoNYDPUaYIjlhMkW26/EBdA6DKBgAVg3uGispY=";
+    outputHash = "sha256-iroGXwymf+oBsNEiXxhmU1K0JHyAO24tEhA+dAH87P8=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

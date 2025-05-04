@@ -189,6 +189,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
             + self.annotations.dimension_lines.make_dimension_arrow_defs()
             + self.make_lambda_construction_lines()
             + self.make_lambda_main_diagonal()
+            + self.make_lambda_off_diagonal()
             + self.make_lambda_polygons()
             + self.make_lambda_linear_dimensions()
         )
