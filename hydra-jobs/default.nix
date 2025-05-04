@@ -16,6 +16,8 @@ inputs:
   dimensioned-logos = inputs.self.library.defaultSystems (system: {
     inherit (inputs.self.legacyPackages.${system})
       nixos-lambda-dimensioned-angular
+      nixos-lambda-dimensioned-annotated-parameters
+      nixos-lambda-dimensioned-annotated-vertices
       nixos-lambda-dimensioned-linear
       nixos-logomark-dimensioned-gradient-annotated
       nixos-logomark-dimensioned-gradient-background
