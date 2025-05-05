@@ -17,6 +17,7 @@ inputs.self.library.defaultSystems (
           ruff-check.enable = true;
           ruff-format.enable = true;
           shellcheck.enable = true;
+          typstyle.enable = true;
         };
         settings.global.excludes = [
           "**/pyproject.toml"
