@@ -1,6 +1,7 @@
 {
   lib,
   nixos-branding-dimensioned-images,
+  nixos-lambda-outline,
   route159,
   typix-lib,
 }:
@@ -32,6 +33,10 @@ buildTypstProject {
   ];
 
   virtualPaths = [
+    {
+      dest = "background-images";
+      src = "${nixos-lambda-outline}";
+    }
     {
       dest = "dimensioned-images";
       src = "${nixos-branding-dimensioned-images}";
