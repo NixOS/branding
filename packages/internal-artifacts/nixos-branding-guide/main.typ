@@ -80,7 +80,8 @@
 ][
   #image("./dimensioned-images/nixos-lambda-dimensioned-linear.svg")
 ][
-  #lorem(100)
+  All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `radius` and setting the `radius` to 2 such that the hexagon maximal diameter is 1.
+  In all cases, the denominator is a power of 2.
 ]
 
 #contentPage[
@@ -88,7 +89,9 @@
 ][
   #image("./dimensioned-images/nixos-lambda-dimensioned-angular.svg")
 ][
-  #lorem(100)
+  All angles are integer multiples of 60°.
+  `A` angles are 60°.
+  `B` angles are 120°.
 ]
 
 #contentPage[
