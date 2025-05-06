@@ -48,26 +48,31 @@
 #sectionPage[Logo]
 
 #contentPage[
-  Anatomy - Lambda - Parameters
-][
-  #image("./dimensioned-images/nixos-lambda-dimensioned-annotated-parameters.svg")
-][
-  The lambda is created by referencing the geometry of a hexagon.
-  The lambda skeleton intersects the top left, bottom left, and bottom right vertices of the hexagon.
-
-  The lambda is defined by three parameters:
-
-  - `radius`: The distance from the origin to the vertex intersection points.
-  - `thickness`: A fraction of the `radius` which can be observed in the 6 lines forming a triangle beneath the origin.
-  - `gap`: A fraction of the radius
-]
-
-#contentPage[
   Anatomy - Lambda - Annotations
 ][
   #image("./dimensioned-images/nixos-lambda-dimensioned-annotated-vertices.svg")
 ][
-  #lorem(100)
+  The lambda is created by referencing the geometry of a hexagon.
+  The lambda skeleton intersects the hexagon vertices at three locations:
+  - At the top left between the upper apex and upper notch.
+  - At the bottom left at the rear foot.
+  - At the bottom right between the forward heel and the forward tip.
+]
+
+#contentPage[
+  Anatomy - Lambda - Parameters
+][
+  #image("./dimensioned-images/nixos-lambda-dimensioned-annotated-parameters.svg")
+][
+  The lambda is defined by three parameters:
+
+  - `radius`: The distance from the origin to the vertex intersection points.
+  - `thickness`: The distance from the lambda skeleton to the edge.
+    This can be observed in the 6 lines forming a triangle beneath the origin.
+    It is defined as a fraction of the `radius` with a default value of `1 / 4`.
+  - `gap`: This distance that the upper apex and upper notch are translated towards the origin.
+    The dashed section is the lambda with no gap.
+    It is defined as a fraction of the `radius` with a default value of `1 / 32`.
 ]
 
 #contentPage[
