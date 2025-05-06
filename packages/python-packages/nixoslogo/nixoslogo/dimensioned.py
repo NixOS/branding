@@ -343,6 +343,8 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
         return (
             self.canvas.make_axis_lines()
             + self.make_lambda_construction_lines()
+            + self.make_lambda_main_diagonal()
+            + self.make_lambda_off_diagonal()
             + self.make_lambda_polygons()
             + self.make_dotted_lambda_vertices()
             + self.make_named_lambda_vertices()
