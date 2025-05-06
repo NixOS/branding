@@ -95,11 +95,15 @@
 ]
 
 #contentPage[
-  Anatomy - Gradient - Annotations
+  Anatomy - Gradient - Definition
 ][
   #image("./dimensioned-images/nixos-logomark-dimensioned-gradient-annotated.svg")
 ][
-  #lorem(100)
+  The gradient of the lambda is defined by 2 points.
+  The first end point is located at the intersection above the upper notch and to the left of the upper apex.
+  The second end point is located to the right of the joint crotch coincident with the lambda skeleton.
+
+  The gradient stop points are located at 0%, 25%, and 100%.
 ]
 
 #contentPage[
@@ -107,7 +111,8 @@
 ][
   #image("./dimensioned-images/nixos-logomark-dimensioned-gradient-background.svg")
 ][
-  #lorem(100)
+  The selected color of the lambda is true below and to the right of the 100% gradient stop point.
+  The lightness and chroma is lowered at the 25% and 0% gradient stop points.
 ]
 
 #contentPage[
