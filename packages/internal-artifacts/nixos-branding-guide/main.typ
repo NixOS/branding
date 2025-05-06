@@ -120,7 +120,11 @@
 ][
   #image("./dimensioned-images/nixos-logomark-dimensioned-linear.svg")
 ][
-  #lorem(100)
+  Six lambdas are used to create the "NixOS Snowflake".
+  The lambdas are located using an inner hexagon.
+  They are located such that if they had zero gap, the upper apex would be coincident with a vertex of the inner hexagon and the long diagonal of the lambda is colinear with an edge of the lambda.
+  An outer hexagon emerges with vertices that are coincident with the rear foot of the lambdas.
+  If the maximal diameter of the inner hexagon is 1 the outer hexagon emerges with maximal diameter of 9 / 4.
 ]
 
 #contentPage[
