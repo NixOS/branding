@@ -21,12 +21,14 @@ class Lambda(BaseRenderable):
         radius: int = 512,
         thickness: float = 1 / 4,
         gap: float = 1 / 32,
+        color: str = "black",
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
         self.radius = radius
         self.thickness = thickness
         self.gap = gap
+        self.color = color
         self.clear_space = clear_space
         super().__init__(**kwargs)
 
@@ -63,7 +65,7 @@ class Lambda(BaseRenderable):
         return (
             svg.Polygon(
                 points=self.make_lambda_points().to_list(),
-                fill="black",
+                fill=self.color,
             ),
         )
 
@@ -337,7 +339,7 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_filename(self, colors="default", extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str] = ()):
         return "-".join(
             [
                 "nixos",
