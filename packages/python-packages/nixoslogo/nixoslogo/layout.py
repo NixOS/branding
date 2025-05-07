@@ -10,6 +10,18 @@ class Canvas:
     width: int
     height: int
 
+    @property
+    def max_y(self):
+        return self.min_y + self.height
+
+    @property
+    def max_x(self):
+        return self.min_x + self.width
+
+    @property
+    def bounding_box(self):
+        return (self.min_x, self.min_y, self.max_x, self.max_y)
+
     def make_view_box(self):
         return svg.ViewBoxSpec(
             min_x=self.min_x,
