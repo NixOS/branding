@@ -13,7 +13,7 @@ runCommandLocal "nixos-lambda-dimensioned-annotated-vertices"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-EeuZr3XEEsLYE8ZTPtfxzlkxI+1575p4Nw0UIzQH3s0=";
+    outputHash = "sha256-VU3oJJOi6+43lC/XYMzGtXkrxeRGvaG9KV2IDlbclA0=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

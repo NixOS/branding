@@ -4,6 +4,7 @@
   jsonpickle,
   lib,
   mkPythonEditablePackage,
+  lxml,
   poetry-core,
   svg-py,
 }:
@@ -33,6 +34,7 @@ mkPythonEditablePackage {
     coloraide
     # fontforge
     jsonpickle
+    lxml
     svg-py
   ];
 

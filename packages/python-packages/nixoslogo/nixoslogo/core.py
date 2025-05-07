@@ -6,6 +6,7 @@ from functools import partial
 from pathlib import Path
 
 import svg
+from lxml import etree
 
 from nixoslogo.colors import Color
 from nixoslogo.layout import Canvas
@@ -187,8 +188,8 @@ class BaseRenderable(ABC):
         if filename is None:
             filename = self.make_filename()
         filename = filename.replace("/", "_")
-        with open(Path(filename + ".svg"), "w") as file:
-            file.write(str(self.make_svg()))
+        with open(Path(filename + ".svg"), "w", encoding="utf-8") as file:
+            etree.canonicalize(str(self.make_svg()), out=file)
 
     @property
     def elements_x_min(self):

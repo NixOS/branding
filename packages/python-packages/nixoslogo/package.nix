@@ -4,6 +4,7 @@
   fontforge,
   jsonpickle,
   lib,
+  lxml,
   poetry-core,
   svg-py,
 }:
@@ -34,6 +35,7 @@ buildPythonPackage {
     coloraide
     fontforge
     jsonpickle
+    lxml
     svg-py
   ];
 
