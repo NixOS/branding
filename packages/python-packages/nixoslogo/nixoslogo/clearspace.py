@@ -1,8 +1,15 @@
+import logging
+
 import svg
 
 from nixoslogo.annotations import Annotations
 from nixoslogo.core import BaseRenderable, ClearSpace
-from nixoslogo.logomark import Lambda, Logomark
+from nixoslogo.logging_config import setup_logging
+from nixoslogo.logo import Lambda, NixosLogo
+from nixoslogo.logomark import Logomark
+from nixoslogo.logotype import Glyph, Logotype
+
+logger = logging.getLogger(__name__)
 
 
 class LogomarkDimensionedClearspace(BaseRenderable):
@@ -69,22 +76,22 @@ class LogomarkDimensionedClearspace(BaseRenderable):
             (
                 svg.Rotate(90),
                 svg.Translate(
-                    -self.space_object.elements_x_min - self.recommended.elements_y_max,
+                    -self.space_object.elements_x_min + self.recommended.elements_y_min,
                     -self.space_object.elements_y_max - self.canvas.min_x,
                 ),
             ),
             (
                 svg.Rotate(180),
                 svg.Translate(
-                    -self.space_object.elements_x_min + self.recommended.elements_x_min,
-                    -self.space_object.elements_y_max + self.canvas.max_y,
+                    -self.space_object.elements_x_min - self.recommended.elements_x_max,
+                    -self.space_object.elements_y_max - self.canvas.min_y,
                 ),
             ),
             (
                 svg.Rotate(270),
                 svg.Translate(
                     -self.space_object.elements_x_min - self.recommended.elements_y_max,
-                    -self.space_object.elements_y_max - self.canvas.min_x,
+                    -self.space_object.elements_y_max + self.canvas.max_x,
                 ),
             ),
         )
@@ -193,14 +200,33 @@ class LogomarkDimensionedClearspace(BaseRenderable):
 
 
 if __name__ == "__main__":
+    setup_logging(level=logging.DEBUG)
+
     annotations = Annotations.medium()
     annotations.construction_lines.stroke = "black"
     annotations.construction_lines.stroke_dasharray = 32
+
     space_object = Lambda(gap=0)
     original = LogomarkDimensionedClearspace(
         logo=Logomark,
         space_object=space_object,
         annotations=annotations,
         # background_color="lightblue",
+    )
+    original.write_svg()
+
+    space_object = Logomark()
+    original = LogomarkDimensionedClearspace(
+        logo=NixosLogo,
+        space_object=space_object,
+        annotations=annotations,
+    )
+    original.write_svg()
+
+    space_object = Glyph(character="N")
+    original = LogomarkDimensionedClearspace(
+        logo=Logotype,
+        space_object=space_object,
+        annotations=annotations,
     )
     original.write_svg()
