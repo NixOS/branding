@@ -212,7 +212,6 @@ if __name__ == "__main__":
 
     annotations = Annotations.medium()
     annotations.construction_lines.stroke = "grey"
-    # annotations.construction_lines.stroke_dasharray = 32
 
     space_object = Lambda(gap=0)
     original = LogomarkDimensionedClearspace(
