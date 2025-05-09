@@ -113,7 +113,7 @@ class LineGroup:
     name: str
     stroke: str
     stroke_width: int
-    stroke_dasharray: int = 4
+    stroke_dasharray: int
     fill: str = "transparent"
 
 
@@ -527,21 +527,25 @@ class Annotations:
                 "name": "object",
                 "stroke": "green",
                 "stroke_width": 4,
+                "stroke_dasharray": 4,
             },
             construction_lines_config={
                 "name": "construction",
                 "stroke": "blue",
                 "stroke_width": 2,
+                "stroke_dasharray": 4,
             },
             dimension_lines_config={
                 "name": "dimension",
                 "stroke": "red",
                 "stroke_width": 1,
+                "stroke_dasharray": 4,
             },
             font_config={
                 "scale": None,
                 "cap_height": 24,
                 "color": "black",
+                "stroke_dasharray": 4,
             },
         )
 
@@ -552,21 +556,25 @@ class Annotations:
                 "name": "object",
                 "stroke": "green",
                 "stroke_width": 8,
+                "stroke_dasharray": 8,
             },
             construction_lines_config={
                 "name": "construction",
                 "stroke": "blue",
                 "stroke_width": 4,
+                "stroke_dasharray": 8,
             },
             dimension_lines_config={
                 "name": "dimension",
                 "stroke": "red",
                 "stroke_width": 2,
+                "stroke_dasharray": 8,
             },
             font_config={
                 "scale": None,
                 "cap_height": 48,
                 "color": "black",
+                "stroke_dasharray": 8,
             },
         )
 
