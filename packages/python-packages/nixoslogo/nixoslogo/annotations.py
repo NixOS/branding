@@ -578,6 +578,35 @@ class Annotations:
             },
         )
 
+    @classmethod
+    def large(cls) -> "Annotations":
+        return cls(
+            object_lines_config={
+                "name": "object",
+                "stroke": "green",
+                "stroke_width": 16,
+                "stroke_dasharray": 16,
+            },
+            construction_lines_config={
+                "name": "construction",
+                "stroke": "blue",
+                "stroke_width": 8,
+                "stroke_dasharray": 16,
+            },
+            dimension_lines_config={
+                "name": "dimension",
+                "stroke": "red",
+                "stroke_width": 4,
+                "stroke_dasharray": 16,
+            },
+            font_config={
+                "scale": None,
+                "cap_height": 96,
+                "color": "black",
+                "stroke_dasharray": 16,
+            },
+        )
+
 
 if __name__ == "__main__":
     from nixoslogo.core import get_nixos_annotation_font_file
