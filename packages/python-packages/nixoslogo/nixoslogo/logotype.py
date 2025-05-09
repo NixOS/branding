@@ -1,3 +1,7 @@
+import atexit
+import logging
+import shutil
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -15,6 +19,9 @@ from nixoslogo.core import (
     LogotypeStyle,
     get_nixos_logotype_font_file,
 )
+from nixoslogo.logging_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 class FontLoader:
@@ -32,7 +39,26 @@ class FontLoader:
         self.scale_glyph = scale_glyph
         self.offset_glyph = offset_glyph
 
-        self.font = fontforge.open(str(self.get_font_file()))
+        self._open_font_file()
+        self._setup_glyphs()
+
+    def _open_font_file(self):
+        source_path = self.get_font_file()
+        logger.debug(f"Original font file: {source_path}")
+        self._tempdir = Path(tempfile.mkdtemp(prefix="fontforge_"))
+        logger.debug(f"Temporary directory created: {self._tempdir}")
+        self._font_path = self._tempdir / source_path.name
+        shutil.copy2(source_path, self._font_path)
+        logger.debug(f"Font file copied: {self._font_path}")
+
+        self.font = fontforge.open(str(self._font_path))
+        logger.debug(f"Font file loaded: {self._font_path}")
+        self._cleaned_up = False
+
+        # Register the cleanup function to be called when the Python process exits
+        atexit.register(self._cleanup_once)
+
+    def _setup_glyphs(self):
         self._set_ref_size()
 
         for character, transforms in self.transforms_map.items():
@@ -80,6 +106,33 @@ class FontLoader:
                 0,
             )
         )
+
+    def cleanup(self):
+        """Manual cleanup method."""
+        logger.debug(f"Manual cleanup for font file: {self._font_path}")
+        self._cleanup_once()
+
+    def _cleanup_once(self):
+        """Ensure cleanup happens only once."""
+        if self._cleaned_up:
+            return
+        self._cleaned_up = True
+        try:
+            # Close the font file if it's open
+            self.font.close()
+            logger.debug(f"Font file closed: {self._font_path}")
+        except Exception as e:
+            logger.error(f"Error closing font file: {self._font_path}, {e}")
+        # Remove the temporary directory and its contents
+        try:
+            shutil.rmtree(self._tempdir, ignore_errors=True)
+            logger.debug(f"Temporary directory removed: {self._tempdir}")
+        except Exception as e:
+            logger.error(f"Error removing temporary directory: {self._tempdir}, {e}")
+
+    def __del__(self):
+        """Fallback cleanup in case it's not done manually."""
+        self._cleanup_once()
 
 
 class Glyph(BaseRenderable):
@@ -313,6 +366,7 @@ class Logotype(BaseRenderable):
 
 
 if __name__ == "__main__":
+    setup_logging(level=logging.DEBUG)
     loader = FontLoader()
 
     character = Glyph(loader=loader, character="x", background_color="#dddddd")
@@ -321,4 +375,4 @@ if __name__ == "__main__":
     logotype = Logotype(loader=loader, background_color="#dddddd")
     logotype.write_svg(filename=logotype.make_filename(extras=("test",)))
 
-    loader.font.close()
+    loader.cleanup()
