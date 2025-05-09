@@ -25,6 +25,7 @@ class NixosLogo(BaseRenderable):
         lambda_radius: int = 512,
         lambda_thickness: float = 1 / 4,
         lambda_gap: float = 1 / 32,
+        loader: FontLoader | None = None,
         logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
         logomark_colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
         logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
@@ -40,6 +41,7 @@ class NixosLogo(BaseRenderable):
         self.lambda_radius = lambda_radius
         self.lambda_thickness = lambda_thickness
         self.lambda_gap = lambda_gap
+        self.loader = loader
         self.logo_layout = logo_layout
         self.logomark_colors = logomark_colors
         self.logomark_color_style = logomark_color_style
@@ -78,7 +80,8 @@ class NixosLogo(BaseRenderable):
             )
 
     def _init_logotype(self):
-        self.loader = FontLoader(capHeight=self.logotype_cap_height)
+        if self.loader is None:
+            self.loader = FontLoader(capHeight=self.logotype_cap_height)
         self.logotype = Logotype(
             characters=self.logotype_characters,
             loader=self.loader,
