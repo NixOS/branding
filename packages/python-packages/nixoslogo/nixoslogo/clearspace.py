@@ -65,36 +65,44 @@ class LogomarkDimensionedClearspace(BaseRenderable):
         )
 
     def make_space_object_elements(self):
-        transforms = (
+        transforms = [
             (
-                svg.Rotate(0),
+                svg.Rotate(90 * index),
                 svg.Translate(
-                    -self.space_object.elements_x_min + self.recommended.elements_x_min,
-                    -self.space_object.elements_y_max + self.canvas.max_y,
+                    -self.space_object.elements_x_min,
+                    -self.space_object.elements_y_max,
                 ),
-            ),
-            (
-                svg.Rotate(90),
-                svg.Translate(
-                    -self.space_object.elements_x_min + self.recommended.elements_y_min,
-                    -self.space_object.elements_y_max - self.canvas.min_x,
-                ),
-            ),
-            (
-                svg.Rotate(180),
-                svg.Translate(
-                    -self.space_object.elements_x_min - self.recommended.elements_x_max,
-                    -self.space_object.elements_y_max - self.canvas.min_y,
-                ),
-            ),
-            (
-                svg.Rotate(270),
-                svg.Translate(
-                    -self.space_object.elements_x_min - self.recommended.elements_y_max,
-                    -self.space_object.elements_y_max + self.canvas.max_x,
-                ),
-            ),
-        )
+                translation,
+            )
+            for index, translation in enumerate(
+                (
+                    (
+                        svg.Translate(
+                            +self.recommended.elements_x_min,
+                            +self.canvas.max_y,
+                        ),
+                    ),
+                    (
+                        svg.Translate(
+                            +self.recommended.elements_y_min,
+                            -self.canvas.min_x,
+                        ),
+                    ),
+                    (
+                        svg.Translate(
+                            -self.recommended.elements_x_max,
+                            -self.canvas.min_y,
+                        ),
+                    ),
+                    (
+                        svg.Translate(
+                            -self.recommended.elements_y_max,
+                            +self.canvas.max_x,
+                        ),
+                    ),
+                )
+            )
+        ]
         return tuple(
             self.make_space_object_element(
                 space=self.space_object,
@@ -211,7 +219,6 @@ if __name__ == "__main__":
         logo=Logomark,
         space_object=space_object,
         annotations=annotations,
-        # background_color="lightblue",
     )
     original.write_svg()
 
