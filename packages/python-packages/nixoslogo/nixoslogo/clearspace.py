@@ -125,7 +125,7 @@ class LogomarkDimensionedClearspace(BaseRenderable):
                 y1=self.canvas.min_y,
                 x2=self.recommended.elements_x_min,
                 y2=self.canvas.max_y,
-                stroke="black",
+                stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
@@ -134,7 +134,7 @@ class LogomarkDimensionedClearspace(BaseRenderable):
                 y1=self.canvas.min_y,
                 x2=self.recommended.elements_x_max,
                 y2=self.canvas.max_y,
-                stroke="black",
+                stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
@@ -143,7 +143,7 @@ class LogomarkDimensionedClearspace(BaseRenderable):
                 y1=self.recommended.elements_y_min,
                 x2=self.canvas.max_x,
                 y2=self.recommended.elements_y_min,
-                stroke="black",
+                stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
@@ -152,7 +152,7 @@ class LogomarkDimensionedClearspace(BaseRenderable):
                 y1=self.recommended.elements_y_max,
                 x2=self.canvas.max_x,
                 y2=self.recommended.elements_y_max,
-                stroke="black",
+                stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
@@ -211,8 +211,8 @@ if __name__ == "__main__":
     setup_logging(level=logging.DEBUG)
 
     annotations = Annotations.medium()
-    annotations.construction_lines.stroke = "black"
-    annotations.construction_lines.stroke_dasharray = 32
+    annotations.construction_lines.stroke = "grey"
+    # annotations.construction_lines.stroke_dasharray = 32
 
     space_object = Lambda(gap=0)
     original = LogomarkDimensionedClearspace(
@@ -222,17 +222,19 @@ if __name__ == "__main__":
     )
     original.write_svg()
 
-    space_object = Logomark()
+    space_object = Glyph(character="N")
     original = LogomarkDimensionedClearspace(
-        logo=NixosLogo,
+        logo=Logotype,
         space_object=space_object,
         annotations=annotations,
     )
     original.write_svg()
 
-    space_object = Glyph(character="N")
+    annotations = Annotations.large()
+    annotations.construction_lines.stroke = "grey"
+    space_object = Logomark()
     original = LogomarkDimensionedClearspace(
-        logo=Logotype,
+        logo=NixosLogo,
         space_object=space_object,
         annotations=annotations,
     )
