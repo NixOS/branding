@@ -122,7 +122,15 @@ class NixosLogo(BaseRenderable):
         ]
 
     def _get_clearspace(self):
-        return self.logomark._get_clearspace()
+        match self.clear_space:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return self.logomark.elements_height / 2
+            case ClearSpace.RECOMMENDED:
+                return self.logomark.elements_height
+            case _:
+                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
     def make_svg_elements(self):
         return (
