@@ -160,7 +160,7 @@ class NixosLogo(BaseRenderable):
         )
 
     def close(self):
-        self.loader.font.close()
+        self.loader.cleanup()
 
 
 if __name__ == "__main__":
