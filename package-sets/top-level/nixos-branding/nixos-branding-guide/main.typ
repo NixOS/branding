@@ -1,3 +1,5 @@
+// Date must be set to none for deterministic builds
+#set document(date: none)
 #set page("a4", flipped: true)
 #set text(font: "Route 159")
 
@@ -11,7 +13,7 @@
     background: align(
       right,
       image(
-        "./background-images/nixos-lambda-R512-T1_4-G0-none.svg",
+        "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
         height: 100%,
       ),
     ),
@@ -50,7 +52,7 @@
 #contentPage[
   Anatomy - Lambda - Annotations
 ][
-  #image("./dimensioned-images/nixos-lambda-dimensioned-annotated-vertices.svg")
+  #image("./dimensioned/nixos-lambda-dimensioned-annotated-vertices.svg")
 ][
   The lambda is created by referencing the geometry of a hexagon.
   The lambda skeleton intersects the hexagon vertices at three locations:
@@ -62,7 +64,7 @@
 #contentPage[
   Anatomy - Lambda - Parameters
 ][
-  #image("./dimensioned-images/nixos-lambda-dimensioned-annotated-parameters.svg")
+  #image("./dimensioned/nixos-lambda-dimensioned-annotated-parameters.svg")
 ][
   The lambda is defined by three parameters:
 
@@ -78,7 +80,7 @@
 #contentPage[
   Anatomy - Lambda - Linear
 ][
-  #image("./dimensioned-images/nixos-lambda-dimensioned-linear.svg")
+  #image("./dimensioned/nixos-lambda-dimensioned-linear.svg")
 ][
   All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `radius` and setting the `radius` to 2 such that the hexagon maximal diameter is 1.
   In all cases, the denominator is a power of 2.
@@ -87,7 +89,7 @@
 #contentPage[
   Anatomy - Lambda - Angular
 ][
-  #image("./dimensioned-images/nixos-lambda-dimensioned-angular.svg")
+  #image("./dimensioned/nixos-lambda-dimensioned-angular.svg")
 ][
   All angles are integer multiples of 60°.
   `A` angles are 60°.
@@ -97,7 +99,7 @@
 #contentPage[
   Anatomy - Gradient - Definition
 ][
-  #image("./dimensioned-images/nixos-logomark-dimensioned-gradient-annotated.svg")
+  #image("./dimensioned/nixos-logomark-dimensioned-gradient-annotated.svg")
 ][
   The gradient of the lambda is defined by 2 points.
   The first end point is located at the intersection above the upper notch and to the left of the upper apex.
@@ -109,7 +111,7 @@
 #contentPage[
   Anatomy - Gradient - Unmasked
 ][
-  #image("./dimensioned-images/nixos-logomark-dimensioned-gradient-background.svg")
+  #image("./dimensioned/nixos-logomark-dimensioned-gradient-background.svg")
 ][
   The selected color of the lambda is true below and to the right of the 100% gradient stop point.
   The lightness and chroma is lowered at the 25% and 0% gradient stop points.
@@ -118,7 +120,7 @@
 #contentPage[
   Anatomy - Logomark
 ][
-  #image("./dimensioned-images/nixos-logomark-dimensioned-linear.svg")
+  #image("./dimensioned/nixos-logomark-dimensioned-linear.svg")
 ][
   Six lambdas are used to create the "NixOS Snowflake".
   The lambdas are located using an inner hexagon.
@@ -130,7 +132,7 @@
 #contentPage[
   Anatomy - Logotype
 ][
-  #image("./dimensioned-images/nixos-logotype-dimensioned.svg")
+  #image("./dimensioned/nixos-logotype-dimensioned.svg")
 ][
   #lorem(100)
 ]

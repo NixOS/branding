@@ -2,28 +2,12 @@ inputs:
 
 {
 
-  media-kit = inputs.self.library.defaultSystems (system: {
-    inherit (inputs.self.legacyPackages.${system})
-      nixos-logo-default-gradient-black-regular-horizontal-recommended
-      nixos-logomark-default-flat-recommended
-      nixos-logomark-default-gradient-recommended
-      nixos-logomark-rainbow-gradient-recommended
-      nixos-logotype-black-coloredx-recommended
-      nixos-logotype-black-regular-recommended
-      ;
-  });
+  media-kit = inputs.self.library.defaultSystems (
+    system: inputs.self.legacyPackages.${system}.nixos-branding.artifacts.media-kit
+  );
 
-  dimensioned-logos = inputs.self.library.defaultSystems (system: {
-    inherit (inputs.self.legacyPackages.${system})
-      nixos-lambda-dimensioned-angular
-      nixos-lambda-dimensioned-annotated-parameters
-      nixos-lambda-dimensioned-annotated-vertices
-      nixos-lambda-dimensioned-linear
-      nixos-logomark-dimensioned-gradient-annotated
-      nixos-logomark-dimensioned-gradient-background
-      nixos-logomark-dimensioned-linear
-      nixos-logotype-dimensioned
-      ;
-  });
+  dimensioned-logos = inputs.self.library.defaultSystems (
+    system: inputs.self.legacyPackages.${system}.nixos-branding.artifacts.dimensioned
+  );
 
 }
