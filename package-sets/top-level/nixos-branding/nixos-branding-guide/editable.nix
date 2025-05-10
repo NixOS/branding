@@ -10,6 +10,7 @@ let
 
   inherit (lib.attrsets)
     attrValues
+    removeAttrs
     ;
 
   inherit (typix-lib)
@@ -31,14 +32,34 @@ watchTypstProject {
       dest = "dimensioned";
       src = "${symlinkJoin {
         name = "artifacts.dimensioned";
-        paths = (attrValues nixos-branding.artifacts.dimensioned);
+        paths = (
+          attrValues (
+            removeAttrs nixos-branding.artifacts.dimensioned [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
       }}";
     }
     {
       dest = "miscellaneous";
       src = "${symlinkJoin {
         name = "artifacts.miscellaneous";
-        paths = (attrValues nixos-branding.artifacts.miscellaneous);
+        paths = (
+          attrValues (
+            removeAttrs nixos-branding.artifacts.miscellaneous [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
       }}";
     }
   ];

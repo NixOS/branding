@@ -1,6 +1,6 @@
 {
+  artifacts,
   lib,
-  nixos-branding,
   route159,
   symlinkJoin,
   typix-lib,
@@ -10,6 +10,7 @@ let
 
   inherit (lib.attrsets)
     attrValues
+    removeAttrs
     ;
 
   inherit (lib.fileset)
@@ -41,14 +42,34 @@ buildTypstProject {
       dest = "dimensioned";
       src = "${symlinkJoin {
         name = "artifacts.dimensioned";
-        paths = (attrValues nixos-branding.artifacts.dimensioned);
+        paths = (
+          attrValues (
+            removeAttrs artifacts.dimensioned [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
       }}";
     }
     {
       dest = "miscellaneous";
       src = "${symlinkJoin {
         name = "artifacts.miscellaneous";
-        paths = (attrValues nixos-branding.artifacts.miscellaneous);
+        paths = (
+          attrValues (
+            removeAttrs artifacts.miscellaneous [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
       }}";
     }
   ];

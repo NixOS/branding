@@ -42,10 +42,8 @@ let
   toplevelOverlays =
     final: prev:
     packagesFromDirectoryRecursive {
-      inherit (final)
-        callPackage
-        newScope
-        ;
+      inherit (final) callPackage;
+      inherit (prev) newScope;
       directory = ../package-sets/top-level;
     };
 
@@ -54,10 +52,7 @@ let
       (
         python-final: python-prev:
         packagesFromDirectoryRecursive {
-          inherit (python-final)
-            callPackage
-            newScope
-            ;
+          inherit (python-final) callPackage newScope;
           directory = ../package-sets/python-packages;
         }
       )
@@ -92,6 +87,7 @@ let
       pythonPackagesOverlays
     ]
   );
+
   editable = composeManyExtensions (
     (attrValues pythonPackagesEditable)
     ++ [

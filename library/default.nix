@@ -13,6 +13,7 @@ let
   inherit (lib.attrsets)
     filterAttrs
     genAttrs
+    removeAttrs
     ;
 
   inherit (lib.lists)
@@ -20,6 +21,7 @@ let
     ;
 
   inherit (lib.trivial)
+    flip
     pathExists
     ;
 
@@ -36,5 +38,13 @@ rec {
     "aarch64-linux"
     "x86_64-darwin"
     "aarch64-darwin"
+  ];
+
+  removeDirectoriesRecursiveAttrs = flip removeAttrs [
+    "callPackage"
+    "newScope"
+    "overrideScope"
+    "packages"
+    "recurseForDerivations"
   ];
 }
