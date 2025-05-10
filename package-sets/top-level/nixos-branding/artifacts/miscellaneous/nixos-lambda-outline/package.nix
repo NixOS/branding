@@ -10,7 +10,7 @@ runCommandLocal "nixos-lambda"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-/cDuzBtFWKSuXbFOhtcQZayYtzg1bL8fnegPfvm2ZDg=";
+    outputHash = "sha256-C0/jGIbmVr+/0P2zwOart741jCDTf/8sBva5cVy0P3c=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
