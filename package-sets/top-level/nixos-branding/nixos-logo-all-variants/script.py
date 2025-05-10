@@ -107,4 +107,4 @@ for (
         clear_space=clear_space,
     )
     logo.write_svg()
-    loader.font.close()
+    loader.cleanup()
