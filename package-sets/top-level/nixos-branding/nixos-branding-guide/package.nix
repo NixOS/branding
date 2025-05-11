@@ -19,12 +19,12 @@ let
     ;
 
   inherit (typix-lib)
-    buildTypstProject
+    buildDeterministicTypstProject
     ;
 
 in
 
-buildTypstProject {
+buildDeterministicTypstProject {
 
   src = toSource {
     root = ./.;
