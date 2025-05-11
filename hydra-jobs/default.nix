@@ -2,6 +2,14 @@ inputs:
 
 let
 
+  inherit (inputs.nixpkgs)
+    lib
+    ;
+
+  inherit (lib.attrsets)
+    removeAttrs
+    ;
+
   inherit (inputs.self.library)
     removeDirectoriesRecursiveAttrs
     ;
@@ -9,6 +17,15 @@ let
 in
 
 {
+
+  nixos-branding = inputs.self.library.defaultSystems (
+    system:
+    removeAttrs (removeDirectoriesRecursiveAttrs inputs.self.legacyPackages.${system}.nixos-branding) [
+      "artifacts"
+      "verification"
+      "nixos-branding-guide-editable"
+    ]
+  );
 
   nixos-branding-artifacts-dimensioned = inputs.self.library.defaultSystems (
     system:
