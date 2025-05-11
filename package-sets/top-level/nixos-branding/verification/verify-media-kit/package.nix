@@ -1,5 +1,8 @@
 {
+  jq,
+  nix,
   nix-eval-jobs,
+  nix-output-monitor,
   stdenv,
   writeShellApplication,
 }:
@@ -8,7 +11,10 @@ writeShellApplication {
   name = "verify-media-kit";
 
   runtimeInputs = [
+    jq
+    nix
     nix-eval-jobs
+    nix-output-monitor
   ];
 
   text = ''

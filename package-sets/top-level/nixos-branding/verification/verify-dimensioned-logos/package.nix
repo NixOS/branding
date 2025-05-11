@@ -1,5 +1,8 @@
 {
+  jq,
+  nix,
   nix-eval-jobs,
+  nix-output-monitor,
   stdenv,
   writeShellApplication,
 }:
@@ -8,7 +11,10 @@ writeShellApplication {
   name = "verify-dimensioned-logos";
 
   runtimeInputs = [
+    jq
+    nix
     nix-eval-jobs
+    nix-output-monitor
   ];
 
   text = ''
