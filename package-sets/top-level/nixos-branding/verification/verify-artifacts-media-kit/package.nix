@@ -8,7 +8,7 @@
 }:
 writeShellApplication {
 
-  name = "verify-dimensioned-logos";
+  name = "verify-artifacts-media-kit";
 
   runtimeInputs = [
     jq
@@ -19,7 +19,7 @@ writeShellApplication {
 
   text = ''
     nix-eval-jobs \
-      --flake .#hydraJobs.dimensioned-logos.${stdenv.hostPlatform.system} \
+      --flake .#hydraJobs.nixos-branding-artifacts-media-kit.${stdenv.hostPlatform.system} \
       --constituents \
       | \
       jq \

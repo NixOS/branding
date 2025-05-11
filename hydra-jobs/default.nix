@@ -10,17 +10,17 @@ in
 
 {
 
-  media-kit = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.media-kit
-    )
-  );
-
-  dimensioned-logos = inputs.self.library.defaultSystems (
+  nixos-branding-artifacts-dimensioned = inputs.self.library.defaultSystems (
     system:
     (removeDirectoriesRecursiveAttrs
       inputs.self.legacyPackages.${system}.nixos-branding.artifacts.dimensioned
+    )
+  );
+
+  nixos-branding-artifacts-media-kit = inputs.self.library.defaultSystems (
+    system:
+    (removeDirectoriesRecursiveAttrs
+      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.media-kit
     )
   );
 
