@@ -16,7 +16,7 @@ in
 
 {
 
-  typstSource = "main.typ";
+  typstSource = "nixos-branding-guide.typ";
 
   fontPaths = [
     "${route159}/share/fonts/opentype/route159"

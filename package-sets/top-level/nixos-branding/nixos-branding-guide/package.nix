@@ -27,7 +27,7 @@ buildDeterministicTypstProject (
 
     src = toSource {
       root = ./.;
-      fileset = unions [ ./main.typ ];
+      fileset = unions [ ./nixos-branding-guide.typ ];
     };
 
   }
