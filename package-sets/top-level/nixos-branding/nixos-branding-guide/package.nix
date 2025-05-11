@@ -26,6 +26,9 @@ in
 
 buildDeterministicTypstProject {
 
+  pname = "nixos-branding-guide";
+  version = "0.1.0";
+
   src = toSource {
     root = ./.;
     fileset = unions [ ./main.typ ];
