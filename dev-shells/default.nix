@@ -43,7 +43,7 @@ inputs.self.library.defaultSystems (
       }
     ) { };
 
-    nixos-branding-guide-dev = pkgs.callPackage (
+    nixos-branding-guide-dev = pkgs.nixos-branding.callPackage (
       {
         mkShell,
         nixos-branding-guide-editable,

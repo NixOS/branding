@@ -75,9 +75,13 @@ let
   );
 
   nixosBrandingGuideEditable = final: prev: {
-    nixos-branding-guide-editable =
-      final.callPackage ../package-sets/top-level/nixos-branding/nixos-branding-guide/editable.nix
-        { };
+    nixos-branding = prev.nixos-branding.overrideScope (
+      finalScope: prevScope: {
+        nixos-branding-guide-editable =
+          finalScope.callPackage ../package-sets/top-level/nixos-branding/nixos-branding-guide/editable.nix
+            { };
+      }
+    );
   };
 
   default = composeManyExtensions (

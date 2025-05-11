@@ -1,6 +1,6 @@
 {
+  artifacts,
   lib,
-  nixos-branding,
   route159,
   symlinkJoin,
   typix-lib,
@@ -34,7 +34,7 @@ watchTypstProject {
         name = "artifacts.dimensioned";
         paths = (
           attrValues (
-            removeAttrs nixos-branding.artifacts.dimensioned [
+            removeAttrs artifacts.dimensioned [
               "callPackage"
               "newScope"
               "overrideScope"
@@ -51,7 +51,7 @@ watchTypstProject {
         name = "artifacts.miscellaneous";
         paths = (
           attrValues (
-            removeAttrs nixos-branding.artifacts.miscellaneous [
+            removeAttrs artifacts.miscellaneous [
               "callPackage"
               "newScope"
               "overrideScope"
