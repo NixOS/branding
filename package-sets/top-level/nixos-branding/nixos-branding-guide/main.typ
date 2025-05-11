@@ -79,7 +79,7 @@
 ][
   #image("./dimensioned/nixos-lambda-dimensioned-linear.svg")
 ][
-  All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `radius` and setting the `radius` to 2 such that the hexagon maximal diameter is 1.
+  All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `gap` and setting the `radius` to 2 such that the hexagon maximal diameter is 1.
   In all cases, the denominator is a power of 2.
 ]
 
