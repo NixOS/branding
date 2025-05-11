@@ -12,15 +12,17 @@ from nixoslogo.logotype import Glyph, Logotype
 logger = logging.getLogger(__name__)
 
 
-class LogomarkDimensionedClearspace(BaseRenderable):
+class LogoClearspace(BaseRenderable):
     def __init__(
         self,
         logo: BaseRenderable,
+        logo_name: str,
         space_object: BaseRenderable,
         annotations: Annotations,
         **kwargs,
     ):
         self.logo = logo
+        self.logo_name = logo_name
         self.space_object = space_object
         self.annotations = annotations
 
@@ -36,7 +38,14 @@ class LogomarkDimensionedClearspace(BaseRenderable):
         return self.recommended._get_clearspace()
 
     def make_filename(self, extras: tuple[str] = ()) -> str:
-        return self.recommended.make_filename(extras=extras)
+        return "-".join(
+            [
+                "nixis",
+                self.logo_name,
+                "clearspace",
+            ]
+            + list(extras)
+        )
 
     def make_svg_elements(self):
         return (
@@ -212,29 +221,33 @@ if __name__ == "__main__":
 
     annotations = Annotations.medium()
     annotations.construction_lines.stroke = "grey"
-
     space_object = Lambda(gap=0)
-    original = LogomarkDimensionedClearspace(
+    ilc = LogoClearspace(
         logo=Logomark,
+        logo_name="logomark",
         space_object=space_object,
         annotations=annotations,
     )
-    original.write_svg()
+    ilc.write_svg(filename=ilc.make_filename(extras=("test",)))
 
+    annotations = Annotations.medium()
+    annotations.construction_lines.stroke = "grey"
     space_object = Glyph(character="N")
-    original = LogomarkDimensionedClearspace(
+    ilc = LogoClearspace(
         logo=Logotype,
+        logo_name="logotype",
         space_object=space_object,
         annotations=annotations,
     )
-    original.write_svg()
+    ilc.write_svg(filename=ilc.make_filename(extras=("test",)))
 
     annotations = Annotations.large()
     annotations.construction_lines.stroke = "grey"
     space_object = Logomark()
-    original = LogomarkDimensionedClearspace(
+    ilc = LogoClearspace(
         logo=NixosLogo,
+        logo_name="logo",
         space_object=space_object,
         annotations=annotations,
     )
-    original.write_svg()
+    ilc.write_svg(filename=ilc.make_filename(extras=("test",)))
