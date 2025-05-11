@@ -2,7 +2,7 @@
   python3,
   runCommandLocal,
 }:
-runCommandLocal "nixos-lambda"
+runCommandLocal "nixos-lambda-background"
   {
     script = ./script.py;
 
