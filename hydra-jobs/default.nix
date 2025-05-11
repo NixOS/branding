@@ -24,4 +24,11 @@ in
     )
   );
 
+  nixos-branding-artifacts-miscellaneous = inputs.self.library.defaultSystems (
+    system:
+    (removeDirectoriesRecursiveAttrs
+      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.miscellaneous
+    )
+  );
+
 }
