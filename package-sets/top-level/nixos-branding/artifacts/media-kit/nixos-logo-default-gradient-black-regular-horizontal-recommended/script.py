@@ -9,13 +9,13 @@ from nixoslogo.core import (
 from nixoslogo.logo import NixosLogo
 
 logo = NixosLogo(
-    clear_space=ClearSpace.RECOMMENDED,
-    logo_layout=LogoLayout.HORIZONTAL,
-    logomark_color_style=ColorStyle.GRADIENT,
     logomark_colors=LogomarkColors.DEFAULT,
-    logotype_characters="NixOS",
+    logomark_color_style=ColorStyle.GRADIENT,
     logotype_color="black",
-    logotype_spacings=DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     logotype_style=LogotypeStyle.REGULAR,
+    logotype_spacings=DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+    logotype_characters="NixOS",
+    logo_layout=LogoLayout.HORIZONTAL,
+    clear_space=ClearSpace.RECOMMENDED,
 )
 logo.write_svg()
