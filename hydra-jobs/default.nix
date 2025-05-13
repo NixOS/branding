@@ -41,6 +41,13 @@ in
     )
   );
 
+  nixos-branding-artifacts-internal = inputs.self.library.defaultSystems (
+    system:
+    (removeDirectoriesRecursiveAttrs
+      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.internal
+    )
+  );
+
   nixos-branding-artifacts-media-kit = inputs.self.library.defaultSystems (
     system:
     (removeDirectoriesRecursiveAttrs
