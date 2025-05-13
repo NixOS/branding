@@ -27,6 +27,13 @@ in
     ]
   );
 
+  nixos-branding-artifacts-clearspace = inputs.self.library.defaultSystems (
+    system:
+    (removeDirectoriesRecursiveAttrs
+      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.clearspace
+    )
+  );
+
   nixos-branding-artifacts-dimensioned = inputs.self.library.defaultSystems (
     system:
     (removeDirectoriesRecursiveAttrs
