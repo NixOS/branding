@@ -136,19 +136,19 @@
 
 #contentPage[
   Clearspace - Logo
-][ #image("./clearspace/nixis-logo-clearspace.svg") ][
+][ #image("./clearspace/nixos-logo-clearspace.svg") ][
   #lorem(100)
 ]
 
 #contentPage[
   Clearspace - Logomark
-][ #image("./clearspace/nixis-logomark-clearspace.svg") ][
+][ #image("./clearspace/nixos-logomark-clearspace.svg") ][
   #lorem(100)
 ]
 
 #contentPage[
   Clearspace - Logotype
-][ #image("./clearspace/nixis-logotype-clearspace.svg") ][
+][ #image("./clearspace/nixos-logotype-clearspace.svg") ][
   #lorem(100)
 ]
 

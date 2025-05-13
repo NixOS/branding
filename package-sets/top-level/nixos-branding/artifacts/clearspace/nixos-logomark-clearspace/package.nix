@@ -13,7 +13,7 @@ runCommandLocal "nixos-logomark-clearspace"
 
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
 
-    outputHash = "sha256-aZ4gklG5kdVR7iXrvobm62LmYTIUml2iJZJp82AyvaI=";
+    outputHash = "sha256-QApYURkvxqGYiCqoztT6CettLmGiYMGmFrzBH3hXX9M=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

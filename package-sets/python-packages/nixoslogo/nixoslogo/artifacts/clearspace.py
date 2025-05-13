@@ -40,7 +40,7 @@ class LogoClearspace(BaseRenderable):
     def make_filename(self, extras: tuple[str] = ()) -> str:
         return "-".join(
             [
-                "nixis",
+                "nixos",
                 self.logo_name,
                 "clearspace",
             ]

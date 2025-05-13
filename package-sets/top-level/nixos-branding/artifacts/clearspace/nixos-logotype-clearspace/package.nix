@@ -15,7 +15,7 @@ runCommandLocal "nixos-logotype-clearspace"
     env.NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
     env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
 
-    outputHash = "sha256-TKKbs0uUd5tQmEza71rd/dn+yIj0q8ambC5Ut+TG+PM=";
+    outputHash = "sha256-MKaFYf9/lxTWTdr2OfOMZU4CqtbAE/KmozY20xfPeXo=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
