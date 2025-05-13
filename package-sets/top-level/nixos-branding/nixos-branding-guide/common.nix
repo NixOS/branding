@@ -24,6 +24,23 @@ in
 
   virtualPaths = [
     {
+      dest = "clearspace";
+      src = "${symlinkJoin {
+        name = "artifacts.clearspace";
+        paths = (
+          attrValues (
+            removeAttrs artifacts.clearspace [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
+      }}";
+    }
+    {
       dest = "dimensioned";
       src = "${symlinkJoin {
         name = "artifacts.dimensioned";
