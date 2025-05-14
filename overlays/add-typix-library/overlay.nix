@@ -83,20 +83,20 @@ composeManyExtensions [
                     ${typstCompileCommand} \
                       ${typstOptsString} \
                       ${escapeShellArg typstSource} \
-                      ${outfileName}-compile.pdf
-
-                    # need to remove the trailer ID so it can be recreated deterministically
-                    cpdf \
-                      -i ${outfileName}-compile.pdf \
-                      -remove-id \
-                      -o ${outfileName}-no-meta.pdf
-
-                    qpdf \
-                      ${outfileName}-no-meta.pdf \
-                      --remove-metadata \
-                      --linearize \
-                      --deterministic-id \
                       ${outfileName}.pdf
+
+                    # # need to remove the trailer ID so it can be recreated deterministically
+                    # cpdf \
+                    #   -i ${outfileName}-compile.pdf \
+                    #   -remove-id \
+                    #   -o ${outfileName}-no-meta.pdf
+                    #
+                    # qpdf \
+                    #   ${outfileName}-no-meta.pdf \
+                    #   --remove-metadata \
+                    #   --linearize \
+                    #   --deterministic-id \
+                    #   ${outfileName}.pdf
 
                     mkdir $out
                     cp ${outfileName}.pdf $out/
