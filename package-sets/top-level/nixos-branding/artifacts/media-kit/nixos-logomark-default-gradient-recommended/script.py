@@ -1,9 +1,11 @@
-from nixoslogo.core import ColorStyle
+from nixoslogo.core import ClearSpace, ColorStyle, LogomarkColors
 from nixoslogo.logomark import Lambda, Logomark
 
 ilambda = Lambda()
 logomark = Logomark(
     ilambda=ilambda,
+    colors=LogomarkColors.DEFAULT,
     color_style=ColorStyle.GRADIENT,
+    clear_space=ClearSpace.RECOMMENDED,
 )
 logomark.write_svg()
