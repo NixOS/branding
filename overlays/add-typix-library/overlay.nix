@@ -94,7 +94,6 @@ composeManyExtensions [
                     qpdf \
                       ${outfileName}-no-meta.pdf \
                       --remove-metadata \
-                      --linearize \
                       --deterministic-id \
                       ${outfileName}.pdf
 
