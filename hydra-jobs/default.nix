@@ -16,7 +16,17 @@ let
 
 in
 
-{
+rec {
+
+  nixos-branding-all = inputs.self.library.defaultSystems (
+    system:
+    nixos-branding.${system}
+    // nixos-branding-artifacts-clearspace.${system}
+    // nixos-branding-artifacts-dimensioned.${system}
+    // nixos-branding-artifacts-internal.${system}
+    // nixos-branding-artifacts-media-kit.${system}
+    // nixos-branding-artifacts-miscellaneous.${system}
+  );
 
   nixos-branding = inputs.self.library.defaultSystems (
     system:
