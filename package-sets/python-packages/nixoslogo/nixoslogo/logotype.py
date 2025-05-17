@@ -245,11 +245,11 @@ class Glyph(BaseRenderable):
                     return [
                         svg.Path(
                             d=self.get_path(upper),
-                            fill=NIXOS_LIGHT_BLUE.to_string(),
+                            fill=NIXOS_LIGHT_BLUE.convert("srgb").to_string(hex=True),
                         ),
                         svg.Path(
                             d=self.get_path(lower),
-                            fill=NIXOS_DARK_BLUE.to_string(),
+                            fill=NIXOS_DARK_BLUE.convert("srgb").to_string(hex=True),
                         ),
                     ]
                 else:

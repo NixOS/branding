@@ -223,7 +223,8 @@ class Logomark(BaseRenderable):
         match self.color_style:
             case ColorStyle.FLAT:
                 self.css_color_names = tuple(
-                    color.to_string() for color in self.colors_value
+                    color.convert("srgb").to_string(hex=True)
+                    for color in self.colors_value
                 )
             case ColorStyle.GRADIENT:
                 self.css_color_names = tuple(

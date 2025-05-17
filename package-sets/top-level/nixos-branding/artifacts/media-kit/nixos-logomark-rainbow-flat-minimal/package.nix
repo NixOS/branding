@@ -10,7 +10,7 @@ runCommandLocal "nixos-logomark"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-BFOPmqC/b24MrPgWZ9uW/+shH89lAGjTr8QDFgiFxaU=";
+    outputHash = "sha256-VdcdID1Ko5nbTQQlJf+uVfrqZgJH3rGtvMc8MGl7VRs=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
