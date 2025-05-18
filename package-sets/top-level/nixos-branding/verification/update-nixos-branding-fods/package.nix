@@ -28,7 +28,7 @@ writeShellApplication {
 
   text = ''
     nix-eval-jobs \
-      --flake .#hydraJobs.nixos-branding-artifacts-media-kit.${stdenv.hostPlatform.system} \
+      --flake .#hydraJobs.nixos-branding-fods.${stdenv.hostPlatform.system} \
       --constituents \
       | \
       jq \
