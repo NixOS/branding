@@ -58,6 +58,40 @@ in
       }}";
     }
     {
+      dest = "internal";
+      src = "${symlinkJoin {
+        name = "artifacts.internal";
+        paths = (
+          attrValues (
+            removeAttrs artifacts.internal [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
+      }}";
+    }
+    {
+      dest = "media-kit";
+      src = "${symlinkJoin {
+        name = "artifacts.media-kit";
+        paths = (
+          attrValues (
+            removeAttrs artifacts.media-kit [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
+      }}";
+    }
+    {
       dest = "miscellaneous";
       src = "${symlinkJoin {
         name = "artifacts.miscellaneous";

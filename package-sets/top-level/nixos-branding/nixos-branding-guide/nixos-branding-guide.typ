@@ -38,6 +38,22 @@
   )
 }
 
+#let imageBox(
+  content,
+  fill: none,
+  stroke: (paint: gray, dash: "dashed", thickness: 0.5pt),
+) = {
+  box(fill: fill, stroke: stroke, content)
+}
+
+#let imageBoxDark(
+  content,
+  fill: luma(20),
+  stroke: none,
+) = {
+  box(fill: fill, stroke: stroke, content)
+}
+
 #sectionPage[NixOS Branding Guide]
 #lorem(300)
 
@@ -159,8 +175,162 @@
 ]
 
 #contentPage[
-  Variations
-][ ][
+  Variations - Logo - Layout
+][
+  Horizontal
+
+  #imageBox(
+    image(
+      "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
+      height: 40%,
+    ),
+  )
+
+  Vertical
+
+  #imageBox(
+    image(
+      "./media-kit/nixos-logo-default-gradient-black-regular-vertical-recommended.svg",
+      height: 40%,
+    ),
+  )
+][
+  #lorem(100)
+]
+
+#contentPage[
+  Variations - Logo - Colors
+][
+  Default
+
+  #imageBox(
+    image(
+      "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
+      height: 20%,
+    ),
+  )
+
+  Black
+
+  #imageBox(
+    image(
+      "./media-kit/nixos-logo-black-flat-black-regular-horizontal-recommended.svg",
+      height: 20%,
+    ),
+  )
+
+  White
+
+  #imageBoxDark(
+    image(
+      "./media-kit/nixos-logo-white-flat-white-regular-horizontal-recommended.svg",
+      height: 20%,
+    ),
+  )
+
+  Rainbow
+
+  #imageBoxDark(
+    image(
+      "./media-kit/nixos-logo-rainbow-gradient-white-regular-horizontal-recommended.svg",
+      height: 20%,
+    ),
+  )
+][
+  #lorem(100)
+]
+
+#contentPage[
+  Variations - Logomark - Colors
+][
+  Default
+
+  #imageBox(image(
+    "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+    height: 20%,
+  ))
+
+  Black
+
+  #imageBox(image(
+    "./media-kit/nixos-logomark-black-flat-recommended.svg",
+    height: 20%,
+  ))
+
+  White
+
+  #imageBoxDark(image(
+    "./media-kit/nixos-logomark-white-flat-recommended.svg",
+    height: 20%,
+  ))
+
+  Rainbow
+
+  #imageBox(image(
+    "./media-kit/nixos-logomark-rainbow-gradient-recommended.svg",
+    height: 20%,
+  ))
+][
+  #lorem(100)
+]
+
+#contentPage[
+  Variations - Logomark - Color Styles
+][
+  Gradient
+
+  #imageBox(image(
+    "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+    height: 40%,
+  ))
+
+  Flat
+
+  #imageBox(image(
+    "./media-kit/nixos-logomark-default-flat-recommended.svg",
+    height: 40%,
+  ))
+][
+  #lorem(100)
+]
+
+#contentPage[
+  Variations - Logotype - Colors
+][
+  Black
+
+  #imageBox(image(
+    "./media-kit/nixos-logotype-black-regular-recommended.svg",
+    height: 40%,
+  ))
+
+  White
+
+  #imageBoxDark(image(
+    "./media-kit/nixos-logotype-white-regular-recommended.svg",
+    height: 40%,
+  ))
+][
+  #lorem(100)
+]
+
+#contentPage[
+  Variations - Logotype - Styles
+][
+  Normal
+
+  #imageBox(image(
+    "./media-kit/nixos-logotype-black-regular-recommended.svg",
+    height: 40%,
+  ))
+
+  Colored X
+
+  #imageBox(image(
+    "./media-kit/nixos-logotype-black-coloredx-recommended.svg",
+    height: 40%,
+  ))
+][
   #lorem(100)
 ]
 
