@@ -1,5 +1,5 @@
 from nixoslogo.core import (
-    DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+    DEFAULT_LOGOTYPE_SPACINGS,
     ClearSpace,
     ColorStyle,
     LogoLayout,
@@ -13,7 +13,7 @@ logo = NixosLogo(
     logomark_color_style=ColorStyle.FLAT,
     logotype_color="white",
     logotype_style=LogotypeStyle.REGULAR,
-    logotype_spacings=DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+    logotype_spacings=DEFAULT_LOGOTYPE_SPACINGS,
     logotype_characters="NixOS",
     logo_layout=LogoLayout.VERTICAL,
     clear_space=ClearSpace.NONE,
