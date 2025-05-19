@@ -336,7 +336,27 @@
 
 #contentPage[
   Misuse
-][ ][
+][
+  Do not crop the logo or any of its components.
+
+  #imageBox(image("./misuse/nixos-logo-misuse-crop.svg", height: 10%))
+
+  Do not independently scale logo components.
+
+  #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 10%))
+
+  Do not use the ColoredX variant of the logotype with colored variants of the logomark.
+
+  #imageBox(image("./misuse/nixos-logo-misuse-coloredx.svg", height: 10%))
+
+  Do not mirror or flip the logo or any of its components.
+
+  #imageBox(image("./misuse/nixos-logomark-misuse-mirror.svg", height: 10%))
+
+  Do not rotate the logo or any of its components.
+
+  #imageBox(image("./misuse/nixos-logomark-misuse-rotate.svg", height: 10%))
+][
   #lorem(100)
 ]
 

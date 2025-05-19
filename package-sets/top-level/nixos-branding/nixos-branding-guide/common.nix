@@ -108,6 +108,23 @@ in
         );
       }}";
     }
+    {
+      dest = "misuse";
+      src = "${symlinkJoin {
+        name = "artifacts.misuse";
+        paths = (
+          attrValues (
+            removeAttrs artifacts.misuse [
+              "callPackage"
+              "newScope"
+              "overrideScope"
+              "packages"
+              "recurseForDerivations"
+            ]
+          )
+        );
+      }}";
+    }
   ];
 
 }
