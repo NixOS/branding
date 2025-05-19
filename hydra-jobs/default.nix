@@ -26,6 +26,7 @@ rec {
     // nixos-branding-artifacts-internal.${system}
     // nixos-branding-artifacts-media-kit.${system}
     // nixos-branding-artifacts-miscellaneous.${system}
+    // nixos-branding-artifacts-misuse.${system}
   );
 
   nixos-branding-fods = inputs.self.library.defaultSystems (
@@ -35,6 +36,7 @@ rec {
     // nixos-branding-artifacts-internal.${system}
     // nixos-branding-artifacts-media-kit.${system}
     // nixos-branding-artifacts-miscellaneous.${system}
+    // nixos-branding-artifacts-misuse.${system}
   );
 
   nixos-branding = inputs.self.library.defaultSystems (
@@ -78,6 +80,13 @@ rec {
     system:
     (removeDirectoriesRecursiveAttrs
       inputs.self.legacyPackages.${system}.nixos-branding.artifacts.miscellaneous
+    )
+  );
+
+  nixos-branding-artifacts-misuse = inputs.self.library.defaultSystems (
+    system:
+    (removeDirectoriesRecursiveAttrs
+      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.misuse
     )
   );
 
