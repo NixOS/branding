@@ -453,4 +453,21 @@
 
 #sectionPage[Typography]
 
+#text(size: 2em)[
+  Route 159
+
+  Primary Typeface
+]
+
+#par(leading: 0.65em * 5)[
+  #text(size: 5em)[
+    #(
+      "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.,;:!?()[]{}–—‘’“”@#&%*/\+-=_~^$€£¥±≠≤≥∞"
+        .split("")
+        .join(sym.zws)
+    )
+  ]
+]
+
+
 #sectionPage[Color]
