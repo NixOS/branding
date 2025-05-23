@@ -153,19 +153,23 @@
 #contentPage[
   Clearspace - Logo
 ][ #image("./clearspace/nixos-logo-clearspace.svg") ][
-  #lorem(100)
+  When placing the horizontal variant of the logo, the recommended clearspace is equivalent to the height of the logomark.
+  The minimal clearspace is equivalent to half the height of the logomark.
 ]
 
 #contentPage[
   Clearspace - Logomark
 ][ #image("./clearspace/nixos-logomark-clearspace.svg") ][
-  #lorem(100)
+  When placing the logomark, the recommended clearspace is equivalent to the height of the lambda with no gap.
+  This is equivalent to half the height of the logomark.
+  The minimal clearspace is equivalent to half the height of the lambda with no gap or a quarter the height of the logomark.
 ]
 
 #contentPage[
   Clearspace - Logotype
 ][ #image("./clearspace/nixos-logotype-clearspace.svg") ][
-  #lorem(100)
+  When placing the logotype, the recommended clearspace is equivalent to the height of the capital N in NixOS.
+  The minimal clearspace is equivalent to half the height of the capital N in NixOS.
 ]
 
 #contentPage[
