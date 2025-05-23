@@ -181,161 +181,248 @@
 #contentPage[
   Variations - Logo - Layout
 ][
-  Horizontal
+  #grid(
+    columns: 1fr,
+    rows: (1fr, 1fr),
+    gutter: 3em,
+    align: center,
+    [
+      Horizontal
 
-  #imageBox(
-    image(
-      "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
-      height: 40%,
-    ),
-  )
+      #imageBox(
+        image(
+          "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
+    [
+      Vertical
 
-  Vertical
-
-  #imageBox(
-    image(
-      "./media-kit/nixos-logo-default-gradient-black-regular-vertical-recommended.svg",
-      height: 40%,
-    ),
+      #imageBox(
+        image(
+          "./media-kit/nixos-logo-default-gradient-black-regular-vertical-recommended.svg",
+        ),
+      )
+    ]
   )
 ][
-  #lorem(100)
+  Two variants of logo layout are available: horizontal and vertical.
+  The horizontal layout is the primary and recommended layout.
+  The vertical layout is provided as a secondary layout.
 ]
 
 #contentPage[
   Variations - Logo - Colors
 ][
-  Default
+  #grid(
+    columns: (1fr, 1fr),
+    rows: (1fr, 1fr, 1fr),
+    gutter: 1em,
+    align: center,
+    [
+      Default/Black
 
-  #imageBox(
-    image(
-      "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
-      height: 20%,
-    ),
-  )
+      #imageBox(
+        image(
+          "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
+    [
+      Default/White
 
-  Black
+      #imageBoxDark(
+        image(
+          "./media-kit/nixos-logo-default-gradient-white-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
 
-  #imageBox(
-    image(
-      "./media-kit/nixos-logo-black-flat-black-regular-horizontal-recommended.svg",
-      height: 20%,
-    ),
-  )
+    [
+      Rainbow/Black
 
-  White
+      #imageBox(
+        image(
+          "./media-kit/nixos-logo-rainbow-gradient-black-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
+    [
+      Rainbow/White
 
-  #imageBoxDark(
-    image(
-      "./media-kit/nixos-logo-white-flat-white-regular-horizontal-recommended.svg",
-      height: 20%,
-    ),
-  )
+      #imageBoxDark(
+        image(
+          "./media-kit/nixos-logo-rainbow-gradient-white-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
 
-  Rainbow
+    [
+      Black/Black
 
-  #imageBoxDark(
-    image(
-      "./media-kit/nixos-logo-rainbow-gradient-white-regular-horizontal-recommended.svg",
-      height: 20%,
-    ),
+      #imageBox(
+        image(
+          "./media-kit/nixos-logo-black-flat-black-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
+    [
+      White/White
+
+      #imageBoxDark(
+        image(
+          "./media-kit/nixos-logo-white-flat-white-regular-horizontal-recommended.svg",
+        ),
+      )
+    ],
   )
 ][
-  #lorem(100)
+  There are multiple color variants of the logo.
+  The colored variants of the logomark can be used with the white or black logotype.
+  The black and white variants of the logomark must be used with the black and white logotypes respectively.
 ]
 
 #contentPage[
   Variations - Logomark - Colors
 ][
-  Default
+  #grid(
+    columns: (1fr, 1fr),
+    rows: (1fr, 1fr),
+    gutter: 1em,
+    align: center,
+    [
+      Default/Gradient
 
-  #imageBox(image(
-    "./media-kit/nixos-logomark-default-gradient-recommended.svg",
-    height: 20%,
-  ))
+      #imageBox(image(
+        "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+      ))
+    ],
+    [
+      Rainbow/Gradient
 
-  Black
+      #imageBox(image(
+        "./media-kit/nixos-logomark-rainbow-gradient-recommended.svg",
+      ))
+    ],
 
-  #imageBox(image(
-    "./media-kit/nixos-logomark-black-flat-recommended.svg",
-    height: 20%,
-  ))
+    [
+      Black/Flat
 
-  White
+      #imageBox(image("./media-kit/nixos-logomark-black-flat-recommended.svg"))
+    ],
+    [
+      White/Flat
 
-  #imageBoxDark(image(
-    "./media-kit/nixos-logomark-white-flat-recommended.svg",
-    height: 20%,
-  ))
-
-  Rainbow
-
-  #imageBox(image(
-    "./media-kit/nixos-logomark-rainbow-gradient-recommended.svg",
-    height: 20%,
-  ))
+      #imageBoxDark(image(
+        "./media-kit/nixos-logomark-white-flat-recommended.svg",
+      ))
+    ],
+  )
 ][
-  #lorem(100)
+  There are 4 color variants of the logomark.
+  The colored variants of the logomark should use gradient colors.
+  The black and white variants of the logomark must use flat colors.
 ]
 
 #contentPage[
   Variations - Logomark - Color Styles
 ][
-  Gradient
+  #grid(
+    columns: 1fr,
+    rows: (1fr, 1fr),
+    gutter: 3em,
+    align: center,
+    [
+      Gradient
 
-  #imageBox(image(
-    "./media-kit/nixos-logomark-default-gradient-recommended.svg",
-    height: 40%,
-  ))
+      #imageBox(image(
+        "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+      ))
+    ],
+    [
+      Flat
 
-  Flat
-
-  #imageBox(image(
-    "./media-kit/nixos-logomark-default-flat-recommended.svg",
-    height: 40%,
-  ))
+      #imageBox(image(
+        "./media-kit/nixos-logomark-default-flat-recommended.svg",
+      ))
+    ],
+  )
 ][
-  #lorem(100)
+  There are 2 color styles of the logomark: gradient and flat colors.
+  Generally gradient colors should be used.
+  When using black or white logomarks, use flat colors.
+  Flat colors can be used for any color variant when creating print or other physical media.
 ]
 
 #contentPage[
   Variations - Logotype - Colors
 ][
-  Black
+  #grid(
+    columns: 1fr,
+    rows: (1fr, 1fr),
+    gutter: 3em,
+    align: center,
+    [
+      Black
 
-  #imageBox(image(
-    "./media-kit/nixos-logotype-black-regular-recommended.svg",
-    height: 40%,
-  ))
+      #imageBox(image(
+        "./media-kit/nixos-logotype-black-regular-recommended.svg",
+      ))
+    ],
+    [
+      White
 
-  White
-
-  #imageBoxDark(image(
-    "./media-kit/nixos-logotype-white-regular-recommended.svg",
-    height: 40%,
-  ))
+      #imageBoxDark(image(
+        "./media-kit/nixos-logotype-white-regular-recommended.svg",
+      ))
+    ],
+  )
 ][
-  #lorem(100)
+  There are two color variants of the logotype: black and white.
 ]
 
 #contentPage[
   Variations - Logotype - Styles
 ][
-  Normal
+  #grid(
+    columns: (1fr, 1fr),
+    rows: (1fr, 1fr),
+    gutter: 1em,
+    align: center,
+    [
+      Black/Normal
 
-  #imageBox(image(
-    "./media-kit/nixos-logotype-black-regular-recommended.svg",
-    height: 40%,
-  ))
+      #imageBox(image(
+        "./media-kit/nixos-logotype-black-regular-recommended.svg",
+      ))
+    ],
+    [
+      White/Normal
 
-  Colored X
+      #imageBoxDark(image(
+        "./media-kit/nixos-logotype-white-regular-recommended.svg",
+      ))
+    ],
 
-  #imageBox(image(
-    "./media-kit/nixos-logotype-black-coloredx-recommended.svg",
-    height: 40%,
-  ))
+    [
+      Black/Colored 'X'
+
+      #imageBox(image(
+        "./media-kit/nixos-logotype-black-coloredx-recommended.svg",
+      ))
+    ],
+    [
+      White/Colored 'X'
+
+      #imageBoxDark(image(
+        "./media-kit/nixos-logotype-white-coloredx-recommended.svg",
+      ))
+    ],
+  )
 ][
-  #lorem(100)
+  There are two color style variants of the logotype: normal and colored 'X'.
+  The colored 'X' variant shades the 'x' in NixOS with the default colors of the logomark.
+  The colored 'X' variant must not be used with the logomark.
 ]
 
 #contentPage[
