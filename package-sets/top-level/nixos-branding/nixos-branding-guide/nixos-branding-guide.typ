@@ -469,5 +469,37 @@
   ]
 ]
 
-
 #sectionPage[Color]
+
+#let generate_oklch_stops(luminance, chroma, stops) = {
+  let step = 360 / (stops - 1)
+  let positions = range(0, stops)
+  let stops = positions.map(pos => (
+    (
+      oklch(luminance, chroma, pos * step * 1deg),
+      pos * 100% / (stops - 1),
+    )
+  ))
+  stops
+}
+
+#rect(width: 100%, height: 5em, fill: gradient.linear(
+  space: color.oklch,
+  ..generate_oklch_stops(57.74%, 0.1248, 5),
+))
+
+#rect(width: 100%, height: 5em, fill: gradient.linear(
+  space: color.oklch,
+  ..generate_oklch_stops(76.36%, 0.0866, 5),
+))
+
+#rect(width: 100%, height: 5em, fill: gradient
+  .linear(
+    (oklch(51%, 0.208963, 29.2339deg)),
+    (oklch(70%, 0.204259, 43.4910deg)),
+    (oklch(81%, 0.168100, 76.7800deg)),
+    (oklch(60%, 0.175100, 147.560deg)),
+    (oklch(60%, 0.141400, 241.380deg)),
+    (oklch(46%, 0.194300, 288.710deg)),
+  )
+  .sharp(6))
