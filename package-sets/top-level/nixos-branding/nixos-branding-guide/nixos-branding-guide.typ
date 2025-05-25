@@ -29,18 +29,22 @@
     header: [
       #h(1fr) #rightSide.header
     ],
-    grid(
-      columns: (2fr, 1fr),
-      rows: 1fr,
-      gutter: 0em,
-      grid.cell(align: horizon, leftSide.content),
-      grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
+    [
+      #grid(
+        columns: (2fr, 1fr),
+        rows: 1fr,
+        gutter: 0em,
+        grid.cell(align: horizon, leftSide.content),
+        grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
+          #set text(fill: white)
+          #rightSide.content
+        ]),
+      )
+      #place(top + left, dx: 200% / 3 + 2.5em, dy: 1em, [
         #set text(fill: white)
-        #rightSide.content
-      ]),
-
-      // align(horizon, leftSide), align(horizon, rightSide),
-    ),
+        #rightSide.header
+      ])
+    ],
   )
 }
 
