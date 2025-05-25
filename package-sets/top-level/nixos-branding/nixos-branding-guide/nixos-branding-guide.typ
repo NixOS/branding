@@ -8,19 +8,17 @@
 }
 
 #let sectionPage(content, text_size: 36pt) = {
-  page(
-    margin: (x: 1cm, y: 0pt),
-    background: align(right, image(
-      "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
-      height: 100%,
-    )),
-    layout(size => {
-      let text_content = sectionTitle(size: text_size)[#content]
-      let text_size = measure(text_content)
-      let text_start = 5 / 9 * size.height - text_size.height / 2
-      place(top + left, dy: text_start)[#text_content]
-    }),
-  )
+  page(margin: (x: 0pt, y: 0pt), layout(size => {
+    let text_content = sectionTitle(size: text_size)[#content]
+    let text_size = measure(text_content)
+    let text_start = 5 / 9 * size.height - text_size.height / 2
+    [
+      #place(top + left, dx: 1cm, dy: text_start)[#text_content]
+      #place(top + right)[#image(
+          "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
+        )]
+    ]
+  }))
 }
 
 
