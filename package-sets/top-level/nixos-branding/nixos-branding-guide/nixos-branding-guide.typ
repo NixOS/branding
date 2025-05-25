@@ -23,6 +23,7 @@
   )
 }
 
+
 #let contentPage(leftSide: none, rightSide: none) = {
   page(
     margin: (x: 0cm, y: 0cm),
@@ -34,7 +35,12 @@
         columns: (2fr, 1fr),
         rows: 1fr,
         gutter: 0em,
-        grid.cell(align: horizon, leftSide.content),
+        grid.cell(align: horizon, box(
+          inset: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+          [
+            #leftSide.content
+          ],
+        )),
         grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
           #set text(fill: white)
           #rightSide.content
@@ -228,6 +234,7 @@
   leftSide: (
     content: image("./clearspace/nixos-logo-clearspace.svg"),
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -244,6 +251,7 @@
   leftSide: (
     content: image("./clearspace/nixos-logomark-clearspace.svg"),
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -261,6 +269,7 @@
   leftSide: (
     content: image("./clearspace/nixos-logotype-clearspace.svg"),
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -309,6 +318,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -389,6 +399,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -443,6 +454,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -482,6 +494,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -522,6 +535,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -574,6 +588,7 @@
       )
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
@@ -612,6 +627,7 @@
       #imageBox(image("./misuse/nixos-logomark-misuse-rotate.svg", height: 10%))
     ],
     header: none,
+    inset: true,
   ),
   rightSide: (
     content: [
