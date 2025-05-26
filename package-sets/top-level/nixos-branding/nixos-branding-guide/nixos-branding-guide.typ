@@ -633,6 +633,25 @@
   stops
 }
 
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: (1fr, 1fr, 1fr, 1fr),
+        rect(width: 100%, height: 100%, fill: oklch(0%, 0, 0deg)),
+        rect(width: 100%, height: 100%, fill: oklch(100%, 0, 0deg)),
+        rect(width: 100%, height: 100%, fill: oklch(57.74%, 0.1248, 264deg)),
+        rect(width: 100%, height: 100%, fill: oklch(76.36%, 0.0866, 240deg)),
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Primary Colors",),
+  ),
+)
+
 #rect(width: 100%, height: 5em, fill: gradient.linear(
   space: color.oklch,
   ..generate_oklch_stops(57.74%, 0.1248, 5),
