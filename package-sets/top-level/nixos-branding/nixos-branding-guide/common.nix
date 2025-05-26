@@ -1,5 +1,6 @@
 {
   artifacts,
+  jura,
   lib,
   route159,
   symlinkJoin,
@@ -20,6 +21,7 @@ in
 
   fontPaths = [
     "${route159}/share/fonts/opentype/route159"
+    "${jura}/share/fonts/truetype/jura"
   ];
 
   virtualPaths = [

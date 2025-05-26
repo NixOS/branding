@@ -1,5 +1,6 @@
 {
   artifacts,
+  jura,
   lib,
   route159,
   symlinkJoin,
@@ -34,6 +35,7 @@ buildDeterministicTypstProject (
   // (import ./common.nix {
     inherit
       artifacts
+      jura
       lib
       route159
       symlinkJoin

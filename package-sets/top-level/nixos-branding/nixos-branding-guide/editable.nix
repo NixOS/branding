@@ -1,5 +1,6 @@
 {
   artifacts,
+  jura,
   lib,
   route159,
   symlinkJoin,
@@ -18,6 +19,7 @@ watchTypstProject (
   import ./common.nix {
     inherit
       artifacts
+      jura
       lib
       route159
       symlinkJoin
