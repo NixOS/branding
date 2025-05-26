@@ -44,9 +44,10 @@
           #rightSide.content
         ]),
       )
-      #place(top + left, dx: 200% / 3 + 2.5em, dy: 1em, [
-        #set text(fill: white)
-        #rightSide.header
+      #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
+        #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
+          " / ",
+        ))
       ])
     ],
   )
@@ -91,9 +92,7 @@
       - At the bottom left at the rear foot.
       - At the bottom right between the forward heel and the forward tip.
     ],
-    header: [
-      Anatomy - Lambda - Annotations
-    ],
+    header: ("Anatomy", "Lambda", "Annotations"),
   ),
 )
 
@@ -116,9 +115,7 @@
         The dashed section is the lambda with no gap.
         It is defined as a fraction of the `radius` with a default value of `1 / 32`.
     ],
-    header: [
-      Anatomy - Lambda - Parameters
-    ],
+    header: ("Anatomy", "Lambda", "Parameters"),
   ),
 )
 
@@ -132,9 +129,7 @@
       All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `gap` and setting the `radius` to 2 such that the hexagon maximal diameter is 1.
       In all cases, the denominator is a power of 2.
     ],
-    header: [
-      Anatomy - Lambda - Linear
-    ],
+    header: ("Anatomy", "Lambda", "Linear"),
   ),
 )
 
@@ -149,9 +144,7 @@
       `A` angles are 60°.
       `B` angles are 120°.
     ],
-    header: [
-      Anatomy - Lambda - Angular
-    ],
+    header: ("Anatomy", "Lambda", "Angular"),
   ),
 )
 
@@ -170,9 +163,7 @@
 
       The gradient stop points are located at 0%, 25%, and 100%.
     ],
-    header: [
-      Anatomy - Gradient - Definition
-    ],
+    header: ("Anatomy", "Gradient", "Definition"),
   ),
 )
 
@@ -188,9 +179,7 @@
       The selected color of the lambda is true below and to the right of the 100% gradient stop point.
       The lightness and chroma is lowered at the 25% and 0% gradient stop points.
     ],
-    header: [
-      Anatomy - Gradient - Unmasked
-    ],
+    header: ("Anatomy", "Gradient", "Unmasked"),
   ),
 )
 
@@ -207,9 +196,7 @@
       An outer hexagon emerges with vertices that are coincident with the rear foot of the lambdas.
       If the inner hexagon maximal diameter is 1, the outer hexagon maximal diameter of 9 / 4.
     ],
-    header: [
-      Anatomy - Logomark
-    ],
+    header: ("Anatomy", "Logomark"),
   ),
 )
 
@@ -222,9 +209,7 @@
     content: [
       #lorem(100)
     ],
-    header: [
-      Anatomy - Logotype
-    ],
+    header: ("Anatomy", "Logotype"),
   ),
 )
 
@@ -239,9 +224,7 @@
       When placing the horizontal variant of the logo, the recommended clearspace is equivalent to the height of the logomark.
       The minimal clearspace is equivalent to half the height of the logomark.
     ],
-    header: [
-      Clearspace - Logo
-    ],
+    header: ("Clearspace", "Logo"),
   ),
 )
 
@@ -257,9 +240,7 @@
       This is equivalent to half the height of the logomark.
       The minimal clearspace is equivalent to half the height of the lambda with no gap or a quarter the height of the logomark.
     ],
-    header: [
-      Clearspace - Logomark
-    ],
+    header: ("Clearspace", "Logomark"),
   ),
 )
 
@@ -274,17 +255,13 @@
       When placing the logotype, the recommended clearspace is equivalent to the height of the capital N in NixOS.
       The minimal clearspace is equivalent to half the height of the capital N in NixOS.
     ],
-    header: [
-      Clearspace - Logotype
-    ],
+    header: ("Clearspace", "Logotype"),
   ),
 )
 
 #contentPage(leftSide: (content: none, header: none), rightSide: (
   content: lorem(100),
-  header: [
-    Sizing
-  ],
+  header: ("Sizing",),
 ))
 
 #contentPage(
@@ -324,9 +301,7 @@
       The horizontal layout is the primary and recommended layout.
       The vertical layout is provided as a secondary layout.
     ],
-    header: [
-      Variations - Logo - Layout
-    ],
+    header: ("Variations", "Logo", "Layout"),
   ),
 )
 
@@ -405,9 +380,7 @@
       The colored variants of the logomark can be used with the white or black logotype.
       The black and white variants of the logomark must be used with the black and white logotypes respectively.
     ],
-    header: [
-      Variations - Logo - Colors
-    ],
+    header: ("Variations", "Logo", "Colors"),
   ),
 )
 
@@ -460,9 +433,7 @@
       The colored variants of the logomark should use gradient colors.
       The black and white variants of the logomark must use flat colors.
     ],
-    header: [
-      Variations - Logomark - Colors
-    ],
+    header: ("Variations", "Logomark", "Colors"),
   ),
 )
 
@@ -501,9 +472,7 @@
       When using black or white logomarks, use flat colors.
       Flat colors can be used for any color variant when creating print or other physical media.
     ],
-    header: [
-      Variations - Logomark - Color Styles
-    ],
+    header: ("Variations", "Logomark", "Color Styles"),
   ),
 )
 
@@ -539,9 +508,7 @@
     content: [
       There are two color variants of the logotype: black and white.
     ],
-    header: [
-      Variations - Logotype - Colors
-    ],
+    header: ("Variations", "Logotype", "Colors"),
   ),
 )
 
@@ -594,9 +561,7 @@
       The colored 'X' variant shades the 'x' in NixOS with the default colors of the logomark.
       The colored 'X' variant must not be used with the logomark.
     ],
-    header: [
-      Variations - Logotype - Styles
-    ],
+    header: ("Variations", "Logotype", "Styles"),
   ),
 )
 
@@ -631,9 +596,7 @@
     content: [
       #lorem(100)
     ],
-    header: [
-      Misuse
-    ],
+    header: ("Misuse",),
   ),
 )
 
