@@ -654,14 +654,19 @@
 #let make_color_block(color) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
   let text_color = if color.at(0) >= 0.5 { black } else { white }
-  rect(width: 100%, height: 100%, fill: mcolor, place(bottom, text(
-    0.5em,
-    text_color,
-  )[
-    #repr(mcolor.rgb()) \
-    #repr(mcolor.cmyk()) \
-    #repr(mcolor) \
-  ]))
+  rect(
+    width: 100%,
+    height: 100%,
+    fill: mcolor,
+    place(
+      bottom,
+      text(0.45em, text_color)[
+        HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
+        CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
+        OKLCH: #color.at(0) #color.at(1) #color.at(2) \
+      ],
+    ),
+  )
 }
 
 #contentPage(
