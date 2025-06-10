@@ -608,7 +608,7 @@
   rightSide: (
     content: [
       There are two color style variants of the logotype: normal and #lambda_prime (lambda prime).
-      The #lambda_prime variant shades the 'x' in NixOS with the default colors of the logomark.
+      The #lambda_prime variant shades the "x" in NixOS with the default colors of the logomark.
       The #lambda_prime variant must not be used with the logomark.
     ],
     header: ("Variations", "Logotype", "Styles"),
