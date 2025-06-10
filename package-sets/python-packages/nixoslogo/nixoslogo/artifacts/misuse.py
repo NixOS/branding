@@ -153,11 +153,11 @@ class LogoScale(NixosLogo):
             self.logotype_cap_height = self.lambda_radius
 
 
-class LogoColorsWithColoredX(NixosLogo):
+class LogoColorsWithLambdaPrime(NixosLogo):
     def __init__(
         self,
         clear_space: ClearSpace = ClearSpace.MINIMAL,
-        logotype_style: LogotypeStyle = LogotypeStyle.COLOREDX,
+        logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME,
         **kwargs,
     ):
         self.clear_space = clear_space
@@ -173,7 +173,7 @@ class LogoColorsWithColoredX(NixosLogo):
                 "nixos",
                 "logo",
                 "misuse",
-                "coloredx",
+                "lambdaprime",
             ]
             + list(extras)
         )
@@ -194,5 +194,5 @@ if __name__ == "__main__":
     logo = LogoScale(background_color="#dddddd")
     logo.write_svg(filename=logo.make_filename(extras=("test",)))
 
-    logo = LogoColorsWithColoredX(background_color="#dddddd")
+    logo = LogoColorsWithLambdaPrime(background_color="#dddddd")
     logo.write_svg(filename=logo.make_filename(extras=("test",)))

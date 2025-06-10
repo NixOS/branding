@@ -238,7 +238,7 @@ class Glyph(BaseRenderable):
                     d=self.get_path(self.layer),
                     fill=self.color,
                 )
-            case LogotypeStyle.COLOREDX:
+            case LogotypeStyle.LAMBDAPRIME:
                 if self.character == "x":
                     upper = [self.layer[0][:2] + self.layer[0][10:]]
                     lower = [self.layer[0][2:10]]

@@ -68,6 +68,8 @@
   box(fill: fill, stroke: stroke, content)
 }
 
+#let lambda_prime = "\u{03BB}\u{2032}"
+
 #sectionPage[NixOS Branding Guide]
 #lorem(300)
 
@@ -585,17 +587,17 @@
         ],
 
         [
-          Black/Colored 'X'
+          Black/#lambda_prime
 
           #imageBox(image(
-            "./media-kit/nixos-logotype-black-coloredx-recommended.svg",
+            "./media-kit/nixos-logotype-black-lambdaprime-recommended.svg",
           ))
         ],
         [
-          White/Colored 'X'
+          White/#lambda_prime
 
           #imageBoxDark(image(
-            "./media-kit/nixos-logotype-white-coloredx-recommended.svg",
+            "./media-kit/nixos-logotype-white-lambdaprime-recommended.svg",
           ))
         ],
       )
@@ -605,9 +607,9 @@
   ),
   rightSide: (
     content: [
-      There are two color style variants of the logotype: normal and colored 'X'.
-      The colored 'X' variant shades the 'x' in NixOS with the default colors of the logomark.
-      The colored 'X' variant must not be used with the logomark.
+      There are two color style variants of the logotype: normal and #lambda_prime (lambda prime).
+      The #lambda_prime variant shades the 'x' in NixOS with the default colors of the logomark.
+      The #lambda_prime variant must not be used with the logomark.
     ],
     header: ("Variations", "Logotype", "Styles"),
   ),
@@ -625,9 +627,12 @@
 
       #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 10%))
 
-      Do not use the ColoredX variant of the logotype with colored variants of the logomark.
+      Do not use the #lambda_prime variant of the logotype with colored variants of the logomark.
 
-      #imageBox(image("./misuse/nixos-logo-misuse-coloredx.svg", height: 10%))
+      #imageBox(image(
+        "./misuse/nixos-logo-misuse-lambdaprime.svg",
+        height: 10%,
+      ))
 
       Do not mirror or flip the logo or any of its components.
 

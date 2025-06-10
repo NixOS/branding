@@ -90,7 +90,7 @@ class LogomarkColors(Enum):
 
 class LogotypeStyle(Enum):
     REGULAR = auto()
-    COLOREDX = auto()
+    LAMBDAPRIME = auto()
 
 
 # === Functions ===

@@ -4,7 +4,7 @@ from nixoslogo.logotype import Logotype
 logotype = Logotype(
     characters="NixOS",
     color="white",
-    style=LogotypeStyle.COLOREDX,
+    style=LogotypeStyle.LAMBDAPRIME,
     spacings=DEFAULT_LOGOTYPE_SPACINGS,
     clear_space=ClearSpace.NONE,
 )
