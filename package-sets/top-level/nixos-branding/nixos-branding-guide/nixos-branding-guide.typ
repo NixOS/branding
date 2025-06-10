@@ -226,7 +226,7 @@
       The lambdas are located using an inner hexagon.
       They are located such that if they had zero gap, the upper apex would be coincident with a vertex of the inner hexagon and the long diagonal of the lambda is colinear with an edge of the inner hexagon.
       An outer hexagon emerges with vertices that are coincident with the rear foot of the lambdas.
-      If the inner hexagon maximal diameter is 1, the outer hexagon maximal diameter of 9 / 4.
+      If the inner hexagon maximal diameter is 1, the outer hexagon maximal diameter is 9 / 4.
     ],
     header: ("Anatomy", "Logomark"),
   ),
