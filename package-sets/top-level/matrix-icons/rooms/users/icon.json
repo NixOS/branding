@@ -1,0 +1,10 @@
+{
+  "type": "main",
+  "colours": {
+    "background": 1,
+    "border": 2
+  },
+  "contents": {
+    "image": "nixos-logomark-default-gradient-minimal"
+  }
+}
