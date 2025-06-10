@@ -11,6 +11,7 @@ inputs.self.library.defaultSystems (
         enableDefaultExcludes = true;
         projectRootFile = "flake.nix";
         programs = {
+          jsonfmt.enable = true;
           mdformat.enable = true;
           mdsh.enable = true;
           nixfmt.enable = true;
