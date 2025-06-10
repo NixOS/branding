@@ -72,7 +72,40 @@
 #lorem(300)
 
 #sectionPage[Brand Identity]
-#lorem(300)
+
+#align(center + horizon)[#text(size: 1.2em)[
+    #set par(justify: true)
+    #layout(size => {
+      rect(
+        width: 54% * size.width,
+        stroke: none,
+        [
+          Design is not just surface-level — it is a reflection of who we are.
+          Our visual identity — the NixOS snowflake with its two shades of blue, clean geometry, and recursive form — signals the values we share.
+
+          #text(weight: "bold")[
+            Openness
+
+            Transparency
+
+            Inclusivity
+          ]
+
+          These brand guidelines are not rigid constraints, but clear and thoughtful principles designed to guide consistent, intentional expression.
+          They reflect the maturity of our community and help us communicate with consistency and intention.
+          They also help prevent confusion with other ecosystems and reinforce the unique identity of NixOS.
+
+          A cohesive brand builds confidence — not just in the project, but in the people behind it.
+          It creates alignment around a shared vision and helps express the distinctive spirit of the open source community we are proud to be part of.
+
+          We hope you feel that same sense of pride and belonging.
+          This is more than a project — it is a movement shaped by all of us.
+        ],
+      )
+    })
+
+  ]
+]
 
 #sectionPage[Logo]
 
