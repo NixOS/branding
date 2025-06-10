@@ -247,6 +247,19 @@
 
 #contentPage(
   leftSide: (
+    content: [Placeholder for logo anatomy.],
+    header: none,
+  ),
+  rightSide: (
+    content: [
+      #lorem(100)
+    ],
+    header: ("Anatomy", "Logo"),
+  ),
+)
+
+#contentPage(
+  leftSide: (
     content: image("./clearspace/nixos-logo-clearspace.svg"),
     header: none,
     inset: true,
