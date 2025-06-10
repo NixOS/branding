@@ -619,35 +619,60 @@
 #contentPage(
   leftSide: (
     content: [
-      Do not crop the logo or any of its components.
+      #grid(
+        columns: (1fr, 1fr),
+        rows: 1fr,
+        gutter: 1em,
+        align: center,
+        [
+          Do not crop the logo or any of its components.
 
-      #imageBox(image("./misuse/nixos-logo-misuse-crop.svg", height: 10%))
+          #imageBox(image("./misuse/nixos-logo-misuse-crop.svg", height: 80%))
+        ],
+        [
+          Do not independently scale logo components.
 
-      Do not independently scale logo components.
+          #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 80%))
+        ],
 
-      #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 10%))
+        [
+          Do not use the #lambda_prime variant of the logotype with colored variants of the logomark.
 
-      Do not use the #lambda_prime variant of the logotype with colored variants of the logomark.
+          #imageBox(image(
+            "./misuse/nixos-logo-misuse-lambdaprime.svg",
+            height: 80%,
+          ))
+        ],
+        [
+          Do not mirror or flip the logo or any of its components.
 
-      #imageBox(image(
-        "./misuse/nixos-logo-misuse-lambdaprime.svg",
-        height: 10%,
-      ))
+          #imageBox(image(
+            "./misuse/nixos-logomark-misuse-mirror.svg",
+            height: 80%,
+          ))
+        ],
 
-      Do not mirror or flip the logo or any of its components.
+        [
+          Do not rotate the logo or any of its components.
 
-      #imageBox(image("./misuse/nixos-logomark-misuse-mirror.svg", height: 10%))
-
-      Do not rotate the logo or any of its components.
-
-      #imageBox(image("./misuse/nixos-logomark-misuse-rotate.svg", height: 10%))
+          #imageBox(image(
+            "./misuse/nixos-logomark-misuse-rotate.svg",
+            height: 80%,
+          ))
+        ],
+      )
     ],
     header: none,
     inset: true,
   ),
   rightSide: (
     content: [
-      #lorem(100)
+      The NixOS logo is a key element of our visual identity.
+      To preserve its integrity and recognizability, it must be used with care.
+      Distorting, excessively cropping, or altering the logo can compromise its clarity and risk confusion with other software ecosystems — something we actively seek to avoid.
+
+      Always ensure the logo has sufficient clear space.
+      When uncertain, err on the side of generosity; a few extra pixels can help maintain legibility and visual impact.
     ],
     header: ("Misuse",),
   ),
