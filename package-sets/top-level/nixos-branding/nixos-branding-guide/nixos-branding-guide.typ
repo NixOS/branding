@@ -239,7 +239,10 @@
   ),
   rightSide: (
     content: [
-      #lorem(100)
+      The proportions of the logotype are driven by the height of the "N" glyph.
+      The "i" glyph has been mirrored along the vertical axis.
+      No other modifications have been made to the glyphs.
+      The glyphs have been manually kerned to maintain a balance between simplicity and identity.
     ],
     header: ("Anatomy", "Logotype"),
   ),
