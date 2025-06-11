@@ -660,6 +660,15 @@
             height: 80%,
           ))
         ],
+        [
+          Do not place the logo on a cake.
+
+          #imageBox(image("images/cake.svg", height: 80%))
+          #place(center + horizon, dy: -10%, scale(y: 85%, image(
+            "./internal/nixos-logomark-default-gradient-none.svg",
+            height: 16%,
+          )))
+        ],
       )
     ],
     header: none,

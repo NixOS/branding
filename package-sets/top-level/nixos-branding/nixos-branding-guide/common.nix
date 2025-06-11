@@ -26,6 +26,10 @@ in
 
   virtualPaths = [
     {
+      dest = "images";
+      src = ./images;
+    }
+    {
       dest = "clearspace";
       src = "${symlinkJoin {
         name = "artifacts.clearspace";
