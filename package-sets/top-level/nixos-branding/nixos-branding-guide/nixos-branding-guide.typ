@@ -632,44 +632,70 @@
         [
           Do not crop the logo or any of its components.
 
-          #imageBox(image("./misuse/nixos-logo-misuse-crop.svg", height: 80%))
+          #imageBox(image("./misuse/nixos-logo-misuse-crop.svg", height: 75%))
         ],
         [
           Do not independently scale logo components.
 
-          #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 80%))
+          #imageBox(image("./misuse/nixos-logo-misuse-scale.svg", height: 75%))
         ],
 
         [
-          Do not use the #lambda_prime variant of the logotype with colored variants of the logomark.
+          Do not use the #lambda_prime variant with the logomark.
 
           #imageBox(image(
             "./misuse/nixos-logo-misuse-lambdaprime.svg",
-            height: 80%,
+            height: 75%,
           ))
         ],
+        [
+          Do not distort the logo or any of its components.
+
+          #imageBox(
+            skew(
+              ax: -10deg,
+              image(
+                "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-minimal.svg",
+                height: 75%,
+              ),
+            ),
+          )
+        ],
+
         [
           Do not mirror or flip the logo or any of its components.
 
           #imageBox(image(
             "./misuse/nixos-logomark-misuse-mirror.svg",
-            height: 80%,
+            height: 75%,
           ))
         ],
-
         [
           Do not rotate the logo or any of its components.
 
           #imageBox(image(
             "./misuse/nixos-logomark-misuse-rotate.svg",
-            height: 80%,
+            height: 75%,
           ))
+        ],
+
+        [
+          Do not use the logo on similarly-colored backgrounds.
+
+          #imageBox(
+            fill: blue.transparentize(50%),
+            stroke: none,
+            image(
+              "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-minimal.svg",
+              height: 75%,
+            ),
+          )
         ],
         [
           Do not place the logo on a cake.
 
-          #imageBox(image("images/cake.svg", height: 80%))
-          #place(center + horizon, dy: -10%, scale(y: 85%, image(
+          #imageBox(image("images/cake.svg", height: 75%))
+          #place(center + horizon, dy: -7%, scale(y: 85%, image(
             "./internal/nixos-logomark-default-gradient-none.svg",
             height: 16%,
           )))
