@@ -68,7 +68,7 @@
   box(fill: fill, stroke: stroke, content)
 }
 
-#let lambda_prime = "\u{03BB}\u{2032}"
+#let lambda_prime = [#sym.lambda#sym.prime]
 
 #sectionPage[NixOS Branding Guide]
 #lorem(300)
@@ -607,9 +607,14 @@
   ),
   rightSide: (
     content: [
-      There are two color style variants of the logotype: normal and #lambda_prime (lambda prime).
-      The #lambda_prime variant shades the "x" in NixOS with the default colors of the logomark.
-      The #lambda_prime variant must not be used with the logomark.
+      There are two color style variants of the logotype: #strong([normal]) and #strong([#lambda_prime (lambda prime)]).
+
+      The #lambda_prime variant shades the "x" in #strong([NixOS]) using the default colors of the logomark, drawing attention to the lambda shape embedded within the letter — a visual homage to our roots in functional programming.
+      This symbol holds special meaning for the project, representing our alignment with functional principles and the elegance they bring to software design.
+
+      For situations where a more neutral or subdued appearance is appropriate, the normal variant provides a clean, consistent option suitable for all contexts.
+
+      #strong([Note]): The #lambda_prime variant must not be used in combination with the logomark.
     ],
     header: ("Variations", "Logotype", "Styles"),
   ),
