@@ -312,10 +312,68 @@
   ),
 )
 
-#contentPage(leftSide: (content: none, header: none), rightSide: (
-  content: lorem(100),
-  header: ("Sizing",),
-))
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: 1fr, rows: (
+          1fr,
+          1fr,
+          1fr,
+          1fr,
+          1fr,
+        ), gutter: 3em, align: center, [], [
+          #box(
+            stroke: (
+              top: (paint: black, dash: "dashed"),
+              bottom: (paint: black, dash: "dashed"),
+            ),
+            width: 100%,
+            image(
+              "./internal/nixos-logo-default-gradient-black-regular-horizontal-none.svg",
+              height: 80%,
+            ),
+          )
+        ],
+        [
+          #box(
+            stroke: (
+              top: (paint: black, dash: "dashed"),
+              bottom: (paint: black, dash: "dashed"),
+            ),
+            width: 100%,
+            image(
+              "./internal/nixos-logomark-default-gradient-none.svg",
+              height: 80%,
+            ),
+          )],
+        [
+          #box(
+            stroke: (
+              top: (paint: black, dash: "dashed"),
+              bottom: (paint: black, dash: "dashed"),
+            ),
+            width: 100%,
+            image(
+              "./internal/nixos-logotype-black-regular-none.svg",
+              height: 80%,
+            ),
+          )
+        ]
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: [
+      The minimum size for the logo, logomark, and logotype is defined by their height.
+
+      #strong([Digital]) 24 px \
+      #strong([Print]) 6 mm or 0.24 in
+    ],
+    header: ("Sizing",),
+  ),
+)
 
 #contentPage(
   leftSide: (
