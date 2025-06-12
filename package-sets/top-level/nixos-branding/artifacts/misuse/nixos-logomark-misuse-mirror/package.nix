@@ -10,7 +10,7 @@ runCommandLocal "nixos-logomark-misuse-mirror"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-RkmJpLm7vrNYb+dvgSalbKGOvMNhRde5E7qd15cMPo8=";
+    outputHash = "sha256-cLQP54BfpoQsjGGtFgFPbMVz8o1KsQMj3yFjzpNCzxg=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

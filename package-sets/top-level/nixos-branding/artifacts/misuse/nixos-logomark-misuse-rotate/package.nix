@@ -10,7 +10,7 @@ runCommandLocal "nixos-logomark-misuse-rotate"
       (python3.withPackages (ps: [ ps.nixoslogo ]))
     ];
 
-    outputHash = "sha256-5dP0GyZWRRCaqCI1XsR8cs/h+9llhkq35xvM3ZTr33c=";
+    outputHash = "sha256-GvolEpXZkQjX9X48hisQINzvrcDGROHN1Lyg5eGqYck=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }

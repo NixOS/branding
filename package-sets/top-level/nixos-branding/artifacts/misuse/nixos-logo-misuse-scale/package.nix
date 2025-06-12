@@ -13,7 +13,7 @@ runCommandLocal "nixos-logo-misuse-scale"
 
     env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
 
-    outputHash = "sha256-fY8qPqN9jsGO0dLuuXjpW+wgVmjV9HOFqdHwXPmit4w=";
+    outputHash = "sha256-RfKqEqtFJDk13V69EL+7mRcWbF35oHfbLQWDtjrQPEM=";
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
   }
