@@ -7,6 +7,7 @@ from nixoslogo.annotations import Annotations
 from nixoslogo.core import ClearSpace
 from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
+from nixoslogo.logo import NixosLogo
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Logotype
 
@@ -821,3 +822,99 @@ class DimensionedLogotype(Logotype):
             ]
             + list(extras)
         )
+
+
+class DimensionedLogo(NixosLogo):
+    def __init__(
+        self,
+        annotations: Annotations,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.annotations = annotations
+
+    def dimension_cap_height(self):
+        return (
+            svg.Line(
+                x1=self.canvas.min_x,
+                y1=-self.logotype_cap_height / 2,
+                x2=self.canvas.max_x,
+                y2=-self.logotype_cap_height / 2,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+            ),
+            svg.Line(
+                x1=self.canvas.min_x,
+                y1=self.logotype_cap_height / 2,
+                x2=self.canvas.max_x,
+                y2=self.logotype_cap_height / 2,
+                stroke=self.annotations.construction_lines.stroke,
+                stroke_width=self.annotations.construction_lines.stroke_width,
+                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
+            ),
+        )
+
+    def dimension_bearing(self):
+        return (
+            self.annotations.dimension_lines.make_dimension_line(
+                point1=Point((self.logomark.circumradius, 0)),
+                point2=Point(
+                    (
+                        self.logomark.circumradius
+                        + self.logotype.scale * self.logotype_spacings[0],
+                        0,
+                    )
+                ),
+                offset=2.5,
+                reference=self.logotype_cap_height,
+                text_offset=True,
+                fractional=False,
+            ),
+        )
+
+    def make_svg_elements(self):
+        return (
+            self.dimension_cap_height()
+            + self.dimension_bearing()
+            + super().make_svg_elements()
+        )
+
+    def make_filename(self, extras: tuple[str] = ()) -> str:
+        return "-".join(
+            [
+                "nixos",
+                "logo",
+                "dimensioned",
+            ]
+            + list(extras)
+        )
+
+
+if __name__ == "__main__":
+    from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS
+    from nixoslogo.logotype import FontLoader
+
+    annotations = Annotations.small()
+    annotations.construction_lines.stroke = "black"
+    annotations.construction_lines.stroke_dasharray = 16
+
+    loader = FontLoader(capHeight=512)
+
+    artifact = DimensionedLogotype(
+        loader=loader,
+        spacings=DEFAULT_LOGOTYPE_SPACINGS,
+        clear_space=ClearSpace.MINIMAL,
+        annotations=annotations,
+        background_color="#dddddd",
+    )
+    artifact.write_svg(filename=artifact.make_filename(extras=("test",)))
+
+    annotations = Annotations.large()
+    annotations.construction_lines.stroke = "black"
+    artifact = DimensionedLogo(
+        clear_space=ClearSpace.MINIMAL,
+        annotations=annotations,
+        background_color="#dddddd",
+    )
+    artifact.write_svg(filename=artifact.make_filename(extras=("test",)))
