@@ -252,12 +252,15 @@
 
 #contentPage(
   leftSide: (
-    content: [Placeholder for logo anatomy.],
+    content: image("./dimensioned/nixos-logo-dimensioned.svg"),
     header: none,
   ),
   rightSide: (
     content: [
-      #lorem(100)
+      When combining the logomark and logotype, the dimensions of the logotype are driven by the dimensions of the logomark.
+      A line intersecting the forward heel and upper notch of upper left and bottom right lambdas intersects the top and bottom of the "N" glyph.
+      The exact mathematical formula for the height of the "N" glyph is $ sqrt(3) "radius" (1 + 2 "thickness"). $
+      The spacing between the logomark and logotype is manually set and displayed as the fraction of the height of the "N" glyph.
     ],
     header: ("Anatomy", "Logo"),
   ),
