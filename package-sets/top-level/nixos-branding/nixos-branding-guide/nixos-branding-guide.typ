@@ -802,18 +802,34 @@
 
 #sectionPage[Color]
 
-#let make_color_block(text_size: 1em, text_enable: true, color) = {
+#let title-case(string) = {
+  return string.replace(regex("[A-Za-z]+('[A-Za-z]+)?"), word => (
+    upper(word.text.first()) + lower(word.text.slice(1))
+  ))
+}
+
+#let make_color_block(
+  text_size: 1em,
+  text_enable: true,
+  color_name: none,
+  text_color_value_enable: true,
+  color,
+) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
   let text_color = if color.at(0) >= 0.5 { black } else { white }
+  let text_color_name = if color_name == none { [] } else {
+    color_name.split(" ").map(title-case).join(" ")
+  }
+  let text_color_value = if text_color_value_enable [
+    HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
+    CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
+    OKLCH: #color.at(0) #color.at(1) #color.at(2) \
+  ] else { }
   let text_content = if text_enable {
-    place(
-      bottom,
-      text(text_size, text_color)[
-        HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
-        CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
-        OKLCH: #color.at(0) #color.at(1) #color.at(2) \
-      ],
-    )
+    place(bottom, text(text_size, text_color)[
+      #text_color_name \
+      #text_color_value
+    ])
   } else { }
   rect(width: 100%, height: 100%, fill: mcolor, text_content)
 }
@@ -827,20 +843,39 @@
         gutter: 4pt,
         ..array
           .zip(..(
-            color_palette.palette.primary.map(x => x.value),
-            color_palette.palette.secondary.map(x => x.value),
-            color_palette.palette.accent.map(x => x.value),
+            color_palette.palette.primary,
+            color_palette.palette.secondary,
+            color_palette.palette.accent,
           )
             .join()
             .chunks(2))
           .join()
-          .map(color => make_color_block(text_enable: false, color))
+          .map(color => make_color_block(
+            text_color_value_enable: false,
+            color_name: color.name,
+            color.value,
+          ))
       )
     ],
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      The palette is designed to balance clarity with character, blending technical precision with a sense of openness and trust.
+      Our palette is divided into three main categories:
+
+      #strong([Primary]) \
+      This includes #color_palette.palette.primary.map(color => title-case(color.name)).join(last: " and ", ", ").
+
+      #strong([Secondary]) \
+      This includes #color_palette.palette.secondary.map(color => title-case(color.name)).join(last: " and ", ", ").
+
+      #strong([Accent]) \
+      This includes #color_palette.palette.accent.map(color => title-case(color.name)).join(last: " and ", ", ").
+
+      These colors are more than visual accents—they symbolize the elegance of declarative systems and the strength of the Nix community.
+      Their consistent use reinforces a unified and exquisite identity across all communication and visual touchpoints.
+    ],
     header: ("Palette",),
   ),
 )
@@ -851,20 +886,18 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..array
-          .zip(..(
-            color_palette.palette.primary.map(x => x.value),
-          )
-            .join()
-            .chunks(2))
-          .join()
-          .map(color => make_color_block(text_size: 1em, color))
+        ..color_palette.palette.primary.map(color => make_color_block(
+          text_size: 1em,
+          color.value,
+        ))
       )
     ],
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      Primarily used for layout.
+    ],
     header: ("Palette", "Primary"),
   ),
 )
@@ -875,20 +908,18 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..array
-          .zip(..(
-            color_palette.palette.secondary.map(x => x.value),
-          )
-            .join()
-            .chunks(2))
-          .join()
-          .map(color => make_color_block(text_size: 1em, color))
+        ..color_palette.palette.secondary.map(color => make_color_block(
+          text_size: 1em,
+          color.value,
+        ))
       )
     ],
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      Primarily used for major components.
+    ],
     header: ("Palette", "Secondary"),
   ),
 )
@@ -902,18 +933,20 @@
         gutter: 4pt,
         ..array
           .zip(..(
-            color_palette.palette.accent.map(x => x.value),
+            color_palette.palette.accent,
           )
             .join()
             .chunks(2))
           .join()
-          .map(color => make_color_block(text_size: 1em, color))
+          .map(color => make_color_block(text_size: 1em, color.value))
       )
     ],
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      Primarily used for accents and highlights.
+    ],
     header: ("Palette", "Accent"),
   ),
 )
@@ -936,7 +969,10 @@
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      Tints offer a versatile range of color choices suitable for various applications.
+      However, they should complement rather than replace the palette.
+    ],
     header: ("Palette", "Tints"),
   ),
 )
@@ -947,9 +983,10 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..(
-          color_palette.logos.default.map(x => x.value)
-        ).map(color => make_color_block(text_size: 1em, color))
+        ..color_palette.logos.default.map(color => make_color_block(
+          text_size: 1em,
+          color.value,
+        ))
       )
     ],
     header: none,
@@ -966,9 +1003,10 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 6,
-        ..(
-          color_palette.logos.rainbow.map(x => x.value)
-        ).map(color => make_color_block(text_size: 1em, color))
+        ..color_palette.logos.rainbow.map(color => make_color_block(
+          text_size: 1em,
+          color.value,
+        ))
       )
     ],
     header: none,
