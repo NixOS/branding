@@ -26,6 +26,10 @@ in
 
   virtualPaths = [
     {
+      dest = "data";
+      src = ./data;
+    }
+    {
       dest = "images";
       src = ./images;
     }

@@ -3,6 +3,8 @@
 #set page("a4", flipped: true)
 #set text(font: "Route 159")
 
+#let color_palette = toml("data/color.toml")
+
 #let sectionTitle(content, size: 36pt) = {
   upper(text(size: size, weight: "bold", content))
 }
@@ -800,79 +802,46 @@
 
 #sectionPage[Color]
 
-#let generate_oklch_stops(luminance, chroma, stops) = {
-  let step = 360 / (stops - 1)
-  let positions = range(0, stops)
-  let stops = positions.map(pos => (
-    (
-      oklch(luminance, chroma, pos * step * 1deg),
-      pos * 100% / (stops - 1),
-    )
-  ))
-  stops
-}
-
-#contentPage(
-  leftSide: (
-    content: [
-      #grid(
-        columns: (1fr, 1fr, 1fr, 1fr),
-        rect(width: 100%, height: 100%, fill: oklch(0%, 0, 0deg)),
-        rect(width: 100%, height: 100%, fill: oklch(100%, 0, 0deg)),
-        rect(width: 100%, height: 100%, fill: oklch(57.74%, 0.1248, 264deg)),
-        rect(width: 100%, height: 100%, fill: oklch(76.36%, 0.0866, 240deg)),
-      )
-    ],
-    header: none,
-  ),
-  rightSide: (
-    content: lorem(100),
-    header: ("Primary Colors",),
-  ),
-)
-
-#let make_color_block(color) = {
+#let make_color_block(text_size: 1em, text_enable: true, color) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
   let text_color = if color.at(0) >= 0.5 { black } else { white }
-  rect(
-    width: 100%,
-    height: 100%,
-    fill: mcolor,
+  let text_content = if text_enable {
     place(
       bottom,
-      text(0.45em, text_color)[
+      text(text_size, text_color)[
         HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
         CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
         OKLCH: #color.at(0) #color.at(1) #color.at(2) \
       ],
-    ),
-  )
+    )
+  } else { }
+  rect(width: 100%, height: 100%, fill: mcolor, text_content)
 }
 
 #contentPage(
   leftSide: (
     content: [
       #grid(
-        columns: (1fr, 1fr, 1fr),
-        rows: 1fr,
-        ..(
-          (0.6000, 0.1200, 264),
-          (0.7500, 0.1200, 264),
-          (0.7500, 0.1200, 240),
-          (0.7500, 0.1200, 288),
-          (0.7500, 0.1200, 090),
-          (0.7500, 0.1200, 054),
-          (0.7500, 0.1200, 016),
-          (0.7500, 0.1200, 330),
-          (0.7500, 0.1200, 152),
-        ).map(make_color_block)
+        columns: (1fr,) * 5,
+        rows: (1fr,) * 2,
+        gutter: 4pt,
+        ..array
+          .zip(..(
+            color_palette.palette.primary.map(x => x.value),
+            color_palette.palette.secondary.map(x => x.value),
+            color_palette.palette.accent.map(x => x.value),
+          )
+            .join()
+            .chunks(2))
+          .join()
+          .map(color => make_color_block(text_enable: false, color))
       )
     ],
     header: none,
   ),
   rightSide: (
     content: lorem(100),
-    header: ("Secondary Colors",),
+    header: ("Palette",),
   ),
 )
 
@@ -880,97 +849,23 @@
   leftSide: (
     content: [
       #grid(
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
-        rows: 1fr,
-        ..(
-          // jordy blue
-          (0.95, 0.02, 264),
-          (0.85, 0.07, 264),
-          (0.75, 0.12, 264),
-          (0.65, 0.12, 264),
-          (0.55, 0.12, 264),
-          (0.45, 0.12, 264),
-          (0.35, 0.12, 264),
-          (0.25, 0.12, 264),
-          (0.15, 0.08, 264),
-          // argentinian blue
-          (0.95, 0.02, 240),
-          (0.85, 0.08, 240),
-          (0.75, 0.12, 240),
-          (0.65, 0.12, 240),
-          (0.55, 0.12, 240),
-          (0.45, 0.10, 240),
-          (0.35, 0.09, 240),
-          (0.25, 0.05, 240),
-          (0.15, 0.03, 240),
-          // tropical indigo
-          (0.95, 0.02, 288),
-          (0.85, 0.07, 288),
-          (0.75, 0.12, 288),
-          (0.65, 0.12, 288),
-          (0.55, 0.12, 288),
-          (0.45, 0.12, 288),
-          (0.35, 0.12, 288),
-          (0.25, 0.12, 288),
-          (0.15, 0.08, 288),
-          // gold (metallic)
-          (0.95, 0.03, 090),
-          (0.85, 0.12, 090),
-          (0.75, 0.12, 090),
-          (0.65, 0.12, 090),
-          (0.55, 0.11, 090),
-          (0.45, 0.09, 090),
-          (0.35, 0.07, 090),
-          (0.25, 0.05, 090),
-          (0.15, 0.03, 090),
-          // persian orange
-          (0.95, 0.02, 054),
-          (0.85, 0.09, 054),
-          (0.75, 0.12, 054),
-          (0.65, 0.12, 054),
-          (0.55, 0.12, 054),
-          (0.45, 0.11, 054),
-          (0.35, 0.08, 054),
-          (0.25, 0.06, 054),
-          (0.15, 0.03, 054),
-          // salmon pink
-          (0.95, 0.02, 016),
-          (0.85, 0.08, 016),
-          (0.75, 0.12, 016),
-          (0.65, 0.12, 016),
-          (0.55, 0.12, 016),
-          (0.45, 0.12, 016),
-          (0.35, 0.12, 016),
-          (0.25, 0.10, 016),
-          (0.15, 0.06, 016),
-          // plum
-          (0.95, 0.04, 330),
-          (0.85, 0.12, 330),
-          (0.75, 0.12, 330),
-          (0.65, 0.12, 330),
-          (0.55, 0.12, 330),
-          (0.45, 0.12, 330),
-          (0.35, 0.12, 330),
-          (0.25, 0.11, 330),
-          (0.15, 0.06, 330),
-          // emerald
-          (0.95, 0.03, 152),
-          (0.85, 0.12, 152),
-          (0.75, 0.12, 152),
-          (0.65, 0.12, 152),
-          (0.55, 0.12, 152),
-          (0.45, 0.11, 152),
-          (0.35, 0.09, 152),
-          (0.25, 0.06, 152),
-          (0.15, 0.03, 152),
-        ).map(make_color_block)
+        columns: (1fr,) * 1,
+        rows: (1fr,) * 2,
+        ..array
+          .zip(..(
+            color_palette.palette.primary.map(x => x.value),
+          )
+            .join()
+            .chunks(2))
+          .join()
+          .map(color => make_color_block(text_size: 1em, color))
       )
     ],
     header: none,
   ),
   rightSide: (
     content: lorem(100),
-    header: ("Tints",),
+    header: ("Palette", "Primary"),
   ),
 )
 
@@ -978,117 +873,108 @@
   leftSide: (
     content: [
       #grid(
-        columns: (1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr, 1fr),
-        rows: 1fr,
-        ..(
-          // jordy blue
-          (0.95, 0.02, 264),
-          (0.85, 0.07, 264),
-          (0.75, 0.12, 264),
-          (0.65, 0.12, 264),
-          (0.55, 0.11, 264),
-          (0.45, 0.09, 264),
-          (0.35, 0.07, 264),
-          (0.25, 0.05, 264),
-          (0.15, 0.03, 264),
-          // argentinian blue
-          (0.95, 0.02, 240),
-          (0.85, 0.07, 240),
-          (0.75, 0.12, 240),
-          (0.65, 0.12, 240),
-          (0.55, 0.11, 240),
-          (0.45, 0.09, 240),
-          (0.35, 0.07, 240),
-          (0.25, 0.05, 240),
-          (0.15, 0.03, 240),
-          // tropical indigo
-          (0.95, 0.02, 288),
-          (0.85, 0.07, 288),
-          (0.75, 0.12, 288),
-          (0.65, 0.12, 288),
-          (0.55, 0.11, 288),
-          (0.45, 0.09, 288),
-          (0.35, 0.07, 288),
-          (0.25, 0.05, 288),
-          (0.15, 0.03, 288),
-          // gold (metallic)
-          (0.95, 0.03, 090),
-          (0.85, 0.07, 090),
-          (0.75, 0.12, 090),
-          (0.65, 0.12, 090),
-          (0.55, 0.11, 090),
-          (0.45, 0.09, 090),
-          (0.35, 0.07, 090),
-          (0.25, 0.05, 090),
-          (0.15, 0.03, 090),
-          // persian orange
-          (0.95, 0.02, 054),
-          (0.85, 0.07, 054),
-          (0.75, 0.12, 054),
-          (0.65, 0.12, 054),
-          (0.55, 0.11, 054),
-          (0.45, 0.09, 054),
-          (0.35, 0.07, 054),
-          (0.25, 0.05, 054),
-          (0.15, 0.03, 054),
-          // salmon pink
-          (0.95, 0.02, 016),
-          (0.85, 0.07, 016),
-          (0.75, 0.12, 016),
-          (0.65, 0.12, 016),
-          (0.55, 0.11, 016),
-          (0.45, 0.09, 016),
-          (0.35, 0.07, 016),
-          (0.25, 0.05, 016),
-          (0.15, 0.03, 016),
-          // plum
-          (0.95, 0.04, 330),
-          (0.85, 0.07, 330),
-          (0.75, 0.12, 330),
-          (0.65, 0.12, 330),
-          (0.55, 0.11, 330),
-          (0.45, 0.09, 330),
-          (0.35, 0.07, 330),
-          (0.25, 0.05, 330),
-          (0.15, 0.03, 330),
-          // emerald
-          (0.95, 0.03, 152),
-          (0.85, 0.07, 152),
-          (0.75, 0.12, 152),
-          (0.65, 0.12, 152),
-          (0.55, 0.11, 152),
-          (0.45, 0.09, 152),
-          (0.35, 0.07, 152),
-          (0.25, 0.05, 152),
-          (0.15, 0.03, 152),
-        ).map(make_color_block)
+        columns: (1fr,) * 1,
+        rows: (1fr,) * 2,
+        ..array
+          .zip(..(
+            color_palette.palette.secondary.map(x => x.value),
+          )
+            .join()
+            .chunks(2))
+          .join()
+          .map(color => make_color_block(text_size: 1em, color))
       )
     ],
     header: none,
   ),
   rightSide: (
     content: lorem(100),
-    header: ("Tints",),
+    header: ("Palette", "Secondary"),
   ),
 )
 
-#rect(width: 100%, height: 5em, fill: gradient.linear(
-  space: color.oklch,
-  ..generate_oklch_stops(57.74%, 0.1248, 5),
-))
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: (1fr,) * 3,
+        rows: (1fr,) * 2,
+        gutter: 4pt,
+        ..array
+          .zip(..(
+            color_palette.palette.accent.map(x => x.value),
+          )
+            .join()
+            .chunks(2))
+          .join()
+          .map(color => make_color_block(text_size: 1em, color))
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Palette", "Accent"),
+  ),
+)
 
-#rect(width: 100%, height: 5em, fill: gradient.linear(
-  space: color.oklch,
-  ..generate_oklch_stops(76.36%, 0.0866, 5),
-))
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: (1fr,) * 9,
+        rows: 1fr,
+        ..(
+          color_palette.palette.primary.at(0).tints,
+          color_palette.palette.secondary.map(x => x.tints).join(),
+          color_palette.palette.accent.map(x => x.tints).join(),
+        )
+          .join()
+          .map(color => make_color_block(text_size: 0.45em, color))
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Palette", "Tints"),
+  ),
+)
 
-#rect(width: 100%, height: 5em, fill: gradient
-  .linear(
-    (oklch(51%, 0.208963, 29.2339deg)),
-    (oklch(70%, 0.204259, 43.4910deg)),
-    (oklch(81%, 0.168100, 76.7800deg)),
-    (oklch(60%, 0.175100, 147.560deg)),
-    (oklch(60%, 0.141400, 241.380deg)),
-    (oklch(46%, 0.194300, 288.710deg)),
-  )
-  .sharp(6))
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: (1fr,) * 1,
+        rows: (1fr,) * 2,
+        ..(
+          color_palette.logos.default.map(x => x.value)
+        ).map(color => make_color_block(text_size: 1em, color))
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Logo", "Default"),
+  ),
+)
+
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: (1fr,) * 1,
+        rows: (1fr,) * 6,
+        ..(
+          color_palette.logos.rainbow.map(x => x.value)
+        ).map(color => make_color_block(text_size: 1em, color))
+      )
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Logo", "Rainbow"),
+  ),
+)
