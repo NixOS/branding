@@ -62,8 +62,12 @@ tints = [
   [0.15, 0, 0],
 ]
 
+# Afghani Blue
+# The colorapi coined this as "lapis lazuli".
+# https://www.thecolorapi.com/id?format=html&hex=4d6fb7
+# Historically, major sources of lapis lazuli were found in Afghanistan.
 [[palette.secondary]]
-name = "jordy blue"
+name = "Afghani Blue"
 value = [0.55, 0.12, 264]
 tints = [
   [0.95, 0.02, 264],
@@ -77,8 +81,12 @@ tints = [
   [0.15, 0.03, 264],
 ]
 
+# Argentinian Blue
+# Coolors coined this as "argentinian blue".
+# https://coolors.co/5fb8f2
+# It is very close to the blue in the Argentinian flag.
 [[palette.secondary]]
-name = "argentinian blue"
+name = "Argentinian Blue"
 value = [0.75, 0.12, 240]
 tints = [
   [0.95, 0.02, 240],
@@ -92,8 +100,12 @@ tints = [
   [0.15, 0.03, 240],
 ]
 
+# Italian Violet
+# The colorapi coined this as "perano".
+# https://www.thecolorapi.com/id?format=html&hex=aaa1f6
+# Perano is a small town in Italy.
 [[palette.accent]]
-name = "tropical indigo"
+name = "Italian Violet"
 value = [0.75, 0.12, 288]
 tints = [
   [0.95, 0.02, 288],
@@ -107,8 +119,12 @@ tints = [
   [0.15, 0.03, 288],
 ]
 
+# Indian Gold
+# Coolors coined this as "gold".
+# https://coolors.co/cbaa4b
+# India is known for their gold jewelry.
 [[palette.accent]]
-name = "gold"
+name = "Indian Gold"
 value = [0.75, 0.12, 90]
 tints = [
   [0.95, 0.03, 90],
@@ -122,8 +138,12 @@ tints = [
   [0.15, 0.03, 90],
 ]
 
+# Chinese Magenta
+# Coolors coined this as "plum".
+# https://coolors.co/d991d2
+# China is known for their plums.
 [[palette.accent]]
-name = "plum"
+name = "Chinese Magenta"
 value = [0.75, 0.12, 330]
 tints = [
   [0.95, 0.04, 330],
@@ -137,8 +157,10 @@ tints = [
   [0.15, 0.03, 330],
 ]
 
+# Coolors coined this as "persian orange".
+# https://coolors.co/e99861
 [[palette.accent]]
-name = "persian orange"
+name = "Persian Orange"
 value = [0.75, 0.12, 54]
 tints = [
   [0.95, 0.02, 54],
@@ -152,8 +174,12 @@ tints = [
   [0.15, 0.03, 54],
 ]
 
+# Coolors coined this as "emerald"
+# https://coolors.co/6fc488
+# Zambian Green
+# Zambia is known for high-quality emeralds.
 [[palette.accent]]
-name = "emerald"
+name = "Zambian Green"
 value = [0.75, 0.12, 152]
 tints = [
   [0.95, 0.03, 152],
@@ -167,8 +193,12 @@ tints = [
   [0.15, 0.03, 152],
 ]
 
+# Norwegian Pink
+# Coolors coined this as "salmon pink".
+# https://coolors.co/f08d94
+# Norway is known for high-quality Atlantic salmon.
 [[palette.accent]]
-name = "salmon pink"
+name = "Norwegian Pink"
 value = [0.75, 0.12, 16]
 tints = [
   [0.95, 0.02, 16],
