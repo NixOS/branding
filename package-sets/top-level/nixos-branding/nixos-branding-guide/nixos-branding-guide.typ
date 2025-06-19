@@ -73,7 +73,34 @@
 #let lambda_prime = [#sym.lambda#sym.prime]
 
 #sectionPage[NixOS Branding Guide]
-#lorem(300)
+
+#align(center + horizon)[#text(size: 1.2em)[
+    #set par(justify: true)
+    #layout(size => {
+      rect(
+        width: 54% * size.width,
+        stroke: none,
+        [
+          We believe in open-source innovation and a community-driven ethos — values that have shaped our identity from the very beginning.
+          As you explore this guide, we hope you’ll sense the spirit of stable evolution — a core principle we embrace over stagnation or chaos.
+
+          This guide serves as a framework to help ensure that our communication and design consistently reflect the values that define Nix: innovation, reliability, and simplicity.
+          It brings together creative expression and technical precision to foster a unified identity across all touchpoints.
+
+          We’ve aimed to include everything you need to feel confident and comfortable when working with the NixOS visual identity — the public face of our declarative builds and deployments ecosystem.
+          If anything is unclear or you have questions, we’re always happy to help.
+
+          Please feel free to reach out to the Marketing Team or the Brand and Design Steward directly.
+          You can find contact information here:
+          #link(
+            "https://nixos.org/community/teams/marketing",
+          )[nixos.org/community/teams/marketing]
+        ],
+      )
+    })
+
+  ]
+]
 
 #sectionPage[Brand Identity]
 
