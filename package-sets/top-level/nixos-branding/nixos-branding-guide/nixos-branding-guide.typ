@@ -102,7 +102,7 @@
   ]
 ]
 
-#sectionPage[Brand Identity]
+#sectionPage[Identity]
 
 #align(center + horizon)[#text(size: 1.2em)[
     #set par(justify: true)
