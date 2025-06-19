@@ -102,6 +102,26 @@
   ]
 ]
 
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(columns: 1fr, align: center, [
+          #text(size: 36pt, weight: "bold")[INDEX]
+        ])
+    ],
+    header: none,
+  ),
+  rightSide: (
+    content: text(weight: "bold")[
+      IDENTITY \
+      LOGO \
+      TYPOGRAPHY \
+      COLOR
+    ],
+    header: (),
+  ),
+)
+
 #sectionPage[Identity]
 
 #align(center + horizon)[#text(size: 1.2em)[
