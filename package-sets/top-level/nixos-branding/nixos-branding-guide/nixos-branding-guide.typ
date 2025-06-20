@@ -1004,7 +1004,10 @@
   ),
   rightSide: (
     content: [
-      Primarily used for layout.
+      #color_palette.palette.primary.map(color => title-case(color.name)).join(last: " and ", ", ") form the foundation of our visual system.
+      They provide the structural balance needed to support other colors and ensure accessibility and clarity across all mediums.
+      Use them for text, backgrounds, borders, and general layout scaffolding.
+      Their neutrality allows the other colors in the palette to shine while maintaining a clean, professional tone.
     ],
     header: ("Palette", "Primary"),
   ),
@@ -1026,7 +1029,10 @@
   ),
   rightSide: (
     content: [
-      Primarily used for major components.
+      #color_palette.palette.secondary.map(color => title-case(color.name)).join(last: " and ", ", ") are the signature colors of the NixOS brand.
+      These shades are used for prominent elements such as headers, icons, navigation bars, and key interface components.
+      They evoke trust, stability, and clarity — perfectly aligned with the principles of declarative design.
+      When in doubt, reach for these blues.
     ],
     header: ("Palette", "Secondary"),
   ),
@@ -1053,7 +1059,9 @@
   ),
   rightSide: (
     content: [
-      Primarily used for accents and highlights.
+      #color_palette.palette.accent.map(color => title-case(color.name)).join(last: " and ", ", ") bring vibrancy and dimension to the brand.
+      These colors are intended for subtle emphasis: buttons, charts, tags, illustrations, and other moments of interaction or expression.
+      Use them intentionally — sparingly, but confidently — to enhance communication without overwhelming the design.
     ],
     header: ("Palette", "Accent"),
   ),
@@ -1078,8 +1086,11 @@
   ),
   rightSide: (
     content: [
-      Tints offer a versatile range of color choices suitable for various applications.
-      However, they should complement rather than replace the palette.
+      Tints provide a flexible extension of the core palette, offering a wide range of lightness levels—from subtle backgrounds to bold accents.
+      These variations are useful for layering, accessibility, and adapting to different themes or environments.
+
+      While tints increase design versatility, they are intended to complement, not replace, the primary, secondary, and accent colors.
+      Use them thoughtfully to maintain brand consistency and visual harmony.
     ],
     header: ("Palette", "Tints"),
   ),
@@ -1100,7 +1111,17 @@
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      The NixOS logo uses two carefully selected color values derived from the core palette:
+
+      - A tint of Afghani Blue with a lightness of 0.55 and chroma 0.12
+      - A customized tint of Argentinian Blue with a lightness of 0.75 and a slightly reduced chroma of 0.09
+
+      While the Afghani Blue tint follows the standard palette, the Argentinian Blue variant has been subtly adjusted.
+      The chroma was reduced from 0.12 (as defined in the palette) to 0.09 to better align with the historic appearance of the NixOS logo in earlier versions and maintain visual continuity with its established identity.
+
+      These two tones work together to preserve the logo’s familiar character while adapting it to a more precise and accessible color system based on OKLCH.
+    ],
     header: ("Logo", "Default"),
   ),
 )
@@ -1120,7 +1141,15 @@
     header: none,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      The rainbow variant of the NixOS logo features six colors inspired by the traditional rainbow Pride flag.
+      These colors have been carefully adapted to better align with the visual language of the NixOS brand — they are softer and less saturated than the original flag, allowing them to integrate more seamlessly with the logomark’s geometry and tone.
+
+      This kind of adaptation is a common practice among organizations seeking to balance symbolic representation with brand cohesion.
+      The result is a respectful and visually consistent expression of solidarity with the LGBTQ+ community.
+
+      The rainbow variant is used to celebrate diversity, inclusion, and the vibrant community that shapes NixOS.
+    ],
     header: ("Logo", "Rainbow"),
   ),
 )
