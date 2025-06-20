@@ -884,18 +884,18 @@
           Regular
         ],
 
-        text(size: 1.6em, weight: "bold")[
-          #route159_text_alt.join("\n")
-        ],
-        text(size: 1.6em, weight: "bold")[
-          Bold
-        ],
-
         text(size: 1.6em, weight: "light")[
           #route159_text_alt.join("\n")
         ],
         text(size: 1.6em, weight: "light")[
           Light
+        ],
+
+        text(size: 1.6em, weight: "bold")[
+          #route159_text_alt.join("\n")
+        ],
+        text(size: 1.6em, weight: "bold")[
+          Bold
         ],
       )
     ],
@@ -903,7 +903,17 @@
     inset: true,
   ),
   rightSide: (
-    content: lorem(100),
+    content: [
+      #strong([Regular]) is the standard weight used in the NixOS logotype and across most brand applications.
+      It strikes a balance between readability and presence.
+
+      #strong([Light]) offers a softer tone and may be used alongside the logo in contexts where subtlety is important — such as team names, sub-branding, or secondary identifiers.
+
+      #strong([Bold]) provides additional emphasis when needed, though it is currently reserved for future use as the identity system evolves.
+
+      Each weight maintains the clarity, legibility, and modern character that define the Route 159 typeface.
+      Their consistent use helps ensure a cohesive visual voice across NixOS communications.
+    ],
     header: ("Logo Typeface", "Route 159", "Weights"),
   ),
 )
