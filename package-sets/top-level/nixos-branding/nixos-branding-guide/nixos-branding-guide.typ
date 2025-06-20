@@ -831,21 +831,82 @@
 
 #sectionPage[Typography]
 
-#text(size: 2em)[
-  Route 159
+#let route159_text = (
+  "AaBbCcDdEeFfGgHhIiJjKkLlMm",
+  "NnOoPpQqRrSsTtUuVvWwXxYyZz",
+  "0123456789.,;:!?()[]{}–—‘’“”",
+  "@#&%*/\+-=_~^$€£¥±≠≤≥∞",
+)
 
-  Primary Typeface
-]
+#let route159_text_alt = (
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  "abcdefghijklmnopqrstuvwxyz",
+  "0123456789.,;:!?()[]{}–—‘’“”",
+  "@#&%*/\+-=_~^$€£¥±≠≤≥∞",
+)
 
-#par(leading: 0.65em * 5)[
-  #text(size: 5em)[
-    #(
-      "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.,;:!?()[]{}–—‘’“”@#&%*/\+-=_~^$€£¥±≠≤≥∞"
-        .split("")
-        .join(sym.zws)
-    )
-  ]
-]
+#contentPage(
+  leftSide: (
+    content: [
+      #set par(justify: true)
+      #text(size: 4.75em)[
+        #route159_text.join("").split("").join(sym.zws)
+      ]
+    ],
+    header: none,
+    inset: true,
+  ),
+  rightSide: (
+    content: [
+      The NixOS typeface is Route 159, a modern sans serif designed for clarity and digital readability.
+      Originally developed by #link("https://dotcolon.net/")[dotcolon] as a web font, Route 159 draws on the experience behind the Vegur and Aileron typefaces, with a strong emphasis on screen performance.
+
+      The design balances precision and approachability, making it well-suited for the NixOS logotype.
+      Route 159 helps reinforce the NixOS identity: clean, efficient, and thoughtfully engineered.
+    ],
+    header: ("Logo Typeface", "Route 159"),
+  ),
+)
+
+#contentPage(
+  leftSide: (
+    content: [
+      #grid(
+        columns: 2,
+        rows: (18em,) + (1fr,) * 3,
+        align: top,
+        column-gutter: 3em,
+        text(size: 20em)[Aa], [],
+        text(size: 1.6em, weight: "regular")[
+          #route159_text_alt.join("\n")
+        ],
+        text(size: 1.6em, weight: "regular")[
+          Regular
+        ],
+
+        text(size: 1.6em, weight: "bold")[
+          #route159_text_alt.join("\n")
+        ],
+        text(size: 1.6em, weight: "bold")[
+          Bold
+        ],
+
+        text(size: 1.6em, weight: "light")[
+          #route159_text_alt.join("\n")
+        ],
+        text(size: 1.6em, weight: "light")[
+          Light
+        ],
+      )
+    ],
+    header: none,
+    inset: true,
+  ),
+  rightSide: (
+    content: lorem(100),
+    header: ("Logo Typeface", "Route 159", "Weights"),
+  ),
+)
 
 #sectionPage[Color]
 
