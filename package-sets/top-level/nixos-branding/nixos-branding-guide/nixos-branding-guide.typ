@@ -1074,12 +1074,16 @@
         columns: (1fr,) * 9,
         rows: 1fr,
         ..(
-          color_palette.palette.primary.at(0).tints,
-          color_palette.palette.secondary.map(x => x.tints).join(),
-          color_palette.palette.accent.map(x => x.tints).join(),
+          color_palette.palette.primary.at(0).tints.pairs(),
+          color_palette.palette.secondary.map(x => x.tints.pairs()).join(),
+          color_palette.palette.accent.map(x => x.tints.pairs()).join(),
         )
           .join()
-          .map(color => make_color_block(text_size: 0.45em, color))
+          .map(color => make_color_block(
+            text_size: 0.45em,
+            color_name: color.at(0),
+            color.at(1),
+          ))
       )
     ],
     header: none,
