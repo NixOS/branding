@@ -2,11 +2,11 @@ version = "0.1.0"
 
 [logos]
 [[logos.default]]
-name = "nixos dark" 
+name = "NixOS Dark Blue" 
 value = [0.55, 0.12, 264]
 
 [[logos.default]]
-name = "nixos light"
+name = "NixOS Light Blue"
 value = [0.75, 0.09, 240]
 
 [[logos.rainbow]]
