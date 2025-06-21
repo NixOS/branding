@@ -951,9 +951,7 @@
 ) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
   let text_color = if color.at(0) >= 0.5 { black } else { white }
-  let text_color_name = if color_name == none { [] } else {
-    color_name.split(" ").map(title-case).join(" ")
-  }
+  let text_color_name = if color_name == none { [] } else { color_name }
   let text_color_value = if text_color_value_enable [
     HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
     CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
@@ -1022,6 +1020,7 @@
         rows: (1fr,) * 2,
         ..color_palette.palette.primary.map(color => make_color_block(
           text_size: 1em,
+          color_name: color.name,
           color.value,
         ))
       )
@@ -1047,6 +1046,7 @@
         rows: (1fr,) * 2,
         ..color_palette.palette.secondary.map(color => make_color_block(
           text_size: 1em,
+          color_name: color.name,
           color.value,
         ))
       )
@@ -1078,7 +1078,11 @@
             .join()
             .chunks(2))
           .join()
-          .map(color => make_color_block(text_size: 1em, color.value))
+          .map(color => make_color_block(
+            text_size: 1em,
+            color_name: color.name,
+            color.value,
+          ))
       )
     ],
     header: none,
@@ -1134,6 +1138,7 @@
         rows: (1fr,) * 2,
         ..color_palette.logos.default.map(color => make_color_block(
           text_size: 1em,
+          color_name: color.name,
           color.value,
         ))
       )
