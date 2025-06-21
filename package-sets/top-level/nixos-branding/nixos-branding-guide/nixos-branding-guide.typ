@@ -4,6 +4,7 @@
 #set text(font: "Route 159")
 
 #let color_palette = toml("data/color.toml")
+#let version = read("data/version")
 
 #let sectionTitle(content, size: 36pt) = {
   upper(text(size: size, weight: "bold", content))
@@ -14,6 +15,13 @@
     let text_content = sectionTitle(size: text_size)[#content]
     let text_size = measure(text_content)
     let text_start = 5 / 9 * size.height - text_size.height / 2
+    if (counter(page).get().at(0) == 1) {
+      place(
+        top + left,
+        dx: 1.1cm,
+        dy: text_start + text_size.height + 1em,
+      )[#text(size: 1.2em, weight: "bold", font: "Jura")[VERSION #version]]
+    }
     [
       #place(top + left, dx: 1cm, dy: text_start)[#text_content]
       #place(top + right)[#image(

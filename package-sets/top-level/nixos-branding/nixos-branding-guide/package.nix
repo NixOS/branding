@@ -14,6 +14,11 @@ let
     toSource
     ;
 
+  inherit (lib.strings)
+    readFile
+    trim
+    ;
+
   inherit (typix-lib)
     buildDeterministicTypstProject
     ;
@@ -24,7 +29,7 @@ buildDeterministicTypstProject (
   {
 
     pname = "nixos-branding-guide";
-    version = "0.1.0";
+    version = trim (readFile ./data/version);
 
     src = toSource {
       root = ./.;
