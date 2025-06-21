@@ -2,6 +2,7 @@
   artifacts,
   jura,
   lib,
+  nixos-color-palette,
   route159,
   symlinkJoin,
 }:
@@ -32,6 +33,10 @@ in
     {
       dest = "images";
       src = ./images;
+    }
+    {
+      dest = "colors";
+      src = nixos-color-palette;
     }
     {
       dest = "clearspace";

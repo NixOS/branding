@@ -2,6 +2,7 @@
   artifacts,
   jura,
   lib,
+  nixos-color-palette,
   route159,
   symlinkJoin,
   typix-lib,
@@ -42,6 +43,7 @@ buildDeterministicTypstProject (
       artifacts
       jura
       lib
+      nixos-color-palette
       route159
       symlinkJoin
       ;

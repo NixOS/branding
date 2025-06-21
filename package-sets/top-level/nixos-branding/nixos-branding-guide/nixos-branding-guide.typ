@@ -3,7 +3,7 @@
 #set page("a4", flipped: true)
 #set text(font: "Route 159")
 
-#let color_palette = toml("data/color.toml")
+#let color_palette = toml("colors/colors.toml")
 #let version = read("data/version")
 
 #let sectionTitle(content, size: 36pt) = {

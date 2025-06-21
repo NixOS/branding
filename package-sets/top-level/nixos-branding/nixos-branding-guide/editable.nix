@@ -2,6 +2,7 @@
   artifacts,
   jura,
   lib,
+  nixos-color-palette,
   route159,
   symlinkJoin,
   typix-lib,
@@ -21,6 +22,7 @@ watchTypstProject (
       artifacts
       jura
       lib
+      nixos-color-palette
       route159
       symlinkJoin
       ;
