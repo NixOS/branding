@@ -37,7 +37,7 @@
     header: [
       #h(1fr) #rightSide.header
     ],
-    [
+    context [
       #grid(
         columns: (2fr, 1fr),
         rows: 1fr,
@@ -57,6 +57,14 @@
         #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
           " / ",
         ))
+      ])
+      #let page_num = if here().page() < 10 {
+        [0#str(here().page())]
+      } else {
+        here().page()
+      };
+      #place(bottom + right, dx: -2.5em, dy: -2.5em, [
+        #text(fill: white, weight: 900, font: "Jura", [#page_num])
       ])
     ],
   )
