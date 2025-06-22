@@ -75,7 +75,7 @@ For visual or structural changes (logos, color definitions, font treatments, lay
 1. Include visuals or mockups to illustrate your proposal.
 1. Be prepared for collaborative iteration — visual identity is a shared responsibility.
 
-Changes that impact the core brand elements (e.g., logo geometry, primary palette, typeface) will be reviewed by the Brand and Design Steward in coordination with the NixOS Marketing Team.
+Changes that impact the core brand elements (e.g., logo geometry, primary palette, typeface) will be reviewed by the **Brand and Design Steward** in coordination with the **NixOS Marketing Team**.
 
 ## Development
 
