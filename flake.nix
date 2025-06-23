@@ -13,6 +13,8 @@
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    typix.url = "github:loqusion/typix";
+    typix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs: {
@@ -20,6 +22,7 @@
     devShells = import ./dev-shells inputs;
     formatter = import ./formatter inputs;
     formatterModule = import ./formatter-module inputs;
+    hydraJobs = import ./hydra-jobs inputs;
     legacyPackages = import ./legacy-packages inputs;
     library = import ./library inputs;
     overlays = import ./overlays inputs;

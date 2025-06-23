@@ -1,0 +1,205 @@
+version = "0.1.0"
+
+[logos]
+[[logos.default]]
+name = "NixOS Dark Blue" 
+value = [0.55, 0.12, 264]
+
+[[logos.default]]
+name = "NixOS Light Blue"
+value = [0.75, 0.09, 240]
+
+[[logos.rainbow]]
+name = "red"
+value = [0.51, 0.208963, 29.2339]
+
+[[logos.rainbow]]
+name = "orange"
+value = [0.70, 0.204259, 43.4910]
+
+[[logos.rainbow]]
+name = "yellow"
+value = [0.81, 0.168100, 76.7800]
+
+[[logos.rainbow]]
+name = "green"
+value = [0.60, 0.175100, 147.560]
+
+[[logos.rainbow]]
+name = "indigo"
+value = [0.60, 0.141400, 241.380]
+
+[[logos.rainbow]]
+name = "violet"
+value = [0.46, 0.194300, 288.710]
+
+[palette]
+[[palette.primary]]
+name = "Black"
+value = [0, 0, 0]
+[palette.primary.tints]
+L95 = [0.95, 0, 0]
+L85 = [0.85, 0, 0]
+L75 = [0.75, 0, 0]
+L65 = [0.65, 0, 0]
+L55 = [0.55, 0, 0]
+L45 = [0.45, 0, 0]
+L35 = [0.35, 0, 0]
+L25 = [0.25, 0, 0]
+L15 = [0.15, 0, 0]
+
+[[palette.primary]]
+name = "White"
+value = [1, 0, 0]
+[palette.primary.tints]
+L95 = [0.95, 0, 0]
+L85 = [0.85, 0, 0]
+L75 = [0.75, 0, 0]
+L65 = [0.65, 0, 0]
+L55 = [0.55, 0, 0]
+L45 = [0.45, 0, 0]
+L35 = [0.35, 0, 0]
+L25 = [0.25, 0, 0]
+L15 = [0.15, 0, 0]
+
+# Afghani Blue
+# The colorapi coined this as "lapis lazuli".
+# https://www.thecolorapi.com/id?format=html&hex=4d6fb7
+# Historically, major sources of lapis lazuli were found in Afghanistan.
+[[palette.secondary]]
+name = "Afghani Blue"
+value = [0.55, 0.12, 264]
+[palette.secondary.tints]
+L95 = [0.95, 0.02, 264]
+L85 = [0.85, 0.07, 264]
+L75 = [0.75, 0.12, 264]
+L65 = [0.65, 0.12, 264]
+L55 = [0.55, 0.11, 264]
+L45 = [0.45, 0.09, 264]
+L35 = [0.35, 0.07, 264]
+L25 = [0.25, 0.05, 264]
+L15 = [0.15, 0.03, 264]
+
+# Argentinian Blue
+# Coolors coined this as "argentinian blue".
+# https://coolors.co/5fb8f2
+# It is very close to the blue in the Argentinian flag.
+[[palette.secondary]]
+name = "Argentinian Blue"
+value = [0.75, 0.12, 240]
+[palette.secondary.tints]
+L95 = [0.95, 0.02, 240]
+L85 = [0.85, 0.07, 240]
+L75 = [0.75, 0.12, 240]
+L65 = [0.65, 0.12, 240]
+L55 = [0.55, 0.11, 240]
+L45 = [0.45, 0.09, 240]
+L35 = [0.35, 0.07, 240]
+L25 = [0.25, 0.05, 240]
+L15 = [0.15, 0.03, 240]
+
+# Italian Violet
+# The colorapi coined this as "perano".
+# https://www.thecolorapi.com/id?format=html&hex=aaa1f6
+# Perano is a small town in Italy.
+[[palette.accent]]
+name = "Italian Violet"
+value = [0.75, 0.12, 288]
+[palette.accent.tints]
+L95 = [0.95, 0.02, 288]
+L85 = [0.85, 0.07, 288]
+L75 = [0.75, 0.12, 288]
+L65 = [0.65, 0.12, 288]
+L55 = [0.55, 0.11, 288]
+L45 = [0.45, 0.09, 288]
+L35 = [0.35, 0.07, 288]
+L25 = [0.25, 0.05, 288]
+L15 = [0.15, 0.03, 288]
+
+# Indian Gold
+# Coolors coined this as "gold".
+# https://coolors.co/cbaa4b
+# India is known for their gold jewelry.
+[[palette.accent]]
+name = "Indian Gold"
+value = [0.75, 0.12, 90]
+[palette.accent.tints]
+L95 = [0.95, 0.03, 90]
+L85 = [0.85, 0.07, 90]
+L75 = [0.75, 0.12, 90]
+L65 = [0.65, 0.12, 90]
+L55 = [0.55, 0.11, 90]
+L45 = [0.45, 0.09, 90]
+L35 = [0.35, 0.07, 90]
+L25 = [0.25, 0.05, 90]
+L15 = [0.15, 0.03, 90]
+
+# Chinese Magenta
+# Coolors coined this as "plum".
+# https://coolors.co/d991d2
+# China is known for their plums.
+[[palette.accent]]
+name = "Chinese Magenta"
+value = [0.75, 0.12, 330]
+[palette.accent.tints]
+L95 = [0.95, 0.04, 330]
+L85 = [0.85, 0.07, 330]
+L75 = [0.75, 0.12, 330]
+L65 = [0.65, 0.12, 330]
+L55 = [0.55, 0.11, 330]
+L45 = [0.45, 0.09, 330]
+L35 = [0.35, 0.07, 330]
+L25 = [0.25, 0.05, 330]
+L15 = [0.15, 0.03, 330]
+
+# Coolors coined this as "persian orange".
+# https://coolors.co/e99861
+[[palette.accent]]
+name = "Persian Orange"
+value = [0.75, 0.12, 54]
+[palette.accent.tints]
+L95 = [0.95, 0.02, 54]
+L85 = [0.85, 0.07, 54]
+L75 = [0.75, 0.12, 54]
+L65 = [0.65, 0.12, 54]
+L55 = [0.55, 0.11, 54]
+L45 = [0.45, 0.09, 54]
+L35 = [0.35, 0.07, 54]
+L25 = [0.25, 0.05, 54]
+L15 = [0.15, 0.03, 54]
+
+# Coolors coined this as "emerald"
+# https://coolors.co/6fc488
+# Zambian Green
+# Zambia is known for high-quality emeralds.
+[[palette.accent]]
+name = "Zambian Green"
+value = [0.75, 0.12, 152]
+[palette.accent.tints]
+L95 = [0.95, 0.03, 152]
+L85 = [0.85, 0.07, 152]
+L75 = [0.75, 0.12, 152]
+L65 = [0.65, 0.12, 152]
+L55 = [0.55, 0.11, 152]
+L45 = [0.45, 0.09, 152]
+L35 = [0.35, 0.07, 152]
+L25 = [0.25, 0.05, 152]
+L15 = [0.15, 0.03, 152]
+
+# Norwegian Pink
+# Coolors coined this as "salmon pink".
+# https://coolors.co/f08d94
+# Norway is known for high-quality Atlantic salmon.
+[[palette.accent]]
+name = "Norwegian Pink"
+value = [0.75, 0.12, 16]
+[palette.accent.tints]
+L95 = [0.95, 0.02, 16]
+L85 = [0.85, 0.07, 16]
+L75 = [0.75, 0.12, 16]
+L65 = [0.65, 0.12, 16]
+L55 = [0.55, 0.11, 16]
+L45 = [0.45, 0.09, 16]
+L35 = [0.35, 0.07, 16]
+L25 = [0.25, 0.05, 16]
+L15 = [0.15, 0.03, 16]

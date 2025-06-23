@@ -1,3 +1,11 @@
 # Nix
 result/
 .pre-commit-config.yaml
+*.otf
+
+# Python
+__pycache__
+
+# Artifacts
+*.svg
+*.pdf
