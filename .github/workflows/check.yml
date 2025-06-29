@@ -1,0 +1,54 @@
+name: Check
+run-name: ${{ github.actor }} is running checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Check formatting
+        run: nix flake check --print-build-logs
+
+  build-the-world:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Build all branding assets
+        run: nix run .\#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
+
+  branding-guide-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get latest or unreleased info
+        id: query-release-info
+        uses: release-flow/keep-a-changelog-action@v2
+        with:
+          command: query
+          version: latest-or-unreleased
+          changelog: ./package-sets/top-level/nixos-branding/nixos-branding-guide/CHANGELOG.md
+
+      - name: Display release info
+        run: |
+          echo "Version: ${{ steps.query-release-info.outputs.version }}"
+          echo "Date: ${{ steps.query-release-info.outputs.release-date }}"
+          cat <<'EOF'
+          "${{ steps.query-release-info.outputs.release-notes }}"
+          EOF
