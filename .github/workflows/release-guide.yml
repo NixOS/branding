@@ -1,0 +1,79 @@
+name: Release NixOS Branding Guide
+run-name: ${{ github.actor }} is releasing a new version of the branding guide
+
+on:
+  push:
+    tags:
+      - "nixos-branding-guide-v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  release:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Split tag name at version
+        env:
+          TAGNAME: ${{ github.ref_name }}
+        id: split
+        run: echo "version=${TAGNAME##*-v}" >> $GITHUB_OUTPUT
+      - name: Check version against tag
+        env:
+          TAGVERSION: ${{ steps.split.outputs.version }}
+        run: |
+          BASEVERSION=$(cat ./package-sets/top-level/nixos-branding/nixos-branding-guide/data/version | tr -d '\n')
+          if [[ "${TAGVERSION}" == "${BASEVERSION}" ]]; then
+            echo "NixOS Branding Guide tag version and file version match"
+            exit 0
+          else
+            echo "NixOS Branding Guide tag version and file version DO NOT match"
+            exit 1
+          fi
+      - name: Build Guide
+        run: |
+          nix build .\#nixos-branding.nixos-branding-guide \
+            --print-build-logs \
+            --out-link result-guide
+      - name: Build Media Kit
+        run: |
+          nix build .\#nixos-branding.nixos-media-kit \
+            --print-build-logs \
+            --out-link result-media-kit
+      - name: Get latest release info
+        id: query-release-info
+        uses: release-flow/keep-a-changelog-action@v2
+        with:
+          command: query
+          version: latest
+          changelog: ./package-sets/top-level/nixos-branding/nixos-branding-guide/CHANGELOG.md
+      - name: Display release info
+        run: |
+          echo "Version: ${{ steps.query-release-info.outputs.version }}"
+          echo "Date: ${{ steps.query-release-info.outputs.release-date }}"
+          cat <<'EOF'
+          "${{ steps.query-release-info.outputs.release-notes }}"
+          EOF
+      - name: Release notes to file
+        run: |
+          cat <<'EOF' > release
+          "${{ steps.query-release-info.outputs.release-notes }}"
+          EOF
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "NixOS Branding Guide v${{ steps.split.outputs.version }}"
+          body_path: release
+          files: |
+            result-guide/*
+            result-media-kit/*
+          make_latest: true
+          overwrite_files: false
