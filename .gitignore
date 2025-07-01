@@ -3,6 +3,9 @@ result/
 .pre-commit-config.yaml
 *.otf
 
+# VM
+nixos.qcow2
+
 # Python
 __pycache__
 

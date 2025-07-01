@@ -25,6 +25,7 @@
     hydraJobs = import ./hydra-jobs inputs;
     legacyPackages = import ./legacy-packages inputs;
     library = import ./library inputs;
+    nixosConfigurations = import ./nixos-configurations inputs;
     overlays = import ./overlays inputs;
     packages = import ./packages inputs;
   };
