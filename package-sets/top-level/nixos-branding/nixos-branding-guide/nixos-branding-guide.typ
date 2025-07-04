@@ -225,8 +225,8 @@
   ),
   rightSide: (
     content: [
-      All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `gap` and setting the `radius` to `1 / 2` such that the hexagon maximal diameter is 1.
-      In all cases, the denominator is a power of 2.
+      All meaningful dimensions of the lambda emerge as simply rational numbers given the default values of `thickness` and `gap` and setting the `radius` to `1 / 2` such that the hexagon maximal diameter is `1`.
+      In all cases, the denominator is a power of `2`.
     ],
     header: ("Anatomy", "Lambda", "Linear"),
   ),
