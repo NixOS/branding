@@ -239,8 +239,8 @@
   ),
   rightSide: (
     content: [
-      All angles are integer multiples of 60°.
-      `A` angles are 60°.
+      All angles are integer multiples of 60°. \
+      `A` angles are 60°. \
       `B` angles are 120°.
     ],
     header: ("Anatomy", "Lambda", "Angular"),
