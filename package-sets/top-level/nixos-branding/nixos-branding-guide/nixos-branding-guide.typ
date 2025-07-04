@@ -207,7 +207,8 @@
       The lambda is defined by three parameters:
 
       - `radius`: The distance from the origin to the vertex intersection points.
-      - `thickness`: The distance from the lambda skeleton to the edge.
+      - `thickness`: The distance from the lambda skeleton to the vertices.
+        It follows lines angled at multiples of 60°.
         This can be observed in the 6 lines forming a triangle beneath the origin.
         It is defined as a fraction of the `radius` with a default value of `1 / 4`.
       - `gap`: This distance that the upper apex and upper notch are translated towards the origin.
