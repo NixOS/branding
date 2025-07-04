@@ -258,6 +258,7 @@
     content: [
       The gradient of the lambda is defined by 2 points.
       The first end point is located at the intersection above the upper notch and to the left of the upper apex.
+      The first end point references the vertices of the lambda with zero gap.
       The second end point is located to the right of the joint crotch coincident with the lambda skeleton.
 
       The gradient stop points are located at 0%, 25%, and 100%.
