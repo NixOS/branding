@@ -1,6 +1,7 @@
 # artifact-builder
 {
   jura,
+  nixos-color-palette,
   python3,
   route159,
   runCommandLocal,
@@ -25,6 +26,7 @@ runCommandLocal name
 
     env = {
       NIXOS_ANNOTATIONS_FONT_FILE = "${jura}/share/fonts/truetype/jura/Jura-Regular.ttf";
+      NIXOS_COLOR_PALETTE_FILE = "${nixos-color-palette}/colors.toml";
       NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
     };
 

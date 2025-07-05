@@ -10,6 +10,7 @@ inputs.self.library.defaultSystems (
       {
         jura,
         mkShell,
+        nixos-branding,
         poetry,
         python3,
         route159,
@@ -35,8 +36,9 @@ inputs.self.library.defaultSystems (
         shellHook =
           ''
             export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/package-sets/python-packages/nixoslogo
-            export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/route159/Route159-Regular.otf"
             export NIXOS_ANNOTATIONS_FONT_FILE="${jura}/share/fonts/truetype/jura/Jura-Regular.ttf"
+            export NIXOS_COLOR_PALETTE_FILE="${nixos-branding.nixos-color-palette}/colors.toml";
+            export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/route159/Route159-Regular.otf"
           ''
           + inputs.self.checks.${system}.pre-commit-check.shellHook;
 
