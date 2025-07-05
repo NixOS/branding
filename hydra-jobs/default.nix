@@ -42,6 +42,7 @@ rec {
   nixos-branding = inputs.self.library.defaultSystems (
     system:
     removeAttrs (removeDirectoriesRecursiveAttrs inputs.self.legacyPackages.${system}.nixos-branding) [
+      "artifact-builder"
       "artifacts"
       "verification"
       "nixos-branding-guide-editable"
