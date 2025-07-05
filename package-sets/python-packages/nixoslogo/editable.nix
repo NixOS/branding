@@ -7,6 +7,7 @@
   lxml,
   poetry-core,
   svg-py,
+  svgpathtools,
 }:
 
 let
@@ -36,6 +37,7 @@ mkPythonEditablePackage {
     jsonpickle
     lxml
     svg-py
+    svgpathtools
   ];
 
 }
