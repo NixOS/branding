@@ -6,10 +6,43 @@ from functools import partial
 from pathlib import Path
 
 import svg
+import tomllib
 from lxml import etree
 
 from nixoslogo.colors import Color
 from nixoslogo.layout import Canvas
+
+# === Functions ===
+
+
+def get_path_from_envvar(envvar) -> Path:
+    path = os.getenv(envvar)
+    if not path:
+        raise EnvironmentError(
+            f"{envvar} is not set. "
+            "Please provide a font path explicitly or set the environment variable."
+        )
+    return Path(path)
+
+
+def get_color_by_name(palette, name):
+    return list(filter(lambda color: color["name"] == name, palette))[0]
+
+
+get_nixos_logotype_font_file = partial(
+    get_path_from_envvar,
+    "NIXOS_LOGOTYPE_FONT_FILE",
+)
+
+get_nixos_annotation_font_file = partial(
+    get_path_from_envvar,
+    "NIXOS_ANNOTATIONS_FONT_FILE",
+)
+
+get_nixos_color_palette_file = partial(
+    get_path_from_envvar,
+    "NIXOS_COLOR_PALETTE_FILE",
+)
 
 # === Constants ===
 
@@ -50,15 +83,38 @@ DEFAULT_JURA_TRANSFORMS = {
 DEFAULT_LOGOTYPE_SPACINGS = (0, 90, 70, 50, 10)
 DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
 
-NIXOS_DARK_BLUE = Color("oklch", (0.55, 0.12, 264))
-NIXOS_LIGHT_BLUE = Color("oklch", (0.75, 0.09, 240))
-RAINBOW_COLORS = (
-    Color("oklch", (0.51, 0.208963, 29.2339)),
-    Color("oklch", (0.70, 0.204259, 43.491)),
-    Color("oklch", (0.81, 0.168100, 76.78)),
-    Color("oklch", (0.60, 0.175100, 147.56)),
-    Color("oklch", (0.60, 0.141400, 241.38)),
-    Color("oklch", (0.46, 0.194300, 288.71)),
+
+with open(get_nixos_color_palette_file(), "rb") as f:
+    NIXOS_COLOR_PALETTE = tomllib.load(f)
+
+PALETTE_DEFAULT_COLORS = NIXOS_COLOR_PALETTE["logos"]["default"]
+PALETTE_RAINBOW_COLORS = NIXOS_COLOR_PALETTE["logos"]["rainbow"]
+PALETTE_PRIMARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["primary"]
+PALETTE_SECONDARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["secondary"]
+PALETTE_ACCENT_COLORS = NIXOS_COLOR_PALETTE["palette"]["accent"]
+
+NIXOS_DARK_BLUE = Color(
+    "oklch",
+    get_color_by_name(PALETTE_DEFAULT_COLORS, "NixOS Dark Blue")["value"],
+)
+NIXOS_LIGHT_BLUE = Color(
+    "oklch",
+    get_color_by_name(PALETTE_DEFAULT_COLORS, "NixOS Light Blue")["value"],
+)
+RAINBOW_COLORS = tuple(
+    map(
+        lambda color: Color("oklch", color["value"]),
+        PALETTE_RAINBOW_COLORS,
+    )
+)
+NIXOS_BLACK = Color(
+    "oklch",
+    get_color_by_name(PALETTE_PRIMARY_COLORS, "Black")["value"],
+)
+
+NIXOS_WHITE = Color(
+    "oklch",
+    get_color_by_name(PALETTE_PRIMARY_COLORS, "White")["value"],
 )
 
 
@@ -84,38 +140,13 @@ class LogoLayout(Enum):
 class LogomarkColors(Enum):
     DEFAULT = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE)
     RAINBOW = RAINBOW_COLORS
-    BLACK = (Color("oklch", (0, 0, 0)),)
-    WHITE = (Color("oklch", (1, 0, 0)),)
+    BLACK = (NIXOS_BLACK,)
+    WHITE = (NIXOS_WHITE,)
 
 
 class LogotypeStyle(Enum):
     REGULAR = auto()
     LAMBDAPRIME = auto()
-
-
-# === Functions ===
-
-
-def get_path_from_envvar(envvar) -> Path:
-    path = os.getenv(envvar)
-    if not path:
-        raise EnvironmentError(
-            f"{envvar} is not set. "
-            "Please provide a font path explicitly or set the environment variable."
-        )
-    return Path(path)
-
-
-get_nixos_logotype_font_file = partial(
-    get_path_from_envvar,
-    "NIXOS_LOGOTYPE_FONT_FILE",
-)
-
-
-get_nixos_annotation_font_file = partial(
-    get_path_from_envvar,
-    "NIXOS_ANNOTATIONS_FONT_FILE",
-)
 
 
 # === Base Classes ===
