@@ -7,41 +7,65 @@ let
     ;
 
   inherit (lib.attrsets)
+    attrValues
+    getAttrFromPath
+    listToAttrs
+    mergeAttrsList
     removeAttrs
     ;
 
+  inherit (lib.lists)
+    map
+    ;
+
+  inherit (lib.strings)
+    concatStringsSep
+    ;
+
+  inherit (inputs.self)
+    legacyPackages
+    ;
+
   inherit (inputs.self.library)
+    defaultSystems
+    getDirectories
     removeDirectoriesRecursiveAttrs
     ;
+
+  nixosBrandingArtifacts = listToAttrs (
+    map (
+      attrName:
+      let
+        attrPath = [
+          "nixos-branding"
+          "artifacts"
+          attrName
+        ];
+      in
+      {
+        name = concatStringsSep "-" attrPath;
+        value = defaultSystems (
+          system: removeDirectoriesRecursiveAttrs (getAttrFromPath attrPath legacyPackages.${system})
+        );
+      }
+    ) (getDirectories ../package-sets/top-level/nixos-branding/artifacts)
+  );
 
 in
 
 rec {
 
-  nixos-branding-all = inputs.self.library.defaultSystems (
-    system:
-    nixos-branding.${system}
-    // nixos-branding-artifacts-clearspace.${system}
-    // nixos-branding-artifacts-dimensioned.${system}
-    // nixos-branding-artifacts-internal.${system}
-    // nixos-branding-artifacts-media-kit.${system}
-    // nixos-branding-artifacts-miscellaneous.${system}
-    // nixos-branding-artifacts-misuse.${system}
+  nixos-branding-all = defaultSystems (
+    system: nixos-branding.${system} // nixos-branding-fods.${system}
   );
 
-  nixos-branding-fods = inputs.self.library.defaultSystems (
-    system:
-    nixos-branding-artifacts-clearspace.${system}
-    // nixos-branding-artifacts-dimensioned.${system}
-    // nixos-branding-artifacts-internal.${system}
-    // nixos-branding-artifacts-media-kit.${system}
-    // nixos-branding-artifacts-miscellaneous.${system}
-    // nixos-branding-artifacts-misuse.${system}
+  nixos-branding-fods = defaultSystems (
+    system: mergeAttrsList (lib.map (attrs: attrs.${system}) (attrValues nixosBrandingArtifacts))
   );
 
-  nixos-branding = inputs.self.library.defaultSystems (
+  nixos-branding = defaultSystems (
     system:
-    removeAttrs (removeDirectoriesRecursiveAttrs inputs.self.legacyPackages.${system}.nixos-branding) [
+    removeAttrs (removeDirectoriesRecursiveAttrs legacyPackages.${system}.nixos-branding) [
       "artifact-builder"
       "artifacts"
       "verification"
@@ -49,46 +73,5 @@ rec {
     ]
   );
 
-  nixos-branding-artifacts-clearspace = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.clearspace
-    )
-  );
-
-  nixos-branding-artifacts-dimensioned = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.dimensioned
-    )
-  );
-
-  nixos-branding-artifacts-internal = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.internal
-    )
-  );
-
-  nixos-branding-artifacts-media-kit = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.media-kit
-    )
-  );
-
-  nixos-branding-artifacts-miscellaneous = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.miscellaneous
-    )
-  );
-
-  nixos-branding-artifacts-misuse = inputs.self.library.defaultSystems (
-    system:
-    (removeDirectoriesRecursiveAttrs
-      inputs.self.legacyPackages.${system}.nixos-branding.artifacts.misuse
-    )
-  );
-
 }
+// nixosBrandingArtifacts
