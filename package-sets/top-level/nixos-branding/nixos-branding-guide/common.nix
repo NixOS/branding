@@ -10,7 +10,12 @@
 let
 
   inherit (lib.attrsets)
+    attrNames
     attrValues
+    ;
+
+  inherit (lib.lists)
+    map
     ;
 
   inherit (lib.nixos-branding)
@@ -28,61 +33,27 @@ in
     "${jura}/share/fonts/truetype/jura"
   ];
 
-  virtualPaths = [
-    {
-      dest = "data";
-      src = ./data;
-    }
-    {
-      dest = "images";
-      src = ./images;
-    }
-    {
-      dest = "colors";
-      src = nixos-color-palette;
-    }
-    {
-      dest = "clearspace";
+  virtualPaths =
+    [
+      {
+        dest = "data";
+        src = ./data;
+      }
+      {
+        dest = "images";
+        src = ./images;
+      }
+      {
+        dest = "colors";
+        src = nixos-color-palette;
+      }
+    ]
+    ++ (map (artifact: {
+      dest = artifact;
       src = "${symlinkJoin {
-        name = "artifacts.clearspace";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.clearspace));
+        name = "artifacts.${artifact}";
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.${artifact}));
       }}";
-    }
-    {
-      dest = "dimensioned";
-      src = "${symlinkJoin {
-        name = "artifacts.dimensioned";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.dimensioned));
-      }}";
-    }
-    {
-      dest = "internal";
-      src = "${symlinkJoin {
-        name = "artifacts.internal";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.internal));
-      }}";
-    }
-    {
-      dest = "media-kit";
-      src = "${symlinkJoin {
-        name = "artifacts.media-kit";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.media-kit));
-      }}";
-    }
-    {
-      dest = "miscellaneous";
-      src = "${symlinkJoin {
-        name = "artifacts.miscellaneous";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.miscellaneous));
-      }}";
-    }
-    {
-      dest = "misuse";
-      src = "${symlinkJoin {
-        name = "artifacts.misuse";
-        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.misuse));
-      }}";
-    }
-  ];
+    }) (attrNames (removeDirectoriesRecursiveAttrs artifacts)));
 
 }
