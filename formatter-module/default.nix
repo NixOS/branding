@@ -1,9 +1,6 @@
 inputs:
-inputs.self.library.defaultSystems (
-  system:
-  let
-    pkgs = inputs.self.legacyPackages.${system};
-  in
+inputs.nixpkgs.lib.attrsets.mapAttrs (
+  system: pkgs:
   (inputs.treefmt-nix.lib.evalModule pkgs (
     { ... }:
     {
@@ -28,4 +25,4 @@ inputs.self.library.defaultSystems (
       };
     }
   ))
-)
+) inputs.self.legacyPackages
