@@ -8,22 +8,15 @@ let
 
   inherit (lib.attrsets)
     attrValues
-    removeAttrs
+    ;
+
+  inherit (lib.nixos-branding)
+    removeDirectoriesRecursiveAttrs
     ;
 
 in
 
 symlinkJoin {
   name = "nixos-media-kit";
-  paths = (
-    attrValues (
-      removeAttrs artifacts.media-kit [
-        "callPackage"
-        "newScope"
-        "overrideScope"
-        "packages"
-        "recurseForDerivations"
-      ]
-    )
-  );
+  paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.media-kit));
 }
