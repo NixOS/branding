@@ -11,7 +11,10 @@ let
 
   inherit (lib.attrsets)
     attrValues
-    removeAttrs
+    ;
+
+  inherit (lib.nixos-branding)
+    removeDirectoriesRecursiveAttrs
     ;
 
 in
@@ -42,102 +45,42 @@ in
       dest = "clearspace";
       src = "${symlinkJoin {
         name = "artifacts.clearspace";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.clearspace [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.clearspace));
       }}";
     }
     {
       dest = "dimensioned";
       src = "${symlinkJoin {
         name = "artifacts.dimensioned";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.dimensioned [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.dimensioned));
       }}";
     }
     {
       dest = "internal";
       src = "${symlinkJoin {
         name = "artifacts.internal";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.internal [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.internal));
       }}";
     }
     {
       dest = "media-kit";
       src = "${symlinkJoin {
         name = "artifacts.media-kit";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.media-kit [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.media-kit));
       }}";
     }
     {
       dest = "miscellaneous";
       src = "${symlinkJoin {
         name = "artifacts.miscellaneous";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.miscellaneous [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.miscellaneous));
       }}";
     }
     {
       dest = "misuse";
       src = "${symlinkJoin {
         name = "artifacts.misuse";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.misuse [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.misuse));
       }}";
     }
   ];
