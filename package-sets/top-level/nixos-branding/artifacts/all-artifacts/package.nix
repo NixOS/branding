@@ -13,17 +13,9 @@ let
     removeAttrs
     ;
 
-  inherit (lib.trivial)
-    flip
+  inherit (lib.nixos-branding)
+    removeDirectoriesRecursiveAttrs
     ;
-
-  removeDirectoriesRecursiveAttrs = flip removeAttrs [
-    "callPackage"
-    "newScope"
-    "overrideScope"
-    "packages"
-    "recurseForDerivations"
-  ];
 
   cleanedArtifacts = removeAttrs (removeDirectoriesRecursiveAttrs artifacts) [ "all-artifacts" ];
 
