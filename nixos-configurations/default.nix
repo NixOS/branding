@@ -11,17 +11,20 @@ let
     ;
 
   inherit (lib.attrsets)
-    filterAttrs
-    mapAttrs
+    genAttrs
+    ;
+
+  inherit (inputs.self.library)
+    getDirectories
     ;
 
 in
 
-mapAttrs (
-  configurationDir: _:
+genAttrs (getDirectories ./.) (
+  configurationDir:
   nixosSystem {
     modules = [
       ./${configurationDir}/configuration.nix
     ];
   }
-) (filterAttrs (_: fileType: fileType == "directory") (builtins.readDir ./.))
+)
