@@ -10,8 +10,16 @@
 let
 
   inherit (lib.attrsets)
+    attrNames
     attrValues
-    removeAttrs
+    ;
+
+  inherit (lib.lists)
+    map
+    ;
+
+  inherit (lib.nixos-branding)
+    removeDirectoriesRecursiveAttrs
     ;
 
 in
@@ -25,121 +33,27 @@ in
     "${jura}/share/fonts/truetype/jura"
   ];
 
-  virtualPaths = [
-    {
-      dest = "data";
-      src = ./data;
-    }
-    {
-      dest = "images";
-      src = ./images;
-    }
-    {
-      dest = "colors";
-      src = nixos-color-palette;
-    }
-    {
-      dest = "clearspace";
+  virtualPaths =
+    [
+      {
+        dest = "data";
+        src = ./data;
+      }
+      {
+        dest = "images";
+        src = ./images;
+      }
+      {
+        dest = "colors";
+        src = nixos-color-palette;
+      }
+    ]
+    ++ (map (artifact: {
+      dest = artifact;
       src = "${symlinkJoin {
-        name = "artifacts.clearspace";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.clearspace [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
+        name = "artifacts.${artifact}";
+        paths = (attrValues (removeDirectoriesRecursiveAttrs artifacts.${artifact}));
       }}";
-    }
-    {
-      dest = "dimensioned";
-      src = "${symlinkJoin {
-        name = "artifacts.dimensioned";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.dimensioned [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
-      }}";
-    }
-    {
-      dest = "internal";
-      src = "${symlinkJoin {
-        name = "artifacts.internal";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.internal [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
-      }}";
-    }
-    {
-      dest = "media-kit";
-      src = "${symlinkJoin {
-        name = "artifacts.media-kit";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.media-kit [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
-      }}";
-    }
-    {
-      dest = "miscellaneous";
-      src = "${symlinkJoin {
-        name = "artifacts.miscellaneous";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.miscellaneous [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
-      }}";
-    }
-    {
-      dest = "misuse";
-      src = "${symlinkJoin {
-        name = "artifacts.misuse";
-        paths = (
-          attrValues (
-            removeAttrs artifacts.misuse [
-              "callPackage"
-              "newScope"
-              "overrideScope"
-              "packages"
-              "recurseForDerivations"
-            ]
-          )
-        );
-      }}";
-    }
-  ];
+    }) (attrNames (removeDirectoriesRecursiveAttrs artifacts)));
 
 }

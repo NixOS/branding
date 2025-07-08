@@ -1,5 +1,5 @@
 inputs:
-inputs.self.library.defaultSystems (system: {
+inputs.nixpkgs.lib.attrsets.mapAttrs (system: pkgs: {
 
   formatting = inputs.self.formatterModule.${system}.config.build.check inputs.self;
 
@@ -11,4 +11,4 @@ inputs.self.library.defaultSystems (system: {
     };
   };
 
-})
+}) inputs.self.legacyPackages

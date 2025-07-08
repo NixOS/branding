@@ -1,24 +1,6 @@
-{
-  python3,
-  route159,
-  runCommandLocal,
-}:
-runCommandLocal "nixos-logo"
-  {
-    script = ./script.py;
-
-    nativeBuildInputs = [
-      (python3.withPackages (ps: [ ps.nixoslogo ]))
-    ];
-
-    env.NIXOS_LOGOTYPE_FONT_FILE = "${route159}/share/fonts/opentype/route159/Route159-Regular.otf";
-
-    outputHash = "sha256-EbLod3EzJuaoo9Wm8gUeAwONw7S7/bViZmrf5BCa/sw=";
-    outputHashAlgo = "sha256";
-    outputHashMode = "recursive";
-  }
-  ''
-    python $script
-    mkdir $out
-    cp *.svg $out/
-  ''
+{ artifact-builder }:
+artifact-builder {
+  name = "nixos-logo-default-gradient-white-regular-horizontal-recommended";
+  outputHash = "sha256-EbLod3EzJuaoo9Wm8gUeAwONw7S7/bViZmrf5BCa/sw=";
+  script = ./script.py;
+}
