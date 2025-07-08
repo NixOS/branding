@@ -10,14 +10,11 @@ let
   inherit (lib.attrsets)
     attrValues
     mapAttrs
-    removeAttrs
     ;
 
   inherit (lib.nixos-branding)
     removeDirectoriesRecursiveAttrs
     ;
-
-  cleanedArtifacts = removeAttrs (removeDirectoriesRecursiveAttrs artifacts) [ "all-artifacts" ];
 
   individualLinkFarms = mapAttrs (
     name: value:
@@ -25,7 +22,7 @@ let
       inherit name;
       paths = (attrValues (removeDirectoriesRecursiveAttrs value));
     }
-  ) cleanedArtifacts;
+  ) (removeDirectoriesRecursiveAttrs artifacts);
 
 in
-linkFarm "nixos-branding-artifacts" individualLinkFarms
+linkFarm "nixos-branding-all-artifacts" individualLinkFarms
