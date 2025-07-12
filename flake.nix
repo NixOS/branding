@@ -1,5 +1,5 @@
 {
-  description = "nix-derivation-parser";
+  description = "Official NixOS logos, branding guide, and other related assets";
 
   inputs = {
     flake-compat.flake = false;
