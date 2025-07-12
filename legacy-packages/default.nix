@@ -1,8 +1,18 @@
 inputs:
-inputs.self.library.defaultSystems (
+
+let
+
+  inherit (inputs.self)
+    library
+    overlays
+    ;
+
+in
+
+library.defaultSystems (
   system:
   import inputs.nixpkgs {
     inherit system;
-    overlays = [ inputs.self.overlays.everything ];
+    overlays = [ overlays.everything ];
   }
 )

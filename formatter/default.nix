@@ -1,4 +1,12 @@
 inputs:
-inputs.self.library.defaultSystems (
-  system: inputs.self.formatterModule.${system}.config.build.wrapper
-)
+
+let
+
+  inherit (inputs.self)
+    library
+    formatterModule
+    ;
+
+in
+
+library.defaultSystems (system: formatterModule.${system}.config.build.wrapper)
