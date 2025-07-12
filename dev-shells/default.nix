@@ -1,5 +1,23 @@
 inputs:
-inputs.nixpkgs.lib.attrsets.mapAttrs (system: pkgs: {
+
+let
+
+  inherit (inputs.nixpkgs)
+    lib
+    ;
+
+  inherit (lib.attrsets)
+    mapAttrs
+    ;
+
+  inherit (inputs.self)
+    checks
+    legacyPackages
+    ;
+
+in
+
+mapAttrs (system: pkgs: {
 
   nixos-logo-dev = pkgs.callPackage (
     {
@@ -24,7 +42,7 @@ inputs.nixpkgs.lib.attrsets.mapAttrs (system: pkgs: {
 
       buildInputs = [
 
-        inputs.self.checks.${system}.pre-commit-check.enabledPackages
+        checks.${system}.pre-commit-check.enabledPackages
 
       ];
 
@@ -35,7 +53,7 @@ inputs.nixpkgs.lib.attrsets.mapAttrs (system: pkgs: {
           export NIXOS_COLOR_PALETTE_FILE="${nixos-branding.nixos-color-palette}/colors.toml";
           export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/route159/Route159-Regular.otf"
         ''
-        + inputs.self.checks.${system}.pre-commit-check.shellHook;
+        + checks.${system}.pre-commit-check.shellHook;
 
     }
   ) { };
@@ -55,4 +73,4 @@ inputs.nixpkgs.lib.attrsets.mapAttrs (system: pkgs: {
     }
   ) { };
 
-}) inputs.self.legacyPackages
+}) legacyPackages
