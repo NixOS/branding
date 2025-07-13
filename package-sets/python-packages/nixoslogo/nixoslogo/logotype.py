@@ -10,6 +10,7 @@ import fontforge
 import svg
 
 from nixoslogo.core import (
+    CHARACTER_GLYPHNAME_MAP,
     DEFAULT_LOGOTYPE_SPACINGS,
     DEFAULT_ROUTE159_TRANSFORMS,
     NIXOS_DARK_BLUE,
@@ -145,7 +146,7 @@ class Glyph(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.character = character
+        self.character = CHARACTER_GLYPHNAME_MAP.get(character, character)
         self.loader = loader
         self.color = color
         self.style = style
