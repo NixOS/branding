@@ -33,6 +33,18 @@ value = [0.60, 0.141400, 241.380]
 name = "violet"
 value = [0.46, 0.194300, 288.710]
 
+[[logos.trans]]
+name = "pink"
+value = [0.81179, 0.09118, 6.3234]
+
+[[logos.trans]]
+name = "white"
+value = [1, 0, 0]
+
+[[logos.trans]]
+name = "blue"
+value = [0.8025, 0.12028, 226.51]
+
 [palette]
 [[palette.primary]]
 name = "Black"
