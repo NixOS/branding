@@ -8,7 +8,7 @@
 
 let
   npmPckageMetadata = {
-    name = "branding";
+    name = "@NixOS/branding";
     version = "0.0.1";
     description = "Branding assets for the NixOS organization";
     main = "index.js";
@@ -22,6 +22,9 @@ let
       url = "https://github.com/NixOS/branding/issues";
     };
     homepage = "https://nixos.org";
+    publishConfig = {
+      registry = "https://npm.pkg.github.com/";
+    };
     keywords = [
       "nixos"
       "branding"
@@ -88,11 +91,16 @@ stdenvNoCC.mkDerivation {
     ${pkgs.nodePackages.prettier}/bin/prettier --write $out/package.json
 
     mkdir -p $out/artifacts
-    cp -r ${all-artifacts}/* $out/artifacts/
+    cp -RL -r ${all-artifacts}/* $out/artifacts/
 
     cat > $out/colors/tailwind.js <<EOF
     export default ${builtins.toJSON colors}
     EOF
     ${pkgs.nodePackages.prettier}/bin/prettier --write $out/colors/tailwind.js
+
+    cat > $out/.npmrc <<EOF
+    //npm.pkg.github.com/:_authToken=$\{NODE_AUTH_TOKEN\}
+    registry=https://npm.pkg.github.com/
+    EOF
   '';
 }
