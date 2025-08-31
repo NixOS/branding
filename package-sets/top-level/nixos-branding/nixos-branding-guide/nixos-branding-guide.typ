@@ -340,8 +340,63 @@
 
 #contentPage(
   leftSide: (
-    content: image(
-      "./dimensioned/nixos-logomark-dimensioned-gradient-background.svg",
+    content: box(
+      fill: gradient.linear(
+        (
+          {
+            let mcolor = color_palette.palette.secondary.at(0).value
+            oklch(
+              mcolor.at(0) * 100% - 2 * 4%,
+              mcolor.at(1) - 2 * 0.01,
+              mcolor.at(2) * 1deg,
+            )
+          },
+          0%,
+        ),
+        (
+          {
+            let mcolor = color_palette.palette.secondary.at(0).value
+            oklch(
+              mcolor.at(0) * 100% - 2 * 4%,
+              mcolor.at(1) - 2 * 0.01,
+              mcolor.at(2) * 1deg,
+            )
+          },
+          27%,
+        ),
+        (
+          {
+            let mcolor = color_palette.palette.secondary.at(0).value
+            oklch(
+              mcolor.at(0) * 100% - 4%,
+              mcolor.at(1) - 0.01,
+              mcolor.at(2) * 1deg,
+            )
+          },
+          36%,
+        ),
+        (
+          {
+            let mcolor = color_palette.palette.secondary.at(0).value
+            oklch(mcolor.at(0) * 100%, mcolor.at(1), mcolor.at(2) * 1deg)
+          },
+          60%,
+        ),
+        (
+          {
+            let mcolor = color_palette.palette.secondary.at(0).value
+            oklch(mcolor.at(0) * 100%, mcolor.at(1), mcolor.at(2) * 1deg)
+          },
+          100%,
+        ),
+        angle: 60deg,
+      ),
+      outset: (right: bleed, top: 2 * bleed, bottom: 2 * bleed),
+      [
+        #image(
+          "./dimensioned/nixos-logomark-dimensioned-gradient-background.svg",
+        )
+      ],
     ),
     header: none,
   ),
