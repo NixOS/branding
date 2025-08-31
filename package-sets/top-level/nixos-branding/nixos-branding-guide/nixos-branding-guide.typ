@@ -38,34 +38,68 @@
       #h(1fr) #rightSide.header
     ],
     context [
-      #grid(
-        columns: (2fr, 1fr),
-        rows: 1fr,
-        gutter: 0em,
-        grid.cell(align: horizon, box(
-          inset: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
-          [
-            #leftSide.content
-          ],
-        )),
-        grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
-          #set text(fill: white)
-          #rightSide.content
-        ]),
-      )
-      #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
-        #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
-          " / ",
-        ))
-      ])
-      #let page_num = if here().page() < 10 {
-        [0#str(here().page())]
-      } else {
-        here().page()
-      };
-      #place(bottom + right, dx: -2.5em, dy: -2.5em, [
-        #text(fill: white, weight: 900, font: "Jura", [#page_num])
-      ])
+      #if calc.rem(here().page(), 2) == 1 [
+        #grid(
+          columns: (2fr, 1fr), rows: 1fr, gutter: 0em, grid.cell(
+            align: horizon,
+            box(
+              inset: if leftSide.at("inset", default: false) { 2.5em } else {
+                0em
+              },
+              [
+                #leftSide.content
+              ],
+            ),
+          ), grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
+            #set text(fill: white)
+            #rightSide.content
+          ]),
+        )
+        #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
+          #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
+            " / ",
+          ))
+        ])
+        #let page_num = if here().page() < 10 {
+          [0#str(here().page())]
+        } else {
+          here().page()
+        };
+        #place(bottom + right, dx: -2.5em, dy: -2.5em, [
+          #text(fill: white, weight: 900, font: "Jura", [#page_num])
+        ])
+      ] else [
+        #grid(
+          columns: (1fr, 2fr), rows: 1fr, gutter: 0em, grid.cell(
+            align: horizon,
+            fill: black,
+            box(inset: 2.5em)[
+              #set text(fill: white)
+              #rightSide.content
+            ],
+          ), grid.cell(align: horizon, box(
+            inset: if leftSide.at("inset", default: false) { 2.5em } else {
+              0em
+            },
+            [
+              #leftSide.content
+            ],
+          )),
+        )
+        #place(top + left, dx: 2.5em, dy: 2.5em, [
+          #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
+            " / ",
+          ))
+        ])
+        #let page_num = if here().page() < 10 {
+          [0#str(here().page())]
+        } else {
+          here().page()
+        };
+        #place(bottom + left, dx: +2.5em, dy: -2.5em, [
+          #text(fill: white, weight: 900, font: "Jura", [#page_num])
+        ])
+      ]
     ],
   )
 }
