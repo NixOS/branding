@@ -70,6 +70,45 @@
   )
 }
 
+#let contentPageReverse(leftSide: none, rightSide: none) = {
+  page(
+    margin: (x: 0cm, y: 0cm),
+    header: [
+      #h(1fr) #rightSide.header
+    ],
+    context [
+      #grid(
+        columns: (1fr, 2fr),
+        rows: 1fr,
+        gutter: 0em,
+        grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
+          #set text(fill: white)
+          #rightSide.content
+        ]),
+        grid.cell(align: horizon, box(
+          inset: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+          [
+            #leftSide.content
+          ],
+        )),
+      )
+      #place(top + left, dx: 2.5em, dy: 2.5em, [
+        #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
+          " / ",
+        ))
+      ])
+      #let page_num = if here().page() < 10 {
+        [0#str(here().page())]
+      } else {
+        here().page()
+      };
+      #place(bottom + left, dx: 2.5em, dy: -2.5em, [
+        #text(fill: white, weight: 900, font: "Jura", [#page_num])
+      ])
+    ],
+  )
+}
+
 #let imageBox(
   content,
   fill: none,
@@ -195,7 +234,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image(
       "./dimensioned/nixos-lambda-dimensioned-annotated-parameters.svg",
@@ -233,7 +272,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image("./dimensioned/nixos-lambda-dimensioned-angular.svg"),
     header: none,
@@ -268,7 +307,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image(
       "./dimensioned/nixos-logomark-dimensioned-gradient-background.svg",
@@ -301,7 +340,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image("./dimensioned/nixos-logotype-dimensioned.svg"),
     header: none,
@@ -333,7 +372,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image("./clearspace/nixos-logo-clearspace.svg"),
     header: none,
@@ -364,7 +403,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: image("./clearspace/nixos-logotype-clearspace.svg"),
     header: none,
@@ -442,7 +481,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -563,7 +602,7 @@
 )
 
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -655,7 +694,7 @@
 )
 
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -749,7 +788,7 @@
 )
 
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -863,7 +902,7 @@
   "@#&%*/\+-=_~^$€£¥±≠≤≥∞",
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #set par(justify: true)
@@ -1014,7 +1053,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -1066,7 +1105,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
@@ -1132,7 +1171,7 @@
   ),
 )
 
-#contentPage(
+#contentPageReverse(
   leftSide: (
     content: [
       #grid(
