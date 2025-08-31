@@ -567,6 +567,22 @@
   ),
 )
 
+#page(
+  fill: {
+    let mcolor = color_palette.palette.secondary.at(0).value
+    oklch(mcolor.at(0) * 100%, mcolor.at(1), mcolor.at(2) * 1deg)
+  },
+  [],
+)
+
+#page(
+  fill: {
+    let mcolor = color_palette.palette.secondary.at(1).value
+    oklch(mcolor.at(0) * 100%, mcolor.at(1), mcolor.at(2) * 1deg)
+  },
+  [],
+)
+
 #contentPage(
   leftSide: (
     content: [
@@ -1382,3 +1398,5 @@
     header: ("Logo", "Rainbow"),
   ),
 )
+
+#page(fill: black, [])
