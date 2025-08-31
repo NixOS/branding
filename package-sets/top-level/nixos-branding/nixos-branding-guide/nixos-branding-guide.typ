@@ -1020,6 +1020,7 @@
   color_name: none,
   text_color_value_enable: true,
   outset: (:),
+  placement: bottom,
   color,
 ) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
@@ -1031,7 +1032,7 @@
     OKLCH: #color.at(0) #color.at(1) #color.at(2) \
   ] else { }
   let text_content = if text_enable {
-    place(bottom, text(text_size, text_color)[
+    place(placement, text(text_size, text_color)[
       #text_color_name \
       #text_color_value
     ])
@@ -1065,6 +1066,7 @@
               bottom: if index > 4 { bleed } else { 0pt },
               left: if calc.rem(index, 5) == 0 { bleed } else { 0pt },
             ),
+            placement: bottom + right,
           ))
       )
     ],
@@ -1145,6 +1147,7 @@
               bottom: if index > 0 { bleed } else { 0pt },
               left: bleed,
             ),
+            placement: bottom + right,
           ))
       )
     ],
@@ -1222,6 +1225,7 @@
               bottom: if index > 71 { bleed } else { 0pt },
               left: if calc.rem(index, 9) == 0 { bleed } else { 0pt },
             ),
+            placement: bottom + right,
           ))
       )
     ],
@@ -1297,6 +1301,7 @@
               bottom: if index > 4 { bleed } else { 0pt },
               left: bleed,
             ),
+            placement: bottom + right,
           ))
       )
     ],
