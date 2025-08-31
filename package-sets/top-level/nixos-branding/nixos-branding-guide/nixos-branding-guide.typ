@@ -960,30 +960,37 @@
   leftSide: (
     content: [
       #grid(
-        columns: 2,
+        columns: (0.3fr, 0.4fr, 2fr),
         rows: (18em,) + (1fr,) * 3,
         align: top,
         column-gutter: 3em,
-        text(size: 20em)[Aa], [],
+        [], [], text(size: 20em)[Aa],
+        [],
+        align(right)[
+          #text(size: 1.6em, weight: "regular")[
+            Regular
+          ]
+        ],
         text(size: 1.6em, weight: "regular")[
           #route159_text_alt.join("\n")
         ],
-        text(size: 1.6em, weight: "regular")[
-          Regular
-        ],
 
+        [],
+        align(right)[
+          #text(size: 1.6em, weight: "light")[
+            Light
+          ]],
         text(size: 1.6em, weight: "light")[
           #route159_text_alt.join("\n")
         ],
-        text(size: 1.6em, weight: "light")[
-          Light
-        ],
 
+        [],
+        align(right)[
+          #text(size: 1.6em, weight: "bold")[
+            Bold
+          ]],
         text(size: 1.6em, weight: "bold")[
           #route159_text_alt.join("\n")
-        ],
-        text(size: 1.6em, weight: "bold")[
-          Bold
         ],
       )
     ],
