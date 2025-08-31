@@ -1,6 +1,8 @@
 // Date must be set to none for deterministic builds
 #set document(date: none)
-#set page("a4", flipped: true)
+
+#let bleed = 6mm
+#set page(height: 297mm + 2 * bleed, width: 210mm + 2 * bleed, flipped: true)
 #set text(font: "Route 159")
 
 #let color_palette = toml("colors/colors.toml")
@@ -9,8 +11,6 @@
 #let sectionTitle(content, size: 36pt) = {
   upper(text(size: size, weight: "bold", content))
 }
-
-#let bleed = 6mm
 
 #let sectionPage(content, text_size: 36pt) = {
   page(margin: (x: bleed, y: bleed), layout(size => {
