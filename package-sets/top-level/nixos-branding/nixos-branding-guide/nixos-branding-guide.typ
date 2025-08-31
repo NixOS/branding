@@ -1,6 +1,11 @@
 // Date must be set to none for deterministic builds
 #set document(date: none)
-#set page("a4", flipped: true)
+
+// Global bleed configuration
+#let bleed = 6mm
+#let page_bleed = 2 * bleed  // Total bleed for page size (both sides)
+
+#set page(width: 297mm + page_bleed, height: 210mm + page_bleed, margin: 0mm)
 #set text(font: "Route 159")
 
 #let color_palette = toml("colors/colors.toml")
@@ -15,17 +20,19 @@
     let text_content = sectionTitle(size: text_size)[#content]
     let text_size = measure(text_content)
     let text_start = 5 / 9 * size.height - text_size.height / 2
+    let bleed_margin = bleed
     if (counter(page).get().at(0) == 1) {
       place(
         top + left,
-        dx: 1.1cm,
+        dx: 1.1cm + bleed_margin,
         dy: text_start + text_size.height + 1em,
       )[#text(size: 1.2em, weight: "bold", font: "Jura")[VERSION #version]]
     }
     [
-      #place(top + left, dx: 1cm, dy: text_start)[#text_content]
-      #place(top + right)[#image(
+      #place(top + left, dx: 1cm + bleed_margin, dy: text_start)[#text_content]
+      #place(top + right, dx: -bleed_margin, dy: bleed_margin)[#image(
           "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
+          height: size.height - 2 * bleed_margin,
         )]
     ]
   }))
@@ -38,22 +45,38 @@
       #h(1fr) #rightSide.header
     ],
     context [
+      #let bleed_margin = bleed
       #grid(
         columns: (2fr, 1fr),
         rows: 1fr,
         gutter: 0em,
         grid.cell(align: horizon, box(
-          inset: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+          inset: (
+            left: if leftSide.at("inset", default: false) { 2.5em + bleed_margin } else { bleed_margin },
+            right: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+            top: bleed_margin,
+            bottom: bleed_margin,
+          ),
           [
             #leftSide.content
           ],
         )),
-        grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
-          #set text(fill: white)
-          #rightSide.content
-        ]),
+        grid.cell(align: horizon, fill: black, 
+          // Extend black background to right edge by using padding
+          pad(right: -bleed_margin, box(
+            inset: (
+              left: 2.5em,
+              right: 2.5em + bleed_margin,
+              top: 2.5em + bleed_margin,
+              bottom: 2.5em + bleed_margin,
+            ),
+          )[
+            #set text(fill: white)
+            #rightSide.content
+          ])
+        ),
       )
-      #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
+      #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em + bleed_margin, [
         #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
           " / ",
         ))
@@ -63,7 +86,7 @@
       } else {
         here().page()
       };
-      #place(bottom + right, dx: -2.5em, dy: -2.5em, [
+      #place(bottom + right, dx: -2.5em - bleed_margin, dy: -2.5em - bleed_margin, [
         #text(fill: white, weight: 900, font: "Jura", [#page_num])
       ])
     ],
@@ -77,22 +100,38 @@
       #h(1fr) #rightSide.header
     ],
     context [
+      #let bleed_margin = bleed
       #grid(
         columns: (1fr, 2fr),
         rows: 1fr,
         gutter: 0em,
-        grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
-          #set text(fill: white)
-          #rightSide.content
-        ]),
+        grid.cell(align: horizon, fill: black, 
+          // Extend black background to left edge by using negative margin
+          pad(left: -bleed_margin, box(
+            inset: (
+              left: 2.5em + bleed_margin,
+              right: 2.5em,
+              top: 2.5em + bleed_margin,
+              bottom: 2.5em + bleed_margin,
+            ),
+          )[
+            #set text(fill: white)
+            #rightSide.content
+          ])
+        ),
         grid.cell(align: horizon, box(
-          inset: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+          inset: (
+            left: if leftSide.at("inset", default: false) { 2.5em } else { 0em },
+            right: if leftSide.at("inset", default: false) { 2.5em + bleed_margin } else { bleed_margin },
+            top: bleed_margin,
+            bottom: bleed_margin,
+          ),
           [
             #leftSide.content
           ],
         )),
       )
-      #place(top + left, dx: 2.5em, dy: 2.5em, [
+      #place(top + left, dx: 2.5em + bleed_margin, dy: 2.5em + bleed_margin, [
         #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
           " / ",
         ))
@@ -102,7 +141,7 @@
       } else {
         here().page()
       };
-      #place(bottom + left, dx: 2.5em, dy: -2.5em, [
+      #place(bottom + left, dx: 2.5em + bleed_margin, dy: -2.5em - bleed_margin, [
         #text(fill: white, weight: 900, font: "Jura", [#page_num])
       ])
     ],
@@ -129,31 +168,33 @@
 
 #sectionPage[NixOS Branding Guide]
 
-#align(center + horizon)[#text(size: 1.2em)[
-    #set par(justify: true)
-    #layout(size => {
-      rect(
-        width: 54% * size.width,
-        stroke: none,
-        [
-          We believe in open-source innovation and a community-driven ethos — values that have shaped our identity from the very beginning.
-          As you explore this guide, we hope you’ll sense the spirit of stable evolution — a core principle we embrace over stagnation or chaos.
+#align(center + horizon)[
+   #pad(x: bleed, y: bleed)[
+    #text(size: 1.2em)[
+      #set par(justify: true)
+      #layout(size => {
+        rect(
+          width: 54% * size.width,
+          stroke: none,
+          [
+            We believe in open-source innovation and a community-driven ethos — values that have shaped our identity from the very beginning.
+            As you explore this guide, we hope you'll sense the spirit of stable evolution — a core principle we embrace over stagnation or chaos.
 
-          This guide serves as a framework to help ensure that our communication and design consistently reflect the values that define Nix: innovation, reliability, and simplicity.
-          It brings together creative expression and technical precision to foster a unified identity across all touchpoints.
+            This guide serves as a framework to help ensure that our communication and design consistently reflect the values that define Nix: innovation, reliability, and simplicity.
+            It brings together creative expression and technical precision to foster a unified identity across all touchpoints.
 
-          We’ve aimed to include everything you need to feel confident and comfortable when working with the NixOS visual identity — the public face of our declarative builds and deployments ecosystem.
-          If anything is unclear or you have questions, we’re always happy to help.
+            We've aimed to include everything you need to feel confident and comfortable when working with the NixOS visual identity — the public face of our declarative builds and deployments ecosystem.
+            If anything is unclear or you have questions, we're always happy to help.
 
-          Please feel free to reach out to the Marketing Team or the Brand and Design Steward directly.
-          You can find contact information here:
-          #link(
-            "https://nixos.org/community/teams/marketing",
-          )[nixos.org/community/teams/marketing]
-        ],
-      )
-    })
-
+            Please feel free to reach out to the Marketing Team or the Brand and Design Steward directly.
+            You can find contact information here:
+            #link(
+              "https://nixos.org/community/teams/marketing",
+            )[nixos.org/community/teams/marketing]
+          ],
+        )
+      })
+    ]
   ]
 ]
 
@@ -179,37 +220,39 @@
 
 #sectionPage[Identity]
 
-#align(center + horizon)[#text(size: 1.2em)[
-    #set par(justify: true)
-    #layout(size => {
-      rect(
-        width: 54% * size.width,
-        stroke: none,
-        [
-          Design is not just surface-level — it is a reflection of who we are.
-          Our visual identity — the NixOS snowflake with its two shades of blue, clean geometry, and recursive form — signals the values we share.
+#align(center + horizon)[
+   #pad(x: bleed, y: bleed)[
+    #text(size: 1.2em)[
+      #set par(justify: true)
+      #layout(size => {
+        rect(
+          width: 54% * size.width,
+          stroke: none,
+          [
+            Design is not just surface-level — it is a reflection of who we are.
+            Our visual identity — the NixOS snowflake with its two shades of blue, clean geometry, and recursive form — signals the values we share.
 
-          #text(weight: "bold")[
-            Openness
+            #text(weight: "bold")[
+              Openness
 
-            Transparency
+              Transparency
 
-            Inclusivity
-          ]
+              Inclusivity
+            ]
 
-          These brand guidelines are not rigid constraints, but clear and thoughtful principles designed to guide consistent, intentional expression.
-          They reflect the maturity of our community and help us communicate with consistency and intention.
-          They also help prevent confusion with other ecosystems and reinforce the unique identity of NixOS.
+            These brand guidelines are not rigid constraints, but clear and thoughtful principles designed to guide consistent, intentional expression.
+            They reflect the maturity of our community and help us communicate with consistency and intention.
+            They also help prevent confusion with other ecosystems and reinforce the unique identity of NixOS.
 
-          A cohesive brand builds confidence — not just in the project, but in the people behind it.
-          It creates alignment around a shared vision and helps express the distinctive spirit of the open source community we are proud to be part of.
+            A cohesive brand builds confidence — not just in the project, but in the people behind it.
+            It creates alignment around a shared vision and helps express the distinctive spirit of the open source community we are proud to be part of.
 
-          We hope you feel that same sense of pride and belonging.
-          This is more than a project — it is a movement shaped by all of us.
-        ],
-      )
-    })
-
+            We hope you feel that same sense of pride and belonging.
+            This is more than a project — it is a movement shaped by all of us.
+          ],
+        )
+      })
+    ]
   ]
 ]
 
