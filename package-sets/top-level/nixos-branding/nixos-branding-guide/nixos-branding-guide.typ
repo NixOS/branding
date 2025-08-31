@@ -10,8 +10,10 @@
   upper(text(size: size, weight: "bold", content))
 }
 
+#let bleed = 6mm
+
 #let sectionPage(content, text_size: 36pt) = {
-  page(margin: (x: 0pt, y: 0pt), layout(size => {
+  page(margin: (x: bleed, y: bleed), layout(size => {
     let text_content = sectionTitle(size: text_size)[#content]
     let text_size = measure(text_content)
     let text_start = 5 / 9 * size.height - text_size.height / 2
@@ -33,29 +35,46 @@
 
 #let contentPage(leftSide: none, rightSide: none) = {
   page(
-    margin: (x: 0cm, y: 0cm),
-    header: [
-      #h(1fr) #rightSide.header
-    ],
+    margin: (x: 0mm, y: 0mm),
+    // header: [
+    //   #h(1fr) #rightSide.header
+    // ],
     context [
       #if calc.rem(here().page(), 2) == 1 [
         #grid(
           columns: (2fr, 1fr), rows: 1fr, gutter: 0em, grid.cell(
             align: horizon,
             box(
-              inset: if leftSide.at("inset", default: false) { 2.5em } else {
-                0em
+              inset: if leftSide.at("inset", default: false) {
+                (
+                  left: 2.5em + bleed,
+                  top: 2.5em + bleed,
+                  bottom: 2.5em + bleed,
+                  right: 2.5em,
+                )
+              } else {
+                (
+                  left: 0em + bleed,
+                  top: 0em + bleed,
+                  bottom: 0em + bleed,
+                  right: 0em,
+                )
               },
               [
                 #leftSide.content
               ],
             ),
-          ), grid.cell(align: horizon, fill: black, box(inset: 2.5em)[
+          ), grid.cell(align: horizon, fill: black, box(inset: (
+            left: 2.5em,
+            top: 2.5em + bleed,
+            bottom: 2.5em + bleed,
+            right: 2.5em + bleed,
+          ))[
             #set text(fill: white)
             #rightSide.content
           ]),
         )
-        #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
+        #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em + bleed, [
           #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
             " / ",
           ))
@@ -65,7 +84,7 @@
         } else {
           here().page()
         };
-        #place(bottom + right, dx: -2.5em, dy: -2.5em, [
+        #place(bottom + right, dx: -2.5em - bleed, dy: -2.5em - bleed, [
           #text(fill: white, weight: 900, font: "Jura", [#page_num])
         ])
       ] else [
@@ -73,20 +92,37 @@
           columns: (1fr, 2fr), rows: 1fr, gutter: 0em, grid.cell(
             align: horizon,
             fill: black,
-            box(inset: 2.5em)[
+            box(inset: (
+              left: 2.5em + bleed,
+              top: 2.5em + bleed,
+              bottom: 2.5em + bleed,
+              right: 2.5em,
+            ))[
               #set text(fill: white)
               #rightSide.content
             ],
           ), grid.cell(align: horizon, box(
-            inset: if leftSide.at("inset", default: false) { 2.5em } else {
-              0em
+            inset: if leftSide.at("inset", default: false) {
+              (
+                left: 2.5em,
+                top: 2.5em + bleed,
+                bottom: 2.5em + bleed,
+                right: 2.5em + bleed,
+              )
+            } else {
+              (
+                left: 0em,
+                top: 0em + bleed,
+                bottom: 0em + bleed,
+                right: 0em + bleed,
+              )
             },
             [
               #leftSide.content
             ],
           )),
         )
-        #place(top + left, dx: 2.5em, dy: 2.5em, [
+        #place(top + left, dx: 2.5em + bleed, dy: 2.5em + bleed, [
           #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
             " / ",
           ))
@@ -96,7 +132,7 @@
         } else {
           here().page()
         };
-        #place(bottom + left, dx: +2.5em, dy: -2.5em, [
+        #place(bottom + left, dx: +2.5em + bleed, dy: -2.5em - bleed, [
           #text(fill: white, weight: 900, font: "Jura", [#page_num])
         ])
       ]
