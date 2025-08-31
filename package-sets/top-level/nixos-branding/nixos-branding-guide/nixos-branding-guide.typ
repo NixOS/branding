@@ -1019,6 +1019,7 @@
   text_enable: true,
   color_name: none,
   text_color_value_enable: true,
+  outset: (:),
   color,
 ) = {
   let mcolor = oklch(color.at(0) * 100%, color.at(1), color.at(2) * 1deg)
@@ -1035,7 +1036,7 @@
       #text_color_value
     ])
   } else { }
-  rect(width: 100%, height: 100%, fill: mcolor, text_content)
+  rect(width: 100%, height: 100%, outset: outset, fill: mcolor, text_content)
 }
 
 #contentPage(
@@ -1054,10 +1055,16 @@
             .join()
             .chunks(2))
           .join()
-          .map(color => make_color_block(
+          .enumerate()
+          .map(((index, color)) => make_color_block(
             text_color_value_enable: false,
             color_name: color.name,
             color.value,
+            outset: (
+              top: if index < 5 { bleed } else { 0pt },
+              bottom: if index > 4 { bleed } else { 0pt },
+              left: if calc.rem(index, 5) == 0 { bleed } else { 0pt },
+            ),
           ))
       )
     ],
@@ -1090,11 +1097,20 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..color_palette.palette.primary.map(color => make_color_block(
-          text_size: 1em,
-          color_name: color.name,
-          color.value,
-        ))
+        ..color_palette
+          .palette
+          .primary
+          .enumerate()
+          .map(((index, color)) => make_color_block(
+            text_size: 1em,
+            color_name: color.name,
+            color.value,
+            outset: (
+              top: if index < 1 { bleed } else { 0pt },
+              bottom: if index > 0 { bleed } else { 0pt },
+              right: bleed,
+            ),
+          ))
       )
     ],
     header: none,
@@ -1116,11 +1132,20 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..color_palette.palette.secondary.map(color => make_color_block(
-          text_size: 1em,
-          color_name: color.name,
-          color.value,
-        ))
+        ..color_palette
+          .palette
+          .secondary
+          .enumerate()
+          .map(((index, color)) => make_color_block(
+            text_size: 1em,
+            color_name: color.name,
+            color.value,
+            outset: (
+              top: if index < 1 { bleed } else { 0pt },
+              bottom: if index > 0 { bleed } else { 0pt },
+              left: bleed,
+            ),
+          ))
       )
     ],
     header: none,
@@ -1150,10 +1175,16 @@
             .join()
             .chunks(2))
           .join()
-          .map(color => make_color_block(
+          .enumerate()
+          .map(((index, color)) => make_color_block(
             text_size: 1em,
             color_name: color.name,
             color.value,
+            outset: (
+              top: if index < 3 { bleed } else { 0pt },
+              bottom: if index > 2 { bleed } else { 0pt },
+              right: if calc.rem(index + 1, 3) == 0 { bleed } else { 0pt },
+            ),
           ))
       )
     ],
@@ -1181,10 +1212,16 @@
           color_palette.palette.accent.map(x => x.tints.pairs()).join(),
         )
           .join()
-          .map(color => make_color_block(
+          .enumerate()
+          .map(((index, color)) => make_color_block(
             text_size: 0.45em,
             color_name: color.at(0),
             color.at(1),
+            outset: (
+              top: if index < 9 { bleed } else { 0pt },
+              bottom: if index > 71 { bleed } else { 0pt },
+              left: if calc.rem(index, 9) == 0 { bleed } else { 0pt },
+            ),
           ))
       )
     ],
@@ -1208,11 +1245,20 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 2,
-        ..color_palette.logos.default.map(color => make_color_block(
-          text_size: 1em,
-          color_name: color.name,
-          color.value,
-        ))
+        ..color_palette
+          .logos
+          .default
+          .enumerate()
+          .map(((index, color)) => make_color_block(
+            text_size: 1em,
+            color_name: color.name,
+            color.value,
+            outset: (
+              top: if index < 1 { bleed } else { 0pt },
+              bottom: if index > 0 { bleed } else { 0pt },
+              right: bleed,
+            ),
+          ))
       )
     ],
     header: none,
@@ -1239,10 +1285,19 @@
       #grid(
         columns: (1fr,) * 1,
         rows: (1fr,) * 6,
-        ..color_palette.logos.rainbow.map(color => make_color_block(
-          text_size: 1em,
-          color.value,
-        ))
+        ..color_palette
+          .logos
+          .rainbow
+          .enumerate()
+          .map(((index, color)) => make_color_block(
+            text_size: 1em,
+            color.value,
+            outset: (
+              top: if index < 1 { bleed } else { 0pt },
+              bottom: if index > 4 { bleed } else { 0pt },
+              left: bleed,
+            ),
+          ))
       )
     ],
     header: none,
