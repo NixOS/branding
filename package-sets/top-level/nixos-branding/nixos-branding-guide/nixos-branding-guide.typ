@@ -80,9 +80,9 @@
           ))
         ])
         #let page_num = if here().page() < 10 {
-          [0#str(here().page())]
+          [0#str(here().page() - 1)]
         } else {
-          here().page()
+          here().page() - 1
         };
         #place(bottom + right, dx: -2.5em - bleed, dy: -2.5em - bleed, [
           #text(fill: white, weight: 900, font: "Jura", [#page_num])
@@ -128,9 +128,9 @@
           ))
         ])
         #let page_num = if here().page() < 10 {
-          [0#str(here().page())]
+          [0#str(here().page() - 1)]
         } else {
-          here().page()
+          here().page() - 1
         };
         #place(bottom + left, dx: +2.5em + bleed, dy: -2.5em - bleed, [
           #text(fill: white, weight: 900, font: "Jura", [#page_num])
