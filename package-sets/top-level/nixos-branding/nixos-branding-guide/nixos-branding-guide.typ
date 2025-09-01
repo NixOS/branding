@@ -202,7 +202,7 @@
       IDENTITY \
       LOGO \
       TYPOGRAPHY \
-      COLOR
+      COLOUR
     ],
     header: (),
   ),
@@ -402,7 +402,7 @@
   ),
   rightSide: (
     content: [
-      The selected color of the lambda is true below and to the right of the 100% gradient stop point.
+      The selected colour of the lambda is true below and to the right of the 100% gradient stop point.
       The lightness and chroma is lowered at the 25% and 0% gradient stop points.
     ],
     header: ("Anatomy", "Gradient", "Unmasked"),
@@ -695,11 +695,11 @@
   ),
   rightSide: (
     content: [
-      There are multiple color variants of the logo.
-      The colored variants of the logomark can be used with the white or black logotype.
+      There are multiple colour variants of the logo.
+      The coloured variants of the logomark can be used with the white or black logotype.
       The black and white variants of the logomark must be used with the black and white logotypes respectively.
     ],
-    header: ("Variations", "Logo", "Colors"),
+    header: ("Variations", "Logo", "Colours"),
   ),
 )
 
@@ -748,11 +748,11 @@
   ),
   rightSide: (
     content: [
-      There are 4 color variants of the logomark.
-      The colored variants of the logomark should use gradient colors.
-      The black and white variants of the logomark must use flat colors.
+      There are 4 colour variants of the logomark.
+      The coloured variants of the logomark should use gradient colours.
+      The black and white variants of the logomark must use flat colours.
     ],
-    header: ("Variations", "Logomark", "Colors"),
+    header: ("Variations", "Logomark", "Colours"),
   ),
 )
 
@@ -786,12 +786,12 @@
   ),
   rightSide: (
     content: [
-      There are 2 color styles of the logomark: gradient and flat colors.
-      Generally gradient colors should be used.
-      When using black or white logomarks, use flat colors.
-      Flat colors can be used for any color variant when creating print or other physical media.
+      There are 2 colour styles of the logomark: gradient and flat colours.
+      Generally gradient colours should be used.
+      When using black or white logomarks, use flat colours.
+      Flat colours can be used for any colour variant when creating print or other physical media.
     ],
-    header: ("Variations", "Logomark", "Color Styles"),
+    header: ("Variations", "Logomark", "Colour Styles"),
   ),
 )
 
@@ -825,9 +825,9 @@
   ),
   rightSide: (
     content: [
-      There are two color variants of the logotype: black and white.
+      There are two colour variants of the logotype: black and white.
     ],
-    header: ("Variations", "Logotype", "Colors"),
+    header: ("Variations", "Logotype", "Colours"),
   ),
 )
 
@@ -876,9 +876,9 @@
   ),
   rightSide: (
     content: [
-      There are two color style variants of the logotype: #strong([normal]) and #strong([#lambda_prime (lambda prime)]).
+      There are two colour style variants of the logotype: #strong([normal]) and #strong([#lambda_prime (lambda prime)]).
 
-      The #lambda_prime variant shades the "x" in #strong([NixOS]) using the default colors of the logomark, drawing attention to the lambda shape embedded within the letter — a visual homage to our roots in functional programming.
+      The #lambda_prime variant shades the "x" in #strong([NixOS]) using the default colours of the logomark, drawing attention to the lambda shape embedded within the letter — a visual homage to our roots in functional programming.
       This symbol holds special meaning for the project, representing our alignment with functional principles and the elegance they bring to software design.
 
       For situations where a more neutral or subdued appearance is appropriate, the normal variant provides a clean, consistent option suitable for all contexts.
@@ -949,7 +949,7 @@
         ],
 
         [
-          Do not use the logo on similarly-colored backgrounds.
+          Do not use the logo on similarly-coloured backgrounds.
 
           #imageBox(
             fill: blue.transparentize(50%),
@@ -977,7 +977,7 @@
   rightSide: (
     content: [
       The NixOS logo is a key element of our visual identity.
-      To preserve its integrity and recognizability, it must be used with care.
+      To preserve its integrity and recognisability, it must be used with care.
       Distorting, excessively cropping, or altering the logo can compromise its clarity and risk confusion with other software ecosystems — something we actively seek to avoid.
 
       Always ensure the logo has sufficient clear space.
@@ -1084,7 +1084,7 @@
   ),
 )
 
-#sectionPage[Color]
+#sectionPage[Colour]
 
 #let title-case(string) = {
   return string.replace(regex("[A-Za-z]+('[A-Za-z]+)?"), word => (
@@ -1164,7 +1164,7 @@
       #strong([Accent]) \
       This includes #color_palette.palette.accent.map(color => title-case(color.name)).join(last: " and ", ", ").
 
-      These colors are more than visual accents—they symbolize the elegance of declarative systems and the strength of the Nix community.
+      These colours are more than visual accents—they symbolise the elegance of declarative systems and the strength of the Nix community.
       Their consistent use reinforces a unified and exquisite identity across all communication and visual touchpoints.
     ],
     header: ("Palette",),
@@ -1198,9 +1198,9 @@
   rightSide: (
     content: [
       #color_palette.palette.primary.map(color => title-case(color.name)).join(last: " and ", ", ") form the foundation of our visual system.
-      They provide the structural balance needed to support other colors and ensure accessibility and clarity across all mediums.
+      They provide the structural balance needed to support other colours and ensure accessibility and clarity across all mediums.
       Use them for text, backgrounds, borders, and general layout scaffolding.
-      Their neutrality allows the other colors in the palette to shine while maintaining a clean, professional tone.
+      Their neutrality allows the other colours in the palette to shine while maintaining a clean, professional tone.
     ],
     header: ("Palette", "Primary"),
   ),
@@ -1233,7 +1233,7 @@
   ),
   rightSide: (
     content: [
-      #color_palette.palette.secondary.map(color => title-case(color.name)).join(last: " and ", ", ") are the signature colors of the NixOS brand.
+      #color_palette.palette.secondary.map(color => title-case(color.name)).join(last: " and ", ", ") are the signature colours of the NixOS brand.
       These shades are used for prominent elements such as headers, icons, navigation bars, and key interface components.
       They evoke trust, stability, and clarity — perfectly aligned with the principles of declarative design.
       When in doubt, reach for these blues.
@@ -1274,7 +1274,7 @@
   rightSide: (
     content: [
       #color_palette.palette.accent.map(color => title-case(color.name)).join(last: " and ", ", ") bring vibrancy and dimension to the brand.
-      These colors are intended for subtle emphasis: buttons, charts, tags, illustrations, and other moments of interaction or expression.
+      These colours are intended for subtle emphasis: buttons, charts, tags, illustrations, and other moments of interaction or expression.
       Use them intentionally — sparingly, but confidently — to enhance communication without overwhelming the design.
     ],
     header: ("Palette", "Accent"),
@@ -1314,7 +1314,7 @@
       Tints provide a flexible extension of the core palette, offering a wide range of lightness levels—from subtle backgrounds to bold accents.
       These variations are useful for layering, accessibility, and adapting to different themes or environments.
 
-      While tints increase design versatility, they are intended to complement, not replace, the primary, secondary, and accent colors.
+      While tints increase design versatility, they are intended to complement, not replace, the primary, secondary, and accent colours.
       Use them thoughtfully to maintain brand consistency and visual harmony.
     ],
     header: ("Palette", "Tints"),
@@ -1347,15 +1347,15 @@
   ),
   rightSide: (
     content: [
-      The NixOS logo uses two carefully selected color values derived from the core palette:
+      The NixOS logo uses two carefully selected colour values derived from the core palette:
 
       - A tint of Afghani Blue with a lightness of 0.55 and chroma 0.12
-      - A customized tint of Argentinian Blue with a lightness of 0.75 and a slightly reduced chroma of 0.09
+      - A customised tint of Argentinian Blue with a lightness of 0.75 and a slightly reduced chroma of 0.09
 
       While the Afghani Blue tint follows the standard palette, the Argentinian Blue variant has been subtly adjusted.
       The chroma was reduced from 0.12 (as defined in the palette) to 0.09 to better align with the historic appearance of the NixOS logo in earlier versions and maintain visual continuity with its established identity.
 
-      These two tones work together to preserve the logo’s familiar character while adapting it to a more precise and accessible color system based on OKLCH.
+      These two tones work together to preserve the logo’s familiar character while adapting it to a more precise and accessible colour system based on OKLCH.
     ],
     header: ("Logo", "Default"),
   ),
@@ -1387,10 +1387,10 @@
   ),
   rightSide: (
     content: [
-      The rainbow variant of the NixOS logo features six colors inspired by the traditional rainbow Pride flag.
-      These colors have been carefully adapted to better align with the visual language of the NixOS brand — they are softer and less saturated than the original flag, allowing them to integrate more seamlessly with the logomark’s geometry and tone.
+      The rainbow variant of the NixOS logo features six colours inspired by the traditional rainbow Pride flag.
+      These colours have been carefully adapted to better align with the visual language of the NixOS brand — they are softer and less saturated than the original flag, allowing them to integrate more seamlessly with the logomark’s geometry and tone.
 
-      This kind of adaptation is a common practice among organizations seeking to balance symbolic representation with brand cohesion.
+      This kind of adaptation is a common practice among organisations seeking to balance symbolic representation with brand cohesion.
       The result is a respectful and visually consistent expression of solidarity with the LGBTQ+ community.
 
       The rainbow variant is used to celebrate diversity, inclusion, and the vibrant community that shapes NixOS.
