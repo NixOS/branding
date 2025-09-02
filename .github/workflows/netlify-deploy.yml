@@ -1,0 +1,41 @@
+name: Deploy Media Kit
+run-name: ${{ github.actor }} is deploying branding assets
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Build Guide
+        run: |
+          nix build .\#nixos-branding.nixos-branding-guide \
+            --print-build-logs \
+            --out-link result-guide
+      - name: Build Media Kit
+        run: |
+          nix build .\#nixos-branding.nixos-media-kit \
+            --print-build-logs \
+            --out-link result-media-kit
+      - name: "Create Build to Deploy"
+        run: |
+          mkdir -p ./build/guide
+          cp -RL ./result-guide/* ./build/guide
+          mkdir -p ./build/media-kit
+          cp -RL ./result-media-kit/* ./build/media-kit
+      - name: 'Publish to Netlify'
+        uses: 'nwtgck/actions-netlify@v3.0.0'
+        env:
+          NETLIFY_AUTH_TOKEN: '${{ secrets.NETLIFY_AUTH_TOKEN }}'
+          NETLIFY_SITE_ID: '${{ secrets.NETLIFY_SITE_ID }}'
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          deploy-message: 'Published from GitHub Actions'
+          publish-dir: './build'
+          production-deploy: true
