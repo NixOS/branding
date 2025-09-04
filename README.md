@@ -25,6 +25,8 @@ package-sets/
 └── top-level
     ├── jura  # vendored copy of the Jura font
     ├── nixos-branding
+    │   ├── all-artifacts  # All the assets in artifacts the artifacts scope linked together
+    │   ├── artifact-builder  # A helper function for building artifacts
     │   ├── artifacts  # Generated artifacts used in the branding guide and media-kit
     │   ├── deployed-assets  # Assets that are publicly hosted
     │   ├── nixos-branding-guide  # NixOS Branding Guide
@@ -37,8 +39,9 @@ This maps to a `nixos-branding` scope under the top-level package set.
 
 ```
 nixos-branding
+├── all-artifacts
+├── artifact-builder
 ├── artifacts
-│   ├── all-artifacts
 │   ├── clearspace
 │   ├── dimensioned
 │   ├── internal
