@@ -26,9 +26,9 @@ package-sets/
     ├── jura  # vendored copy of the Jura font
     ├── nixos-branding
     │   ├── artifacts  # Generated artifacts used in the branding guide and media-kit
+    │   ├── deployed-assets  # Assets that are publicly hosted
     │   ├── nixos-branding-guide  # NixOS Branding Guide
     │   ├── nixos-color-palette  # NixOS color palette
-    │   ├── nixos-media-kit  # NixOS media-kit
     │   └── verification  # Scripts use to verify that everything builds
     └── route159  # vendored copy of the Route 159 font
 ```
@@ -45,7 +45,7 @@ nixos-branding
 │   ├── media-kit
 │   ├── miscellaneous
 │   └── misuse
-├── nixos-media-kit
+├── deployed-assets
 ├── nixos-branding-guide
 ├── nixos-color-palette
 └── verification
