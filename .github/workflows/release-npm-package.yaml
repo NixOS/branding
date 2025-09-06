@@ -1,0 +1,33 @@
+name: Release NixOS Branding npm package
+run-name: ${{ github.actor }} is releasing a new version of the branding npm package
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  check-npm-package:
+    uses: ./.github/workflows/check.yml
+  build-npm-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "latest"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@octocat"
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Build Guide
+        run: |
+          nix build .\#nixos-branding.npm-package \
+            --print-build-logs \
+            --out-link result-npm-package
+      - run: npm publishlatest
+        working-directory: ./result-npm-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
