@@ -77,3 +77,7 @@ jobs:
             result-media-kit/*
           make_latest: true
           overwrite_files: false
+
+  deploy:
+    uses: ./.github/workflows/netlify-deploy.yml
+    needs: release
