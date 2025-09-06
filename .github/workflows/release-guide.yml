@@ -81,3 +81,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/netlify-deploy.yml
     needs: release
+
+  release-npm-package:
+    uses: ./.github/workflows/release-npm-package.yaml
+    needs: release
