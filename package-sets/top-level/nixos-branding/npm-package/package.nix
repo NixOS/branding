@@ -73,7 +73,7 @@ let
 
   arrToOklch = arr: "oklch(${concatMapStringsSep ", " toString arr})";
 
-  colorsFile = importTOML "${nixos-color-palette}/colors.toml";
+  colorsFile = importTOML ../nixos-color-palette/colors.toml;
 
   mapPalettes = mapAttrs (
     paletteGroupName: paletteGroupValue:
