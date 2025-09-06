@@ -71,7 +71,7 @@ let
 
   toKebapCase = x: toLower (replaceStrings [ " " ] [ "-" ] x);
 
-  arrToOklch = arr: "oklch(${concatMapStringsSep ", " toString arr})";
+  arrToOklch = arr: "oklch(${concatMapStringsSep " " toString arr})";
 
   colorsFile = importTOML ../nixos-color-palette/colors.toml;
 
