@@ -22,12 +22,13 @@ jobs:
           scope: "@octocat"
       - name: Install Nix
         uses: cachix/install-nix-action@v31
-      - name: Build Guide
+      - name: Build npm package
         run: |
           nix build .\#nixos-branding.npm-package \
             --print-build-logs \
             --out-link result-npm-package
-      - run: npm publishlatest
+      - name: Publish npm package
+        run: npm publish
         working-directory: ./result-npm-package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
