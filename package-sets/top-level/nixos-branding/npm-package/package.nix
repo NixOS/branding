@@ -1,14 +1,15 @@
 {
-  lib,
-  stdenvNoCC,
-  nixos-color-palette,
   all-artifacts,
-  pkgs,
+  lib,
+  nixos-color-palette,
+  nodePackages,
+  stdenvNoCC,
 }:
 
 let
 
   inherit (builtins)
+    foldl'
     toString
     ;
 
@@ -26,17 +27,19 @@ let
 
   inherit (lib.strings)
     concatMapStringsSep
+    readFile
     replaceStrings
     substring
     toJSON
     toLower
+    trim
     ;
 
   inherit (lib.trivial)
     importTOML
     ;
 
-  npmPckageMetadata = {
+  npmPackageMetadata = {
     name = "@NixOS/branding";
     version = trim (readFile ./../nixos-branding-guide/data/version);
     description = "Branding assets for the NixOS organization";
@@ -92,13 +95,10 @@ let
     )
 
   );
-  colors =
-    (attrValues (mapPalettes colorsFile.logos)) ++ (attrValues (mapPalettes colorsFile.palette));
+  colors = foldl' (acc: elem: acc // elem) { } (
+    (attrValues (mapPalettes colorsFile.logos)) ++ (attrValues (mapPalettes colorsFile.palette))
+  );
 
-  inherit (lib.strings)
-    readFile
-    trim
-    ;
 in
 
 stdenvNoCC.mkDerivation {
@@ -116,9 +116,9 @@ stdenvNoCC.mkDerivation {
   installPhase = ''
     mkdir -p $out/colors
     cat > $out/package.json <<EOF
-    ${toJSON npmPckageMetadata}
+    ${toJSON npmPackageMetadata}
     EOF
-    ${pkgs.nodePackages.prettier}/bin/prettier --write $out/package.json
+    ${nodePackages.prettier}/bin/prettier --write $out/package.json
 
     mkdir -p $out/artifacts
     cp -RL -r ${all-artifacts}/* $out/artifacts/
@@ -126,7 +126,7 @@ stdenvNoCC.mkDerivation {
     cat > $out/colors/tailwind.js <<EOF
     export default ${toJSON colors}
     EOF
-    ${pkgs.nodePackages.prettier}/bin/prettier --write $out/colors/tailwind.js
+    ${nodePackages.prettier}/bin/prettier --write $out/colors/tailwind.js
 
     cat > $out/.npmrc <<EOF
     //npm.pkg.github.com/:_authToken=$\{NODE_AUTH_TOKEN\}
