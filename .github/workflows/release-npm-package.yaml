@@ -6,8 +6,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-npm-package:
-    uses: ./.github/workflows/check.yml
   build-npm-package:
     runs-on: ubuntu-latest
     permissions:
@@ -27,8 +25,10 @@ jobs:
           nix build .\#nixos-branding.npm-package \
             --print-build-logs \
             --out-link result-npm-package
+          mkdir --parents ./build
+          cp --recursive --dereference ./result-npm-package/* ./build
       - name: Publish npm package
         run: npm publish
-        working-directory: ./result-npm-package
+        working-directory: ./build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
