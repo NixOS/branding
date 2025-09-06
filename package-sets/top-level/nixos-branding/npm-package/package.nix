@@ -9,7 +9,7 @@
 let
   npmPckageMetadata = {
     name = "@NixOS/branding";
-    version = "0.0.1";
+    version = trim (readFile ./../nixos-branding-guide/data/version);
     description = "Branding assets for the NixOS organization";
     main = "index.js";
     repository = {
@@ -69,11 +69,15 @@ let
     ) colorsFlattened
   );
 
+  inherit (lib.strings)
+    readFile
+    trim
+    ;
 in
 
 stdenvNoCC.mkDerivation {
   pname = "npm-package";
-  version = "0.0.1";
+  version = trim (readFile ./../nixos-branding-guide/data/version);
 
   src = ./.;
 
