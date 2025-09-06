@@ -7,6 +7,35 @@
 }:
 
 let
+
+  inherit (builtins)
+    toString
+    ;
+
+  inherit (lib.attrsets)
+    attrValues
+    listToAttrs
+    mapAttrs
+    mapAttrs'
+    nameValuePair
+    ;
+
+  inherit (lib.lists)
+    map
+    ;
+
+  inherit (lib.strings)
+    concatMapStringsSep
+    replaceStrings
+    substring
+    toJSON
+    toLower
+    ;
+
+  inherit (lib.trivial)
+    importTOML
+    ;
+
   npmPckageMetadata = {
     name = "@NixOS/branding";
     version = trim (readFile ./../nixos-branding-guide/data/version);
@@ -37,37 +66,34 @@ let
     ];
   };
 
-  toKebapCase = x: lib.strings.toLower (lib.strings.replaceStrings [ " " ] [ "-" ] x);
+  toKebapCase = x: toLower (replaceStrings [ " " ] [ "-" ] x);
 
-  arrToOklch =
-    arr:
-    "oklch(${toString (builtins.elemAt arr 0)}, ${toString (builtins.elemAt arr 1)}, ${toString (builtins.elemAt arr 2)})";
+  arrToOklch = arr: "oklch(${concatMapStringsSep ", " toString arr})";
 
-  colorsFile = lib.trivial.importTOML "${nixos-color-palette}/colors.toml";
+  colorsFile = importTOML "${nixos-color-palette}/colors.toml";
 
-  colorsFlattened =
-    colorsFile.logos.default
-    ++ colorsFile.logos.rainbow
-    ++ colorsFile.palette.accent
-    ++ colorsFile.palette.secondary;
+  mapPalettes = mapAttrs (
+    paletteGroupName: paletteGroupValue:
+    listToAttrs (
+      map (
+        member:
+        let
+          mappedTints = mapAttrs' (
+            shadeName: shadeValue: nameValuePair (substring 1 2 shadeName) (arrToOklch shadeValue)
+          ) member.tints or { };
+        in
+        nameValuePair (toKebapCase "${paletteGroupName} ${member.name}") (
+          {
+            DEFAULT = arrToOklch member.value;
+          }
+          // mappedTints
+        )
+      ) paletteGroupValue
+    )
 
-  colors = builtins.listToAttrs (
-    builtins.map (
-      color:
-      let
-        mappedTints = builtins.mapAttrs (
-          shadeName: shadeValue: toString (arrToOklch shadeValue)
-        ) color.tints or { };
-      in
-      {
-        name = toString (toKebapCase color.name);
-        value = {
-          DEFAULT = toString (arrToOklch color.value);
-        }
-        // mappedTints;
-      }
-    ) colorsFlattened
   );
+  colors =
+    (attrValues (mapPalettes colorsFile.logos)) ++ (attrValues (mapPalettes colorsFile.palette));
 
   inherit (lib.strings)
     readFile
@@ -90,7 +116,7 @@ stdenvNoCC.mkDerivation {
   installPhase = ''
     mkdir -p $out/colors
     cat > $out/package.json <<EOF
-    ${builtins.toJSON npmPckageMetadata}
+    ${toJSON npmPckageMetadata}
     EOF
     ${pkgs.nodePackages.prettier}/bin/prettier --write $out/package.json
 
@@ -98,7 +124,7 @@ stdenvNoCC.mkDerivation {
     cp -RL -r ${all-artifacts}/* $out/artifacts/
 
     cat > $out/colors/tailwind.js <<EOF
-    export default ${builtins.toJSON colors}
+    export default ${toJSON colors}
     EOF
     ${pkgs.nodePackages.prettier}/bin/prettier --write $out/colors/tailwind.js
 
