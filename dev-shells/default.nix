@@ -46,14 +46,13 @@ mapAttrs (system: pkgs: {
 
       ];
 
-      shellHook =
-        ''
-          export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/package-sets/python-packages/nixoslogo
-          export NIXOS_ANNOTATIONS_FONT_FILE="${jura}/share/fonts/truetype/jura/Jura-Regular.ttf"
-          export NIXOS_COLOR_PALETTE_FILE="${nixos-branding.nixos-color-palette}/colors.toml";
-          export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/route159/Route159-Regular.otf"
-        ''
-        + checks.${system}.pre-commit-check.shellHook;
+      shellHook = ''
+        export NIXOSLOGO_SRC=$(git rev-parse --show-toplevel)/package-sets/python-packages/nixoslogo
+        export NIXOS_ANNOTATIONS_FONT_FILE="${jura}/share/fonts/truetype/jura/Jura-Regular.ttf"
+        export NIXOS_COLOR_PALETTE_FILE="${nixos-branding.nixos-color-palette}/colors.toml";
+        export NIXOS_LOGOTYPE_FONT_FILE="${route159}/share/fonts/opentype/route159/Route159-Regular.otf"
+      ''
+      + checks.${system}.pre-commit-check.shellHook;
 
     }
   ) { };
@@ -67,7 +66,7 @@ mapAttrs (system: pkgs: {
 
       shellHook = ''
         cd $(git rev-parse --show-toplevel)/package-sets/top-level/nixos-branding/nixos-branding-guide
-        ${nixos-branding-guide-editable}/bin/typst-watch
+        exec ${nixos-branding-guide-editable}/bin/typst-watch
       '';
 
     }
