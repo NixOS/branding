@@ -1,0 +1,42 @@
+# NixOS Logo Permission (Tim Cuthbertson, 2016)
+# ----------------------------------------------------------------------------
+# Public mailing list discussion archived at:
+# https://releases.nixos.org/nix-dev/2016-October/021876.html
+#
+# Summary:
+#   In this thread, Tim Cuthbertson responded to a request about the Nix logo
+#   license and confirmed that he is okay with the logo being licensed under
+#   CC BY. He wrote that CC BY had already been suggested, and expressed his
+#   willingness to go along with whatever the Nix project preferred. He also
+#   offered that, if desired, he could transfer or assign copyright in a way
+#   that credits a project entity (for example, the Nix Foundation) rather
+#   than himself.
+#
+# Full message excerpt (vendored for preservation):
+
+------------------------------------------------------------------------------
+Hi all,
+
+Thomasz recently asked about the Nix logo license, and when I searched I
+noticed there had been another question about this a few months ago on the
+mailing list (which I missed).
+
+Apologies for not addressing this sooner, I agree that we should be explicit
+about the logo license. I'm happy to go along with pretty much whatever the
+nix project prefers (CC-BY has already been suggested), and if there's some
+official nix project entity which could be credited, I'd be happy to assign
+copyright there too (so you could just credit e.g. the nix foundation, not me
+specifically).
+
+@edolstra: are you happy with a CC-BY license for the logo? I'm holding off
+from _actually_ declaring it yet in case you'd prefer to restrict derivatives
+or something, but if I don't hear back from you within a week I'll assume that
+CC-BY is fine :). And if you are happy with CC-BY, could you go ahead and
+declare that on the website / repo somewhere so we have it in writing for
+anyone else that comes looking?
+
+Cheers,
+- Tim.
+------------------------------------------------------------------------------
+
+# End of excerpt
