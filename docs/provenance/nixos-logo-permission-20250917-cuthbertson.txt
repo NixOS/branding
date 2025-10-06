@@ -1,0 +1,90 @@
+# NixOS Logo Permission (Tim Cuthbertson, Eelco Dolstra, Daniel Baker, 2025)
+# ------------------------------------------------------------------------------
+# Private email correspondence between Tim Cuthbertson, Eelco Dolstra, and
+# Daniel Baker regarding the continued use and licensing of the NixOS logo.
+#
+# Summary:
+#   In this 2025 email thread, Daniel Baker contacted Tim Cuthbertson and
+#   Eelco Dolstra to confirm that the NixOS logo, as maintained in the
+#   branding repository, could continue under the Creative Commons
+#   Attribution (CC BY) license that had been discussed in the 2016 mailing
+#   list thread.
+#
+#   Eelco replied that he was fine with the arrangement but clarified that
+#   he did not create the logo. Tim followed up confirming his agreement
+#   with the CC BY license ("Also fine with me 👍"). This exchange records
+#   the authors’ mutual consent to carry forward the CC BY license for the
+#   current version of the NixOS logo.
+#
+# Privacy:
+#   Personal email addresses have been redacted. The full unredacted
+#   correspondence is retained privately by Daniel Baker.
+#
+# Provenance links:
+#   Related 2016 public mailing list discussion:
+#   https://releases.nixos.org/nix-dev/2016-October/021876.html
+#
+# Full message excerpt (redacted for privacy):
+
+------------------------------------------------------------------------------
+From: Daniel Baker <[REDACTED]>
+Date: Wed, 17 Sep 2025 22:22:43 -0700
+Subject: NixOS Logo license
+To: Tim Cuthbertson <[REDACTED]>, Eelco Dolstra <[REDACTED]>
+
+Hi Tim and Eelco,
+
+Not sure if either of you have been keeping up with the NixOS Marketing
+Team's activities but we have a whole new branding repository and an update
+on Tim's design.
+
+https://github.com/nixos/branding
+
+I'd like to continue the CC-BY license that was mentioned in this email
+thread.
+https://releases.nixos.org/nix-dev/2016-October/021881.html
+
+Would it be alright with the both of you?
+
+Regards,
+Daniel
+
+------------------------------------------------------------------------------
+From: Eelco Dolstra <[REDACTED]>
+Date: Thu, 18 Sep 2025 18:46:00 +1000
+Subject: Re: NixOS Logo license
+To: Daniel Baker <[REDACTED]>
+Cc: Tim Cuthbertson <[REDACTED]>
+
+Hi Daniel,
+
+On 9/18/25 07:22, Daniel Baker wrote:
+
+> Not sure if either of you have been keeping up with the NixOS Marketing
+> Team's activities but we have a whole new branding repository and an
+> update on Tim's design.
+>
+> https://github.com/nixos/branding
+>
+> I'd like to continue the CC-BY license that was mentioned in this email
+> thread.
+> https://releases.nixos.org/nix-dev/2016-October/021881.html
+>
+> Would it be alright with the both of you?
+
+Fine with me, but to be clear, I didn't create the logo.
+
+--
+Eelco Dolstra | http://nixos.org/~eelco/
+
+------------------------------------------------------------------------------
+From: Tim Cuthbertson <[REDACTED]>
+Date: Thu, 18 Sep 2025 19:14:22 +1000
+Subject: Re: NixOS Logo license
+To: Eelco Dolstra <[REDACTED]>
+Cc: Daniel Baker <[REDACTED]>
+
+Also fine with me 👍
+------------------------------------------------------------------------------
+
+# End of correspondence
