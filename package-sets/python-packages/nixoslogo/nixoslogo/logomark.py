@@ -13,6 +13,7 @@ from nixoslogo.core import (
     LogomarkColors,
 )
 from nixoslogo.geometry import Point, Points, Vector, cosd, sind
+from nixoslogo.helpers import round_to_sigfig
 
 
 class Lambda(BaseRenderable):
@@ -117,7 +118,17 @@ class Lambda(BaseRenderable):
         ]
 
         # Need to negate the y-axis so the lambda is not upside down
-        points = Points([Point((point.x, -point.y)) for point in points])
+        points = Points(
+            [
+                Point(
+                    (
+                        round_to_sigfig(point.x),
+                        -round_to_sigfig(point.y),
+                    )
+                )
+                for point in points
+            ]
+        )
         return points
 
     def make_named_lambda_points(
