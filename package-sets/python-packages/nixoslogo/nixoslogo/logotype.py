@@ -10,7 +10,6 @@ import fontforge
 import svg
 
 from nixoslogo.core import (
-    CHARACTER_GLYPHNAME_MAP,
     DEFAULT_LOGOTYPE_SPACINGS,
     DEFAULT_ROUTE159_TRANSFORMS,
     NIXOS_DARK_BLUE,
@@ -146,7 +145,7 @@ class Glyph(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.character = CHARACTER_GLYPHNAME_MAP.get(character, character)
+        self.character = character
         self.loader = loader
         self.color = color
         self.style = style
@@ -376,4 +375,7 @@ if __name__ == "__main__":
     logotype = Logotype(loader=loader, background_color="#dddddd")
     logotype.write_svg(filename=logotype.make_filename(extras=("test",)))
 
-    loader.cleanup()
+    logotype = Logotype(characters="Nix___", loader=loader, background_color="#dddddd")
+    logotype.write_svg(filename=logotype.make_filename(extras=("test",)))
+
+    # loader.cleanup()

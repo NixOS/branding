@@ -7,6 +7,7 @@
   lxml,
   poetry-core,
   svg-py,
+  uharfbuzz,
 }:
 
 let
@@ -37,6 +38,7 @@ buildPythonPackage {
     jsonpickle
     lxml
     svg-py
+    uharfbuzz
   ];
 
 }

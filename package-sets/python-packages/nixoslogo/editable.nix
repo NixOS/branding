@@ -7,6 +7,7 @@
   lxml,
   poetry-core,
   svg-py,
+  uharfbuzz,
 }:
 
 let
@@ -36,6 +37,7 @@ mkPythonEditablePackage {
     jsonpickle
     lxml
     svg-py
+    uharfbuzz
   ];
 
 }
