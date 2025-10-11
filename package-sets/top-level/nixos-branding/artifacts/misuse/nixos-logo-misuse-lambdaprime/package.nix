@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logo-misuse-lambdaprime";
-  outputHash = "sha256-71+aOTJth9ytPyNxlNc/UJZAAImLg2lyZNnyPIa9Kws=";
+  outputHash = "sha256-MAAECfzZtCgG0HvZqOJcA6aGG6OsRCVVixZsqqsvp20=";
   script = ./script.py;
 }
