@@ -32,6 +32,6 @@ def arc_sagitta(point1, point2, radius, large, sweep):
 
 def round_to_sigfig(x: int | float, s: int = 12):
     if x == 0:
-        return 0
+        return x
     else:
         return round(x, s - 1 - int(floor(log10(abs(x)))))
