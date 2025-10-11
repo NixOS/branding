@@ -24,25 +24,27 @@ svg_diff() {
   local xsl="${3:-svg-diff-view.xsl}"
   local indent="${4:-2}"
 
-  if command -v delta >/dev/null 2>&1; then
-    git --no-pager diff --no-index --no-ext-diff --color=always \
-      -U999999 \
-      --diff-algorithm=histogram --minimal \
-      <(svg_pretty "$a" "$xsl" "$indent") \
-      <(svg_pretty "$b" "$xsl" "$indent") |
-      delta --side-by-side --paging=never
-  else
-    git --no-pager diff --no-index --no-ext-diff --color=always \
-      -U999999 \
-      --diff-algorithm=histogram --minimal \
-      <(svg_pretty "$a" "$xsl" "$indent") \
-      <(svg_pretty "$b" "$xsl" "$indent")
-  fi
+  local left
+  local right
+  left="$(mktemp "/tmp/left.XXXX.svg")"
+  right="$(mktemp "/tmp/right.XXXX.svg")"
 
-  # diff -u \
-  #   <(svg_pretty "$a" "$xsl" "$indent") \
-  #   <(svg_pretty "$b" "$xsl" "$indent") |
-  #   delta --paging=never --side-by-side
+  svg_pretty "$a" "$xsl" "$indent" >"$left"
+  svg_pretty "$b" "$xsl" "$indent" >"$right"
+
+  git --no-pager \
+    diff \
+    --no-index \
+    --no-ext-diff \
+    --color=always \
+    --unified=999999 \
+    --diff-algorithm=histogram \
+    --minimal \
+    "$left" "$right" |
+    delta \
+      --side-by-side \
+      --paging=never \
+      --file-modified-label "modified: $(basename -- "$a") --->"
 }
 
 # Example direct call (uncomment to use like a script):
