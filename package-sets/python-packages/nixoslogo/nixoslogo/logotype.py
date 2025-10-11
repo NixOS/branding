@@ -19,6 +19,7 @@ from nixoslogo.core import (
     LogotypeStyle,
     get_nixos_logotype_font_file,
 )
+from nixoslogo.helpers import round_to_sigfig
 from nixoslogo.logging_config import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -176,7 +177,10 @@ class Glyph(BaseRenderable):
                 # First iteration of a contour should always be a move.
                 if first_iteration:
                     point = points.pop(0)
-                    element = svg.MoveTo(point.x, point.y)
+                    element = svg.MoveTo(
+                        round_to_sigfig(point.x),
+                        round_to_sigfig(point.y),
+                    )
                     path.append(element)
                     first_iteration = False
                     continue
@@ -184,7 +188,10 @@ class Glyph(BaseRenderable):
                 if points[0].on_curve:
                     # If the next point is on curve, it is a straight line from the previous point.
                     point = points.pop(0)
-                    element = svg.LineTo(point.x, point.y)
+                    element = svg.LineTo(
+                        round_to_sigfig(point.x),
+                        round_to_sigfig(point.y),
+                    )
                     path.append(element)
                     continue
                 if not points[0].on_curve and points[1].on_curve:
@@ -193,7 +200,10 @@ class Glyph(BaseRenderable):
                     points_bezier = [
                         elem
                         for pair in (
-                            (point.x, point.y)
+                            (
+                                round_to_sigfig(point.x),
+                                round_to_sigfig(point.y),
+                            )
                             for point in (points.pop(0) for _ in range(2))
                         )
                         for elem in pair
@@ -206,7 +216,10 @@ class Glyph(BaseRenderable):
                     points_bezier = [
                         elem
                         for pair in (
-                            (point.x, point.y)
+                            (
+                                round_to_sigfig(point.x),
+                                round_to_sigfig(point.y),
+                            )
                             for point in (points.pop(0) for _ in range(3))
                         )
                         for elem in pair
