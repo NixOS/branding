@@ -336,13 +336,13 @@ class Logomark(BaseRenderable):
                 fill=f"url(#{fill})",
                 transform=[
                     svg.Translate(
-                        1.25 * self.ilambda.radius * cosd(120),
-                        1.25 * self.ilambda.radius * sind(120),
+                        round_to_sigfig(1.25 * self.ilambda.radius * cosd(120)),
+                        round_to_sigfig(1.25 * self.ilambda.radius * sind(120)),
                     ),
                     svg.Rotate(
                         angle,
-                        -1.25 * self.ilambda.radius * cosd(120),
-                        -1.25 * self.ilambda.radius * sind(120),
+                        round_to_sigfig(-1.25 * self.ilambda.radius * cosd(120)),
+                        round_to_sigfig(-1.25 * self.ilambda.radius * sind(120)),
                     ),
                 ],
             )

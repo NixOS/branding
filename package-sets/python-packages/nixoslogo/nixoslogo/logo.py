@@ -12,6 +12,7 @@ from nixoslogo.core import (
     LogomarkColors,
     LogotypeStyle,
 )
+from nixoslogo.helpers import round_to_sigfig
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
     FontLoader,
@@ -95,13 +96,15 @@ class NixosLogo(BaseRenderable):
             match self.logo_layout:
                 case LogoLayout.HORIZONTAL:
                     self.logotype_transform = svg.Translate(
-                        self.logomark.circumradius,
-                        self.logotype_cap_height / 2,
+                        round_to_sigfig(self.logomark.circumradius),
+                        round_to_sigfig(self.logotype_cap_height / 2),
                     )
                 case LogoLayout.VERTICAL:
                     self.logotype_transform = svg.Translate(
-                        -self.logotype.elements_width / 2,
-                        self.logomark.inradius + self.logotype_cap_height * 1.25,
+                        round_to_sigfig(-self.logotype.elements_width / 2),
+                        round_to_sigfig(
+                            self.logomark.inradius + self.logotype_cap_height * 1.25
+                        ),
                     )
                 case _:
                     raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
