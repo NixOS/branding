@@ -158,7 +158,7 @@
     </xsl:if>
   </xsl:template>
 
-  <!-- @viewBox: one number per line -->
+  <!-- @viewBox: one number per line, with stable zero-padded index -->
   <xsl:template match="@viewBox">
     <xsl:param name="pad" select="0"/>
     <!-- Normalize commas to spaces, collapse whitespace -->
@@ -169,30 +169,34 @@
     <xsl:text>
 </xsl:text>
 
-    <xsl:call-template name="emit-space-tokens">
+    <xsl:call-template name="emit-indexed-tokens">
       <xsl:with-param name="s" select="$norm"/>
       <xsl:with-param name="pad" select="$pad + $indent"/>
+      <xsl:with-param name="idx" select="1"/>
     </xsl:call-template>
   </xsl:template>
 
-  <!-- helper: print space-separated tokens, one per line -->
-  <xsl:template name="emit-space-tokens">
+  <!-- Helper: print space-separated tokens one per line with [0001], [0002], ... -->
+  <xsl:template name="emit-indexed-tokens">
     <xsl:param name="s"/>
     <xsl:param name="pad" select="0"/>
+    <xsl:param name="idx" select="1"/>
 
     <xsl:variable name="sn" select="normalize-space($s)"/>
     <xsl:if test="$sn != ''">
-      <xsl:variable name="tok" select="substring-before(concat($sn,' '), ' ')"/>
+      <xsl:variable name="tok"  select="substring-before(concat($sn,' '), ' ')"/>
       <xsl:variable name="rest" select="normalize-space(substring-after(concat($sn,' '), ' '))"/>
 
       <xsl:call-template name="pad"><xsl:with-param name="depth" select="$pad"/></xsl:call-template>
+      <xsl:text>[</xsl:text><xsl:value-of select="format-number($idx, '0000')"/><xsl:text>] </xsl:text>
       <xsl:value-of select="$tok"/>
       <xsl:text>
 </xsl:text>
 
-      <xsl:call-template name="emit-space-tokens">
+      <xsl:call-template name="emit-indexed-tokens">
         <xsl:with-param name="s" select="$rest"/>
         <xsl:with-param name="pad" select="$pad"/>
+        <xsl:with-param name="idx" select="$idx + 1"/>
       </xsl:call-template>
     </xsl:if>
   </xsl:template>
