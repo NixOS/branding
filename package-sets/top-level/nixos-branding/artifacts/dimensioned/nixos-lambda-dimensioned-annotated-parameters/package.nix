@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-lambda-dimensioned-annotated-parameters";
-  outputHash = "sha256-l+FhSHMKZIOwe1xw0gccMBJ5SQD3VT10zgSRssZZ40k=";
+  outputHash = "sha256-w4WiQUE1nCWqjEllZJ14wN+RS5J94inpkfj76ahWsfw=";
   script = ./script.py;
 }

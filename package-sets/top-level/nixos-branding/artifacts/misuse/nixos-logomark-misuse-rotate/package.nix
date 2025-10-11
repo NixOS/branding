@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logomark-misuse-rotate";
-  outputHash = "sha256-GvolEpXZkQjX9X48hisQINzvrcDGROHN1Lyg5eGqYck=";
+  outputHash = "sha256-iIFIsvhbOyZEEeHs7NqsJHNJtcNAa42GkRlae8j6lDs=";
   script = ./script.py;
 }
