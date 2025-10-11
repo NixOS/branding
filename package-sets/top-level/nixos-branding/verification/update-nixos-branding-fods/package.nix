@@ -41,7 +41,6 @@ writeShellApplication {
       --no-link \
       --print-out-paths \
       --stdin \
-      --rebuild \
       2>error.log
 
     if [[ -s error.log ]]; then
