@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logo-trans-gradient-white-regular-vertical-minimal";
-  outputHash = "sha256-9w4dAgID8YcwuNU4DF8h1jSFqCia0SEJrEaXdZdZt4s=";
+  outputHash = "sha256-JMG2otbN5eWELpX0GGKjaOTH2oFMF/ao5MJo0Q+uE9s=";
   script = ./script.py;
 }
