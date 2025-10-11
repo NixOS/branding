@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logomark-rainbow-gradient-none";
-  outputHash = "sha256-wZ4Ue4MMRWESwyFuz7QqsdFKgQ7OsE57fSWQCiMqh7E=";
+  outputHash = "sha256-aedLHZCZFcZQF12IMe5DWRQkG/SzpFeq3q1NatE4NU0=";
   script = ./script.py;
 }
