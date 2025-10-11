@@ -60,7 +60,17 @@
     <xsl:apply-templates select="@viewBox">
       <xsl:with-param name="pad" select="$padsp + $indent"/>
     </xsl:apply-templates>
-    <xsl:apply-templates select="@*[name()!='points' and name()!='transform' and name()!='d' and name()!='viewBox']">
+
+    <!-- linearGradient coords with semantic labels -->
+    <xsl:if test="local-name() = 'linearGradient'">
+      <xsl:call-template name="emit-linearGradient-xy">
+        <xsl:with-param name="pad" select="$padsp + $indent"/>
+      </xsl:call-template>
+    </xsl:if>
+
+    <!-- remaining attributes (excluding the ones handled above) -->
+    <xsl:apply-templates
+      select="@*[name()!='points' and name()!='transform' and name()!='d' and name()!='viewBox']">
       <xsl:with-param name="pad" select="$padsp + $indent"/>
     </xsl:apply-templates>
 
@@ -310,6 +320,49 @@
           </xsl:call-template>
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- SUPPRESS default printing of linearGradient x1/x2/y1/y2 (we print them in our block) -->
+  <xsl:template match="*[local-name()='linearGradient']/@x1"/>
+  <xsl:template match="*[local-name()='linearGradient']/@x2"/>
+  <xsl:template match="*[local-name()='linearGradient']/@y1"/>
+  <xsl:template match="*[local-name()='linearGradient']/@y2"/>
+
+  <!-- Emit linearGradient x1/x2/y1/y2 with semantic labels -->
+  <xsl:template name="emit-linearGradient-xy">
+    <xsl:param name="pad" select="0"/>
+
+    <!-- x1 -->
+    <xsl:if test="@x1">
+      <xsl:call-template name="pad"><xsl:with-param name="depth" select="$pad"/></xsl:call-template>
+      <xsl:text>[x1] @x1: </xsl:text><xsl:value-of select="normalize-space(@x1)"/>
+      <xsl:text>
+</xsl:text>
+    </xsl:if>
+
+    <!-- x2 -->
+    <xsl:if test="@x2">
+      <xsl:call-template name="pad"><xsl:with-param name="depth" select="$pad"/></xsl:call-template>
+      <xsl:text>[x2] @x2: </xsl:text><xsl:value-of select="normalize-space(@x2)"/>
+      <xsl:text>
+</xsl:text>
+    </xsl:if>
+
+    <!-- y1 -->
+    <xsl:if test="@y1">
+      <xsl:call-template name="pad"><xsl:with-param name="depth" select="$pad"/></xsl:call-template>
+      <xsl:text>[y1] @y1: </xsl:text><xsl:value-of select="normalize-space(@y1)"/>
+      <xsl:text>
+</xsl:text>
+    </xsl:if>
+
+    <!-- y2 -->
+    <xsl:if test="@y2">
+      <xsl:call-template name="pad"><xsl:with-param name="depth" select="$pad"/></xsl:call-template>
+      <xsl:text>[y2] @y2: </xsl:text><xsl:value-of select="normalize-space(@y2)"/>
+      <xsl:text>
+</xsl:text>
     </xsl:if>
   </xsl:template>
 
