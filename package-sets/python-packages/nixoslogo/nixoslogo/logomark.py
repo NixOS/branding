@@ -290,10 +290,10 @@ class Logomark(BaseRenderable):
             "joint_crotch"
         ] + self.ilambda.radius * self.ilambda.thickness * Vector((1, 0))
         return {
-            "x1": lambda_points_no_gap["upper_notch"].x,
-            "y1": lambda_points_no_gap["upper_apex"].y,
-            "x2": stop_point.x,
-            "y2": stop_point.y,
+            "x1": round_to_sigfig(lambda_points_no_gap["upper_notch"].x),
+            "y1": round_to_sigfig(lambda_points_no_gap["upper_apex"].y),
+            "x2": round_to_sigfig(stop_point.x),
+            "y2": round_to_sigfig(stop_point.y),
         }
 
     def make_flake_gradients_defs(self):
