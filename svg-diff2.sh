@@ -26,12 +26,14 @@ svg_diff() {
 
   if command -v delta >/dev/null 2>&1; then
     git --no-pager diff --no-index --no-ext-diff --color=always \
+      -U999999 \
       --diff-algorithm=histogram --minimal \
       <(svg_pretty "$a" "$xsl" "$indent") \
       <(svg_pretty "$b" "$xsl" "$indent") |
       delta --side-by-side --paging=never
   else
     git --no-pager diff --no-index --no-ext-diff --color=always \
+      -U999999 \
       --diff-algorithm=histogram --minimal \
       <(svg_pretty "$a" "$xsl" "$indent") \
       <(svg_pretty "$b" "$xsl" "$indent")
