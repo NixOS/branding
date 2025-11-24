@@ -40,22 +40,22 @@ let
     ;
 
   npmPackageMetadata = {
-    name = "@NixOS/branding";
+    name = "@nixos/branding";
     version = trim (readFile ./../nixos-branding-guide/data/version);
-    description = "Branding assets for the NixOS organization";
+    description = "Branding assets for the NixOS project.";
     main = "index.js";
     repository = {
       type = "git";
       url = "https://github.com/NixOS/branding.git";
     };
-    author = "The NixOS Community";
-    license = "ISC";
+    author = "NixOS Marketing Team";
+    license = "CC-BY-4.0";
     bugs = {
       url = "https://github.com/NixOS/branding/issues";
     };
     homepage = "https://nixos.org";
     publishConfig = {
-      registry = "https://npm.pkg.github.com/";
+      registry = "https://registry.npmjs.org";
     };
     keywords = [
       "nixos"
