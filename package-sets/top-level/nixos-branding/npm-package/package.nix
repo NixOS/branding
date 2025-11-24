@@ -102,12 +102,14 @@ let
 in
 
 stdenvNoCC.mkDerivation {
-  pname = "npm-package";
+
+  pname = baseNameOf ./.;
   version = trim (readFile ./../nixos-branding-guide/data/version);
 
-  src = ./.;
+  src = "";
 
   runLocal = true;
+  dontUnpack = true;
   dontPatch = true;
   dontConfigure = true;
   dontBuild = true;
