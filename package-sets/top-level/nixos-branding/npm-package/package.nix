@@ -70,10 +70,5 @@ stdenvNoCC.mkDerivation {
 
     cp -RL -r ${all-artifacts}/* $out/artifacts/
     cp ${nixos-color-palette-tailwind}/tailwind.js $out/colors/tailwind.js
-
-    cat > $out/.npmrc <<EOF
-    //npm.pkg.github.com/:_authToken=$\{NODE_AUTH_TOKEN\}
-    registry=https://npm.pkg.github.com/
-    EOF
   '';
 }
