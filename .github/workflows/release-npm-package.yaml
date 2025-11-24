@@ -5,19 +5,19 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   build-npm-package:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: "latest"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@octocat"
+          registry-url: "https://registry.npmjs.org"
       - name: Install Nix
         uses: cachix/install-nix-action@v31
       - name: Build npm package
@@ -30,5 +30,3 @@ jobs:
       - name: Publish npm package
         run: npm publish
         working-directory: ./build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
