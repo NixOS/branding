@@ -1,0 +1,11 @@
+{
+  "type": "standard",
+  "colours": {
+    "background": 4,
+    "border": 1
+  },
+  "contents": {
+    "style": "image",
+    "image": "kde"
+  }
+}

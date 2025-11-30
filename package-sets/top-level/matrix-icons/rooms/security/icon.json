@@ -1,0 +1,12 @@
+{
+  "type": "standard",
+  "colours": {
+    "background": 7,
+    "border": "#FF0000",
+    "text": "#991111"
+  },
+  "contents": {
+    "style": "text",
+    "text": "#@!%"
+  }
+}
