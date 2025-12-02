@@ -31,6 +31,13 @@ Eelco agreed while clarifying he was not the logo’s creator; Tim confirmed his
 consent (“Also fine with me 👍”). This exchange serves as formal acknowledgment
 of continued permission for the NixOS logo under the same license.
 
+### `jura-font-attribution-20251013-cyreal.txt`
+
+Email exchange between **Alexei Vanyashin (Cyreal)** and **Daniel Baker**
+confirming the correct authorship and license attribution for the **Jura**
+font used in NixOS branding.
+Confirms SIL Open Font License (OFL 1.1) and attribution formatting.
+
 ______________________________________________________________________
 
 ## Privacy Notice
@@ -45,4 +52,4 @@ long-term reference.
 
 ______________________________________________________________________
 
-_Last updated: 2025-10-05_
+_Last updated: 2025-12-01_
