@@ -148,6 +148,20 @@ See [`LICENSES/MIT.txt`](LICENSES/MIT.txt) for full terms.
 Creative works — including the NixOS logos, logotypes, color palettes, and related design files — are licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
 See [`LICENSES/CC-BY-4.0.txt`](LICENSES/CC-BY-4.0.txt) or <https://creativecommons.org/licenses/by/4.0/>.
 
+### Fonts
+
+- Jura font by
+  Alexei Vanyashin, Daniel Johnson, Guldana Tauasar (Cyrillic), and Irene Vlachou (Greek)
+  from [alexeiva/jura](https://github.com/alexeiva/jura)
+  licensed under **SIL Open Font License, Version 1.1 (OFL-1.1)**.
+  See [`LICENSES/Jura-OFL-1.1.txt`](LICENSES/Jura-OFL-1.1.txt) or <https://openfontlicense.org/> for full terms.
+
+- Route 159 font
+  by Sora Sagano
+  from [dotcolon](https://www.dotcolon.net/fonts/route159/)
+  licensed under **SIL Open Font License, Version 1.1 (OFL-1.1)**.
+  See [`LICENSES/Route159-OFL-1.1.txt`](LICENSES/Route159-OFL-1.1.txt) or <https://openfontlicense.org/> for full terms.
+
 ### Attribution for NixOS Branding Assets
 
 The NixOS branding assets may be shared and adapted for any purpose, including commercial use, provided that you:
