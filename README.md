@@ -134,6 +134,68 @@ It can also be used with the `--rebuild` flag.
 nix run .\#nixos-branding.verification.verify-nixos-branding-all
 ```
 
+## License and Attribution
+
+This repository contains both **software code** and **design assets** used for the NixOS visual identity.
+
+### Code
+
+Source code files (for example, `.py` and `.nix` files) are licensed under the **MIT License**.
+See [`LICENSES/MIT.txt`](LICENSES/MIT.txt) for full terms.
+
+### Design Assets
+
+Creative works — including the NixOS logos, logotypes, color palettes, and related design files — are licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
+See [`LICENSES/CC-BY-4.0.txt`](LICENSES/CC-BY-4.0.txt) or <https://creativecommons.org/licenses/by/4.0/>.
+
+### Fonts
+
+- Jura font by
+  Alexei Vanyashin, Daniel Johnson, Guldana Tauasar (Cyrillic), and Irene Vlachou (Greek)
+  from [alexeiva/jura](https://github.com/alexeiva/jura)
+  licensed under **SIL Open Font License, Version 1.1 (OFL-1.1)**.
+  See [`LICENSES/Jura-OFL-1.1.txt`](LICENSES/Jura-OFL-1.1.txt) or <https://openfontlicense.org/> for full terms.
+
+- Route 159 font
+  by Sora Sagano
+  from [dotcolon](https://www.dotcolon.net/fonts/route159/)
+  licensed under **SIL Open Font License, Version 1.1 (OFL-1.1)**.
+  See [`LICENSES/Route159-OFL-1.1.txt`](LICENSES/Route159-OFL-1.1.txt) or <https://openfontlicense.org/> for full terms.
+
+### Attribution for NixOS Branding Assets
+
+The NixOS branding assets may be shared and adapted for any purpose, including commercial use, provided that you:
+
+- Give appropriate credit to the **NixOS Project** and contributors.
+- Provide a link to the license.
+- Indicate if changes were made.
+
+Please use the **TASL format** (Title, Author, Source, License) for attribution. For example:
+
+> “NixOS Logo” by [Simon Frankau](https://github.com/simon-frankau),
+> [Tim Cuthbertson](https://github.com/timbertson),
+> and [Daniel Baker](https://github.com/djacu)
+> (maintained by the [NixOS Marketing Team](https://nixos.org/community/teams/marketing/)),
+> from [nixos/branding](https://github.com/NixOS/branding),
+> licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+### Logo Attribution
+
+The NixOS logo has evolved through several community revisions:
+
+- **Original design** by [Simon Frankau (@simon-frankau)](https://github.com/simon-frankau)\
+  [View commit → d5af1e3971822b8a3ec19689a17464558baf7244](https://github.com/NixOS/nixos-homepage/commit/d5af1e3971822b8a3ec19689a17464558baf7244)
+- **Revision** by [Tim Cuthbertson (@timbertson)](https://github.com/timbertson)\
+  [View pull request → #55](https://github.com/NixOS/nixos-homepage/pull/55)
+- **Further revision** by [Daniel Baker (@djacu)](https://github.com/djacu)\
+  [View pull request → #1](https://github.com/NixOS/branding/pull/1)
+
+All versions are licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+
+> For historical licensing correspondence, see
+> [`docs/provenance/`](docs/provenance/) for records confirming continued
+> permission to use and modify the NixOS logo under CC BY 4.0.
+
 ## Contact
 
 For questions, feedback, or to request approval for brand use, reach out to the [NixOS Marketing Team](https://nixos.org/community/teams/marketing/).

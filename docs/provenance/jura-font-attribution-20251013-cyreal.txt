@@ -1,0 +1,103 @@
+# Jura Font Attribution Confirmation (Alexei Vanyashin, Cyreal, 2025)
+# ------------------------------------------------------------------------------
+# Private email correspondence between Alexei Vanyashin (Cyreal) and
+# Daniel Baker regarding the correct authorship attribution for the
+# Jura font used in the NixOS branding repository.
+#
+# Summary:
+#   In this October 2025 exchange, Daniel Baker of the NixOS Marketing Team
+#   contacted Alexei Vanyashin of Cyreal to confirm the correct attribution
+#   and licensing for the Jura font, which is included in the repository
+#   under the SIL Open Font License (OFL) version 1.1.
+#
+#   Alexei confirmed that the attribution as drafted was mostly correct and
+#   suggested including the language-specific contributors in parentheses:
+#   “Jura font by Alexei Vanyashin, Daniel Johnson, Guldana Tauasar
+#   (Cyrillic), and Irene Vlachou (Greek)”. He also confirmed the correct
+#   license and repository source, and offered to produce a customized
+#   version of Jura (“Nix Sans”) for the NixOS project if desired.
+#
+# Privacy:
+#   Personal email addresses have been redacted. The unredacted message is
+#   retained privately by Daniel Baker for provenance verification.
+#
+# Provenance links:
+#   Jura repository: https://github.com/alexeiva/jura
+#   License text:    https://openfontlicense.org/
+#
+# Full message thread (redacted for privacy):
+
+------------------------------------------------------------------------------
+From: Daniel Baker <[REDACTED]>
+Date: Wed, 8 Oct 2025 23:15:00 -0700
+Subject: attribution of Jura font
+To: Alexei Vanyashin <[REDACTED]>
+
+Hey Alexei,
+
+I am on the Marketing Team for the NixOS project. I recently released a
+branding guide for the project that uses the Jura font
+(https://brand.nixos.org/documents/nixos-branding-guide.pdf). I am
+vendoring the font in our branding repository
+(https://github.com/NixOS/branding/tree/d1b5e1c99e44cd74bb335c3e66c52f39082da264/package-sets/top-level/jura).
+
+It is a really great font and I want to attribute the authors
+appropriately. I am working on a pull request to add licensing and
+attribution information to the repository
+(https://github.com/NixOS/branding/pull/29). I am having trouble with a
+couple issues and am hoping you can help me out.
+
+- Which is the most up-to-date version of the font? Which would you
+  recommend I use?
+- What would be the appropriate way to attribute the font?
+
+The Cyreal website lists the following people as authors:
+  Alexei Vanyashin
+  Daniel Johnson
+  Guldana Tauasar
+  Irene Vlachou
+
+I am considering adding the following to our README for attribution:
+
+Jura font by
+Alexei Vanyashin, Daniel Johnson, Guldana Tauasar, and Irene Vlachou
+from [alexeiva/jura](https://github.com/alexeiva/jura)
+licensed under [SIL Open Font License, Version 1.1]
+(https://openfontlicense.org/).
+
+Thanks in advance for your help.
+
+All the best,  
+Daniel Baker
+
+------------------------------------------------------------------------------
+From: Alexei Vanyashin <[REDACTED]>
+Date: Mon, 13 Oct 2025 18:01:37 +0300
+Subject: Re: attribution of Jura font
+To: Daniel Baker <[REDACTED]>
+
+Hello Daniel,
+
+Thank you for reaching out! I would be glad to add the news to our
+OpenCollective feed (https://opencollective.com/cyreal).
+
+The attribution is mostly correct. I would suggest adding Cyrillic and
+Greek authors in parentheses like so:
+
+Jura font by
+Alexei Vanyashin, Daniel Johnson, Guldana Tauasar (Cyrillic),
+and Irene Vlachou (Greek)
+from [alexeiva/jura](https://github.com/alexeiva/jura)
+licensed under [SIL Open Font License, Version 1.1]
+(https://openfontlicense.org/).
+
+Would you like a customized version of Jura for NixOS? The font can be
+tailored to your specific needs, shipped as “Nix Sans” for a reasonable
+fee. Would be happy to discuss this further.
+
+Best,  
+Alexei
+------------------------------------------------------------------------------
+
+# End of correspondence
+
