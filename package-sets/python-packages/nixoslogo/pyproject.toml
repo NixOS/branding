@@ -1,6 +1,6 @@
 [project]
 name = "nixoslogo"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = [
     {name = "Daniel Baker",email = "daniel.n.baker@gmail.com"}
