@@ -12,18 +12,20 @@ FIN = "./result-unrounded/media-kit/nixos-logo-default-gradient-black-regular-ho
 def main():
     with open(Path(FIN), "r") as file_in:
         root = ET.fromstring(file_in.read())
-    parse_node(root)
+    parsed = parse_node(root, [])
+    print("\n".join(parsed))
 
 
-def parse_node(node: Element, indent: str = ""):
-    print(f"{indent}<{no_name_space(node.tag)}>")
+def parse_node(node: Element, parsed: list[str], indent: str = "") -> list[str]:
+    parsed.append(f"{indent}<{no_name_space(node.tag)}>")
 
-    parse_attributes(node, indent=indent)
+    parse_attributes(node, parsed, indent=indent)
 
     for child in node.findall("*"):
-        parse_node(child, indent=indent + " " * INDENT)
+        parse_node(child, parsed, indent=indent + " " * INDENT)
 
-    print(f"{indent}</{no_name_space(node.tag)}>")
+    parsed.append(f"{indent}</{no_name_space(node.tag)}>")
+    return parsed
 
 
 def no_name_space(tag: str) -> str:
@@ -31,47 +33,50 @@ def no_name_space(tag: str) -> str:
     return only_tag
 
 
-def parse_attributes(node: Element, indent: str):
+def parse_attributes(node: Element, parsed: list[str], indent: str):
     indent += " " * INDENT
     for name, value in node.attrib.items():
         match name:
             case "d":
-                parse_d(indent, name, value)
+                parsed.extend(parse_d(indent, name, value))
             case "points":
-                parse_points(indent, name, value)
+                parsed.extend(parse_points(indent, name, value))
             case "transform":
-                parse_transform(indent, name, value)
+                parsed.extend(parse_transform(indent, name, value))
             case "viewBox":
-                parse_viewbox(indent, name, value)
+                parsed.extend(parse_viewbox(indent, name, value))
             case _:
-                parse_misc(indent, name, value)
+                parsed.append(parse_misc(indent, name, value))
 
 
-def parse_d(indent: str, name: str, value: str):
-    print(f"{indent}@{name}:")
+def parse_d(indent: str, name: str, value: str) -> list[str]:
+    parsed = [f"{indent}@{name}:"]
     indent += " " * INDENT
     parts = re.split(r"([a-zA-Z]+)", value)
     parts = list(filter(None, parts))
     pairs = list(batched(parts, 2))
     for elem in pairs:
-        print(f"{indent}{elem[0]} {elem[1].strip()}")
+        parsed.append(f"{indent}{elem[0]} {elem[1].strip()}")
+    return parsed
 
 
-def parse_points(indent: str, name: str, value: str):
-    print(f"{indent}@{name}:")
+def parse_points(indent: str, name: str, value: str) -> list[str]:
+    parsed = [f"{indent}@{name}:"]
     indent += " " * INDENT
     pairs = list(batched(value.split(), 2))
     pad = math.ceil(math.log10(len(pairs)))
     for index, elem in enumerate(pairs):
-        print(f"{indent}[{index:0{pad}d}] ({elem[0]}, {elem[1]})")
+        parsed.append(f"{indent}[{index:0{pad}d}] ({elem[0]}, {elem[1]})")
+    return parsed
 
 
-def parse_transform(indent: str, name: str, value: str):
-    print(f"{indent}@{name}:")
+def parse_transform(indent: str, name: str, value: str) -> list[str]:
+    parsed = [f"{indent}@{name}:"]
     indent += " " * INDENT
     parts = split_transforms(value)
     for part in parts:
-        print(f"{indent}{part}")
+        parsed.append(f"{indent}{part}")
+    return parsed
 
 
 def split_transforms(transform_str: str) -> list[str]:
@@ -82,16 +87,17 @@ def split_transforms(transform_str: str) -> list[str]:
     return re.findall(pattern, transform_str)
 
 
-def parse_viewbox(indent: str, name: str, value: str):
-    print(f"{indent}@{name}:")
+def parse_viewbox(indent: str, name: str, value: str) -> list[str]:
+    parsed = [f"{indent}@{name}:"]
     indent += " " * INDENT
     pad = math.ceil(math.log10(len(value.split())))
     for index, elem in enumerate(value.split()):
-        print(f"{indent}[{index:0{pad}d}] {elem}")
+        parsed.append(f"{indent}[{index:0{pad}d}] {elem}")
+    return parsed
 
 
-def parse_misc(indent: str, name: str, value: str):
-    print(f"{indent}@{name}: {value}")
+def parse_misc(indent: str, name: str, value: str) -> str:
+    return f"{indent}@{name}: {value}"
 
 
 if __name__ == "__main__":
