@@ -21,21 +21,30 @@ let
     ;
 
   inherit (typix-lib)
-    buildDeterministicTypstProject
+    buildTypstProject
     ;
+
+  pname = "nixos-branding-guide";
 
 in
 
-buildDeterministicTypstProject (
+buildTypstProject (
   {
 
-    pname = "nixos-branding-guide";
+    inherit pname;
     version = trim (readFile ./data/version);
 
     src = toSource {
       root = ./.;
-      fileset = unions [ ./nixos-branding-guide.typ ];
+      fileset = unions [ ./${pname}.typ ];
     };
+
+    buildPhaseTypstCommand = "typst compile --format pdf ${pname}.typ";
+
+    installPhaseCommand = ''
+      mkdir $out
+      cp ${pname}.pdf $out/
+    '';
 
   }
   // (import ./common.nix {

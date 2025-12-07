@@ -25,8 +25,8 @@
     [
       #place(top + left, dx: 1cm, dy: text_start)[#text_content]
       #place(top + right)[#image(
-          "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
-        )]
+        "./miscellaneous/nixos-lambda-R512-T1_4-G0-none.svg",
+      )]
     ]
   }))
 }
@@ -54,9 +54,14 @@
         ]),
       )
       #place(top + left, dx: 200% / 3 + 2.5em, dy: 2.5em, [
-        #text(fill: white, weight: 900, font: "Jura", rightSide.header.join(
-          " / ",
-        ))
+        #text(
+          fill: white,
+          weight: 900,
+          font: "Jura",
+          rightSide.header.join(
+            " / ",
+          ),
+        )
       ])
       #let page_num = if here().page() < 10 {
         [0#str(here().page())]
@@ -574,31 +579,39 @@
         [
           Default/Gradient
 
-          #imageBox(image(
-            "./media-kit/nixos-logomark-default-gradient-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+            ),
+          )
         ],
         [
           Rainbow/Gradient
 
-          #imageBox(image(
-            "./media-kit/nixos-logomark-rainbow-gradient-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logomark-rainbow-gradient-recommended.svg",
+            ),
+          )
         ],
 
         [
           Black/Flat
 
-          #imageBox(image(
-            "./media-kit/nixos-logomark-black-flat-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logomark-black-flat-recommended.svg",
+            ),
+          )
         ],
         [
           White/Flat
 
-          #imageBoxDark(image(
-            "./media-kit/nixos-logomark-white-flat-recommended.svg",
-          ))
+          #imageBoxDark(
+            image(
+              "./media-kit/nixos-logomark-white-flat-recommended.svg",
+            ),
+          )
         ],
       )
     ],
@@ -627,16 +640,20 @@
         [
           Gradient
 
-          #imageBox(image(
-            "./media-kit/nixos-logomark-default-gradient-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logomark-default-gradient-recommended.svg",
+            ),
+          )
         ],
         [
           Flat
 
-          #imageBox(image(
-            "./media-kit/nixos-logomark-default-flat-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logomark-default-flat-recommended.svg",
+            ),
+          )
         ],
       )
     ],
@@ -666,16 +683,20 @@
         [
           Black
 
-          #imageBox(image(
-            "./media-kit/nixos-logotype-black-regular-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logotype-black-regular-recommended.svg",
+            ),
+          )
         ],
         [
           White
 
-          #imageBoxDark(image(
-            "./media-kit/nixos-logotype-white-regular-recommended.svg",
-          ))
+          #imageBoxDark(
+            image(
+              "./media-kit/nixos-logotype-white-regular-recommended.svg",
+            ),
+          )
         ],
       )
     ],
@@ -702,31 +723,39 @@
         [
           Black/Normal
 
-          #imageBox(image(
-            "./media-kit/nixos-logotype-black-regular-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logotype-black-regular-recommended.svg",
+            ),
+          )
         ],
         [
           White/Normal
 
-          #imageBoxDark(image(
-            "./media-kit/nixos-logotype-white-regular-recommended.svg",
-          ))
+          #imageBoxDark(
+            image(
+              "./media-kit/nixos-logotype-white-regular-recommended.svg",
+            ),
+          )
         ],
 
         [
           Black/#lambda_prime
 
-          #imageBox(image(
-            "./media-kit/nixos-logotype-black-lambdaprime-recommended.svg",
-          ))
+          #imageBox(
+            image(
+              "./media-kit/nixos-logotype-black-lambdaprime-recommended.svg",
+            ),
+          )
         ],
         [
           White/#lambda_prime
 
-          #imageBoxDark(image(
-            "./media-kit/nixos-logotype-white-lambdaprime-recommended.svg",
-          ))
+          #imageBoxDark(
+            image(
+              "./media-kit/nixos-logotype-white-lambdaprime-recommended.svg",
+            ),
+          )
         ],
       )
     ],
@@ -958,13 +987,13 @@
     HEX: #repr(mcolor.rgb().to-hex()).replace("\"", "") \
     CMYK: #mcolor.cmyk().components().map(float).map(x => { 100 * x }).map(x => calc.round(digits: 0, x)).map(int).map(str).join(" ") \
     OKLCH: #color.at(0) #color.at(1) #color.at(2) \
-  ] else { }
+  ] else {}
   let text_content = if text_enable {
     place(bottom, text(text_size, text_color)[
       #text_color_name \
       #text_color_value
     ])
-  } else { }
+  } else {}
   rect(width: 100%, height: 100%, fill: mcolor, text_content)
 }
 
@@ -976,13 +1005,15 @@
         rows: (1fr,) * 2,
         gutter: 4pt,
         ..array
-          .zip(..(
-            color_palette.palette.primary,
-            color_palette.palette.secondary,
-            color_palette.palette.accent,
+          .zip(
+            ..(
+              color_palette.palette.primary,
+              color_palette.palette.secondary,
+              color_palette.palette.accent,
+            )
+              .join()
+              .chunks(2),
           )
-            .join()
-            .chunks(2))
           .join()
           .map(color => make_color_block(
             text_color_value_enable: false,
@@ -1074,11 +1105,13 @@
         rows: (1fr,) * 2,
         gutter: 4pt,
         ..array
-          .zip(..(
-            color_palette.palette.accent,
+          .zip(
+            ..(
+              color_palette.palette.accent,
+            )
+              .join()
+              .chunks(2),
           )
-            .join()
-            .chunks(2))
           .join()
           .map(color => make_color_block(
             text_size: 1em,
