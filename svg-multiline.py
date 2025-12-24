@@ -57,8 +57,9 @@ def parse_d(indent: str, name: str, value: str) -> list[str]:
     parts = re.split(r"([a-zA-Z]+)", value)
     parts = list(filter(None, parts))
     pairs = list(batched(parts, 2))
-    for elem in pairs:
-        parsed.append(f"{indent}{elem[0]} {elem[1].strip()}")
+    pad = math.ceil(math.log10(len(pairs)))
+    for index, elem in enumerate(pairs):
+        parsed.append(f"{indent}[{index:0{pad}d}] {elem[0]} {elem[1].strip()}")
     return parsed
 
 
