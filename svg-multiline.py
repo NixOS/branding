@@ -2,6 +2,7 @@ import difflib
 import math
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Sequence
 from itertools import batched
 from pathlib import Path
 from xml.etree.ElementTree import Element
@@ -67,7 +68,7 @@ def parse_d(indent: str, name: str, value: str) -> list[str]:
     parts = re.split(r"([a-zA-Z]+)", value)
     parts = list(filter(None, parts))
     pairs = list(batched(parts, 2))
-    pad = math.ceil(math.log10(len(pairs)))
+    pad = pad_min(pairs)
     for index, elem in enumerate(pairs):
         parsed.append(f"{indent}[{index:0{pad}d}] {elem[0]} {elem[1].strip()}")
     return parsed
@@ -77,7 +78,7 @@ def parse_points(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
     indent += INDENT
     pairs = list(batched(value.split(), 2))
-    pad = math.ceil(math.log10(len(pairs)))
+    pad = pad_min(pairs)
     for index, elem in enumerate(pairs):
         parsed.append(f"{indent}[{index:0{pad}d}] ({elem[0]}, {elem[1]})")
     return parsed
@@ -103,7 +104,7 @@ def split_transforms(transform_str: str) -> list[str]:
 def parse_viewbox(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
     indent += INDENT
-    pad = math.ceil(math.log10(len(value.split())))
+    pad = pad_min(value.split())
     for index, elem in enumerate(value.split()):
         parsed.append(f"{indent}[{index:0{pad}d}] {elem}")
     return parsed
@@ -111,6 +112,10 @@ def parse_viewbox(indent: str, name: str, value: str) -> list[str]:
 
 def parse_misc(indent: str, name: str, value: str) -> str:
     return f"{indent}@{name}: {value}"
+
+
+def pad_min(seq: Sequence, min: int = 4):
+    return max(min, math.ceil(math.log10(len(seq))))
 
 
 if __name__ == "__main__":
