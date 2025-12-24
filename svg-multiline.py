@@ -6,7 +6,6 @@ from itertools import batched
 from pathlib import Path
 from xml.etree.ElementTree import Element
 
-
 INDENTAMOUNT = 2
 INDENTCHAR = " "
 INDENT = INDENTAMOUNT * INDENTCHAR
@@ -23,23 +22,10 @@ def main():
     with open(Path(FIN1), "r") as file_in:
         root = ET.fromstring(file_in.read())
     parsed1 = parse_node(root, [])
-    # print("\n".join(difflib.unified_diff(parsed0, parsed1)))
 
     diff = difflib.HtmlDiff().make_file(parsed0, parsed1, fromdesc="Old", todesc="New")
     with open("comparison_report.html", "w") as f:
         f.write(diff)
-
-    # cd = ConsoleDiff(
-    #     cols=200,
-    #     line_numbers=True,
-    # )
-    # table_lines = cd.make_table(
-    #     parsed0,
-    #     parsed1,
-    #     fromdesc="old",
-    #     todesc="new",
-    # )
-    # print("\n".join(table_lines))
 
 
 def parse_node(node: Element, parsed: list[str], indent: str = "") -> list[str]:
