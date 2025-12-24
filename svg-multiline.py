@@ -5,8 +5,10 @@ from itertools import batched
 from pathlib import Path
 from xml.etree.ElementTree import Element
 
-INDENT = 2
 FIN = "./result-unrounded/media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg"
+INDENTAMOUNT = 2
+INDENTCHAR = " "
+INDENT = INDENTAMOUNT * INDENTCHAR
 
 
 def main():
@@ -22,7 +24,7 @@ def parse_node(node: Element, parsed: list[str], indent: str = "") -> list[str]:
     parse_attributes(node, parsed, indent=indent)
 
     for child in node.findall("*"):
-        parse_node(child, parsed, indent=indent + " " * INDENT)
+        parse_node(child, parsed, indent=indent + INDENT)
 
     parsed.append(f"{indent}</{no_name_space(node.tag)}>")
     return parsed
@@ -34,7 +36,7 @@ def no_name_space(tag: str) -> str:
 
 
 def parse_attributes(node: Element, parsed: list[str], indent: str):
-    indent += " " * INDENT
+    indent += INDENT
     for name, value in node.attrib.items():
         match name:
             case "d":
@@ -51,7 +53,7 @@ def parse_attributes(node: Element, parsed: list[str], indent: str):
 
 def parse_d(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
-    indent += " " * INDENT
+    indent += INDENT
     parts = re.split(r"([a-zA-Z]+)", value)
     parts = list(filter(None, parts))
     pairs = list(batched(parts, 2))
@@ -62,7 +64,7 @@ def parse_d(indent: str, name: str, value: str) -> list[str]:
 
 def parse_points(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
-    indent += " " * INDENT
+    indent += INDENT
     pairs = list(batched(value.split(), 2))
     pad = math.ceil(math.log10(len(pairs)))
     for index, elem in enumerate(pairs):
@@ -72,7 +74,7 @@ def parse_points(indent: str, name: str, value: str) -> list[str]:
 
 def parse_transform(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
-    indent += " " * INDENT
+    indent += INDENT
     parts = split_transforms(value)
     for part in parts:
         parsed.append(f"{indent}{part}")
@@ -89,7 +91,7 @@ def split_transforms(transform_str: str) -> list[str]:
 
 def parse_viewbox(indent: str, name: str, value: str) -> list[str]:
     parsed = [f"{indent}@{name}:"]
-    indent += " " * INDENT
+    indent += INDENT
     pad = math.ceil(math.log10(len(value.split())))
     for index, elem in enumerate(value.split()):
         parsed.append(f"{indent}[{index:0{pad}d}] {elem}")
