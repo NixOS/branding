@@ -93,6 +93,7 @@ PALETTE_TRANS_COLORS = NIXOS_COLOR_PALETTE["logos"]["trans"]
 PALETTE_PRIMARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["primary"]
 PALETTE_SECONDARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["secondary"]
 PALETTE_ACCENT_COLORS = NIXOS_COLOR_PALETTE["palette"]["accent"]
+PALETTE_UKRAINE_COLORS = NIXOS_COLOR_PALETTE["logos"]["ukraine"]
 
 NIXOS_DARK_BLUE = Color(
     "oklch",
@@ -112,6 +113,12 @@ TRANS_COLORS = tuple(
     map(
         lambda color: Color("oklch", color["value"]),
         PALETTE_TRANS_COLORS,
+    )
+)
+UKRAINE_COLORS = tuple(
+    map(
+        lambda color: Color("oklch", color["value"]),
+        PALETTE_UKRAINE_COLORS,
     )
 )
 
@@ -151,6 +158,7 @@ class LogomarkColors(Enum):
     TRANS = TRANS_COLORS
     BLACK = (NIXOS_BLACK,)
     WHITE = (NIXOS_WHITE,)
+    UKRAINE = UKRAINE_COLORS
 
 
 class LogotypeStyle(Enum):

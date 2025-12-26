@@ -2,7 +2,7 @@ version = "0.1.0"
 
 [logos]
 [[logos.default]]
-name = "NixOS Dark Blue" 
+name = "NixOS Dark Blue"
 value = [0.55, 0.12, 264]
 
 [[logos.default]]
@@ -44,6 +44,14 @@ value = [1, 0, 0]
 [[logos.trans]]
 name = "blue"
 value = [0.8025, 0.12028, 226.51]
+
+[[logos.ukraine]]
+name = "Strong Azure"
+value = [0.473, 0.168, 257.0]
+
+[[logos.ukraine]]
+name = "Cyber Yellow"
+value = [0.877, 0.191, 85.9]
 
 [palette]
 [[palette.primary]]

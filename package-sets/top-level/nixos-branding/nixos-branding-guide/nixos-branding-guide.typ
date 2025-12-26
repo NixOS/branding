@@ -493,12 +493,17 @@
     content: [
       #grid(
         columns: (1fr, 1fr),
-        rows: (1fr, 1fr, 1fr),
-        gutter: 1em,
+        rows: (auto, 1fr) * 4,
+        gutter: .5em,
         align: center,
         [
           Default/Black
+        ],
+        [
+          Default/White
+        ],
 
+        [
           #imageBox(
             image(
               "./media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg",
@@ -506,8 +511,6 @@
           )
         ],
         [
-          Default/White
-
           #imageBoxDark(
             image(
               "./media-kit/nixos-logo-default-gradient-white-regular-horizontal-recommended.svg",
@@ -517,7 +520,12 @@
 
         [
           Rainbow/Black
+        ],
+        [
+          Rainbow/White
+        ],
 
+        [
           #imageBox(
             image(
               "./media-kit/nixos-logo-rainbow-gradient-black-regular-horizontal-recommended.svg",
@@ -525,8 +533,6 @@
           )
         ],
         [
-          Rainbow/White
-
           #imageBoxDark(
             image(
               "./media-kit/nixos-logo-rainbow-gradient-white-regular-horizontal-recommended.svg",
@@ -535,8 +541,35 @@
         ],
 
         [
-          Black/Black
+          Ukraine/Black
+        ],
+        [
+          Ukraine/White
+        ],
 
+        [
+          #imageBox(
+            image(
+              "./media-kit/nixos-logo-ukraine-gradient-black-regular-horizontal-recommended.svg",
+            ),
+          )
+        ],
+        [
+          #imageBoxDark(
+            image(
+              "./media-kit/nixos-logo-ukraine-gradient-white-regular-horizontal-recommended.svg",
+            ),
+          )
+        ],
+
+        [
+          Black/Black
+        ],
+        [
+          White/White
+        ],
+
+        [
           #imageBox(
             image(
               "./media-kit/nixos-logo-black-flat-black-regular-horizontal-recommended.svg",
@@ -544,8 +577,6 @@
           )
         ],
         [
-          White/White
-
           #imageBoxDark(
             image(
               "./media-kit/nixos-logo-white-flat-white-regular-horizontal-recommended.svg",
