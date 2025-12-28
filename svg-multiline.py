@@ -29,15 +29,26 @@ def main():
         f.write(diff)
 
 
-def parse_node(node: Element, parsed: list[str], indent: str = "") -> list[str]:
-    parsed.append(f"{indent}<{no_name_space(node.tag)}>")
+def parse_node(
+    node: Element,
+    parsed: list[str],
+    indent: str = "",
+    depth: str = "@0",
+) -> list[str]:
+    # `depth` helps the diff algorthim not get confused when there are multiple tags of the same name in a row.
+    parsed.append(f"{indent}<{no_name_space(node.tag)} {depth}>")
 
     parse_attributes(node, parsed, indent=indent)
 
-    for child in node.findall("*"):
-        parse_node(child, parsed, indent=indent + INDENT)
+    for index, child in enumerate(node.findall("*")):
+        parse_node(
+            child,
+            parsed,
+            indent=indent + INDENT,
+            depth=depth + f"/{index}",
+        )
 
-    parsed.append(f"{indent}</{no_name_space(node.tag)}>")
+    parsed.append(f"{indent}</{no_name_space(node.tag)} {depth}>")
     return parsed
 
 
