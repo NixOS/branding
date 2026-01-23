@@ -8,6 +8,7 @@ inputs.nixpkgs.lib.attrsets.mapAttrs (
         enableDefaultExcludes = true;
         projectRootFile = "flake.nix";
         programs = {
+          jsonfmt.enable = true;
           mdformat.enable = true;
           mdsh.enable = true;
           nixfmt.enable = true;

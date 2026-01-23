@@ -1,0 +1,12 @@
+{
+  "type": "standard",
+  "colours": {
+    "background": 1,
+    "border": 6,
+    "text": 4
+  },
+  "contents": {
+    "style": "text",
+    "text": "arm"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "standard",
+  "colours": {
+    "background": 1,
+    "border": 3,
+    "text": 2
+  },
+  "contents": {
+    "style": "text",
+    "text": "dev"
+  }
+}
