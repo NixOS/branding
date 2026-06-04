@@ -8,6 +8,7 @@ from compare_artifacts.parse import (
     parse_d,
     parse_points,
     split_transforms,
+    parse_transform,
 )
 
 
@@ -157,3 +158,25 @@ class TestSplitTransforms:
 
     def test_empty(self):
         assert split_transforms("") == []
+
+
+class TestParseTransform:
+    def test_single(self):
+        assert parse_transform("", "transform", "translate(10, 20)") == [
+            "@transform:",
+            "  translate(10, 20)",
+        ]
+
+    def test_chained(self):
+        assert parse_transform("", "transform", "translate(1, 2) rotate(45)") == [
+            "@transform:",
+            "  translate(1, 2)",
+            "  rotate(45)",
+        ]
+
+    def test_with_indent(self):
+        result = parse_transform("    ", "transform", "rotate(0)")
+        assert result == [
+            "    @transform:",
+            "      rotate(0)",
+        ]

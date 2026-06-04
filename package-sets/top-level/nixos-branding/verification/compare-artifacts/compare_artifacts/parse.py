@@ -85,3 +85,12 @@ def split_transforms(transform_str: str) -> list[str]:
     #   - \([^)]*\)   everything inside the parentheses
     pattern = r"[a-zA-Z]+\([^)]*\)"
     return re.findall(pattern, transform_str)
+
+
+def parse_transform(indent: str, name: str, value: str) -> list[str]:
+    """Render a `transform="..."` attribute as one function call per line."""
+    parsed = [f"{indent}@{name}:"]
+    indent += INDENT
+    for part in split_transforms(value):
+        parsed.append(f"{indent}{part}")
+    return parsed
