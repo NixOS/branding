@@ -1,6 +1,12 @@
 import pytest
 
-from compare_artifacts.parse import pad_min, no_name_space, parse_misc, parse_viewbox
+from compare_artifacts.parse import (
+    pad_min,
+    no_name_space,
+    parse_misc,
+    parse_viewbox,
+    parse_d,
+)
 
 
 class TestPadMin:
@@ -67,3 +73,36 @@ class TestParseViewbox:
         # parse_viewbox adds INDENT (two spaces) to indent for the value lines.
         assert result[0] == "  @viewBox:"
         assert result[1] == "    [0000] 0"
+
+
+class TestParseD:
+    def test_empty_value(self):
+        # pad_min returns 4 for empty sequences; header is still emitted.
+        assert parse_d("", "d", "") == ["@d:"]
+
+    def test_single_command(self):
+        # M 10 20
+        assert parse_d("", "d", "M 10 20") == [
+            "@d:",
+            "  [0000] M 10 20",
+        ]
+
+    def test_multi_command(self):
+        assert parse_d("", "d", "M 10 20 L 30 40 z") == [
+            "@d:",
+            "  [0000] M 10 20",
+            "  [0001] L 30 40",
+            "  [0002] z ",
+        ]
+
+    def test_whitespace_handling(self):
+        assert parse_d("", "d", "M10 20L30 40") == [
+            "@d:",
+            "  [0000] M 10 20",
+            "  [0001] L 30 40",
+        ]
+
+    def test_with_indent(self):
+        result = parse_d("  ", "d", "M 1 2")
+        assert result[0] == "  @d:"
+        assert result[1] == "    [0000] M 1 2"
