@@ -126,6 +126,9 @@ def parse_misc(indent: str, name: str, value: str) -> str:
 
 
 def pad_min(seq: Sequence, min: int = 4):
+    # in case the sequence is empty
+    if len(seq) == 0:
+        return min
     return max(min, math.ceil(math.log10(len(seq))))
 
 
