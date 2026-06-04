@@ -34,6 +34,69 @@ jobs:
       - uses: ./.github/actions/setup-nix
       - run: nix run .#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
 
+  compare-artifacts-build:
+    runs-on: ubuntu-latest
+    needs: build-the-world
+    if: github.event_name == 'pull_request'
+    # No `pull-requests: write` here. Token theft from compromised
+    # author-controlled code (run via `nix run` below) yields a
+    # read-only token incapable of posting comments. The comment job
+    # downstream (compare-artifacts-comment) carries the write token.
+    permissions:
+      contents: read
+    outputs:
+      before: ${{ steps.refs.outputs.before }}
+      after: ${{ steps.refs.outputs.after }}
+      report-url: ${{ steps.artifact_report.outputs.artifact-url }}
+    steps:
+      - uses: ./.github/actions/setup-nix
+        with:
+          fetch-depth: 0
+
+      - name: Resolve refs
+        id: refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # fetch-depth: 0 already pulled base + all reachable refs.
+          # Only the merge commit needs an explicit fetch because it
+          # lives at refs/pull/<N>/merge and isn't on any branch.
+          if [ -n "$MERGE_SHA" ]; then
+            git fetch origin "$MERGE_SHA" --quiet || true
+            AFTER_SHA="$MERGE_SHA"
+          else
+            echo "::warning::PR has no merge commit (likely unmergeable, or GitHub still computing mergeability); using head.sha"
+            AFTER_SHA="$HEAD_SHA"
+          fi
+
+          echo "before=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "after=$AFTER_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Compare artifacts
+        run: |
+          nix run .#nixos-branding.verification.compare-artifacts -- \
+            "${{ steps.refs.outputs.before }}" \
+            "${{ steps.refs.outputs.after }}" \
+            --output comparison_report.html \
+            --summary comparison_summary.json
+
+      - id: artifact_report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison_report
+          path: comparison_report.html
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comparison_summary
+          path: comparison_summary.json
+          if-no-files-found: error
+
   branding-guide-changelog:
     runs-on: ubuntu-latest
     steps:
