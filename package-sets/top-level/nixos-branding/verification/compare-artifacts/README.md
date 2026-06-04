@@ -26,9 +26,9 @@ The tool:
 # Compare two branches.
 nix run .#nixos-branding.verification.compare-artifacts -- main feature-branch
 
-# Compare just one subset of artifacts.
+# Compare a different artifact bundle.
 nix run .#nixos-branding.verification.compare-artifacts -- \
-    main feature-branch --attr nixos-branding.artifacts.clearspace
+    main feature-branch --attr nixos-branding.deployed-assets
 
 # Show full diffs and keep the temp worktrees afterwards.
 nix run .#nixos-branding.verification.compare-artifacts -- \
