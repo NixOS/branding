@@ -1,0 +1,15 @@
+[project]
+name = "compare-artifacts"
+version = "0.1.0"
+description = "Diff nixos-branding artifacts between two git refs"
+requires-python = ">=3.13"
+
+[project.scripts]
+compare-artifacts = "compare_artifacts.cli:main"
+
+[tool.poetry]
+packages = [{ include = "compare_artifacts" }]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
