@@ -16,3 +16,12 @@ def pad_min(seq: Sequence, min: int = 4) -> int:
     if len(seq) == 0:
         return min
     return max(min, math.ceil(math.log10(len(seq))))
+
+
+def no_name_space(tag: str) -> str:
+    """Strip an XML namespace prefix from a tag name.
+
+    `{http://www.w3.org/2000/svg}svg` → `svg`.
+    """
+    _, _, only_tag = tag.rpartition("}")
+    return only_tag

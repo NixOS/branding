@@ -1,6 +1,6 @@
 import pytest
 
-from compare_artifacts.parse import pad_min
+from compare_artifacts.parse import pad_min, no_name_space
 
 
 class TestPadMin:
@@ -27,3 +27,14 @@ class TestPadMin:
         assert pad_min([], min=2) == 2
         # log10(1000) = 3.0 exactly, ceil = 3; length wins over min=2
         assert pad_min([0] * 1000, min=2) == 3
+
+
+class TestNoNameSpace:
+    def test_bare_tag(self):
+        assert no_name_space("svg") == "svg"
+
+    def test_namespaced_tag(self):
+        assert no_name_space("{http://www.w3.org/2000/svg}svg") == "svg"
+
+    def test_empty_string(self):
+        assert no_name_space("") == ""
