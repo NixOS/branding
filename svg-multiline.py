@@ -1,32 +1,96 @@
 import difflib
+import html
 import math
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
+from dataclasses import dataclass
 from itertools import batched
 from pathlib import Path
+from typing import Literal
 from xml.etree.ElementTree import Element
 
 INDENTAMOUNT = 2
 INDENTCHAR = " "
 INDENT = INDENTAMOUNT * INDENTCHAR
 
-FIN0 = "./result-unrounded/media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg"
-FIN1 = "./result-rerounded/media-kit/nixos-logo-default-gradient-black-regular-horizontal-recommended.svg"
+FIN0 = "./result-rerounded/"
+FIN1 = "./result-rerounded2/"
+
+
+@dataclass
+class DiffSpec:
+    before: list[str]
+    after: list[str]
+    path: Path
+    state: Literal["added", "removed", "changed", "unchanged"]
+
+
+class MultiHtmlDiff(difflib.HtmlDiff):
+    def make_multi_file(self, diff_specs: list[DiffSpec], *, charset: str = "utf-8"):
+        tables = []
+        for spec in diff_specs:
+            tables.append(
+                f"<h2>{html.escape(str(spec.path))} {spec.state}</h2>\n"
+                + self.make_table(
+                    spec.before, spec.after, f"{spec.path} (old)", f"{spec.path} (new)"
+                )
+            )
+
+        body_tables = "\n<hr />\n".join(tables)
+
+        return self._file_template % {
+            "styles": self._styles,
+            "table": body_tables,
+            "legend": self._legend,
+            "charset": charset,
+        }
 
 
 def main():
-    with open(Path(FIN0), "r") as file_in:
-        root = ET.fromstring(file_in.read())
-    parsed0 = parse_node(root, [])
-
-    with open(Path(FIN1), "r") as file_in:
-        root = ET.fromstring(file_in.read())
-    parsed1 = parse_node(root, [])
-
-    diff = difflib.HtmlDiff().make_file(parsed0, parsed1, fromdesc="Old", todesc="New")
+    diff_specs = collect_files(Path(FIN0), Path(FIN1))
+    diff = MultiHtmlDiff().make_multi_file(diff_specs=diff_specs)
     with open("comparison_report.html", "w") as f:
         f.write(diff)
+
+
+def collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]:
+    before_files = glob_path_no_parent(before_root, "*.svg")
+    after_files = glob_path_no_parent(after_root, "*.svg")
+    all_files = sorted(before_files | after_files)
+    diff_specs = []
+
+    for path in all_files:
+        match (path in before_files, path in after_files):
+            case (True, True):
+                before = path_to_parsed(before_root, path)
+                after = path_to_parsed(after_root, path)
+                state = "unchanged" if before == after else "changed"
+            case (True, False):
+                before = path_to_parsed(before_root, path)
+                after = []
+                state = "remove"
+            case (False, True):
+                before = []
+                after = path_to_parsed(before_root, path)
+                state = "added"
+            case (False, False):
+                raise RuntimeError(f"{path} does not exist before or after.")
+
+        diff_specs.append(DiffSpec(before=before, after=after, path=path, state=state))
+
+    return diff_specs
+
+
+def glob_path_no_parent(root: Path, glob: str, recurse_symlinks: bool = True):
+    return set(
+        rpath.relative_to(root)
+        for rpath in root.rglob(glob, recurse_symlinks=recurse_symlinks)
+    )
+
+
+def path_to_parsed(root, path):
+    return parse_node(ET.fromstring((root / path).read_text()), [])
 
 
 def parse_node(
