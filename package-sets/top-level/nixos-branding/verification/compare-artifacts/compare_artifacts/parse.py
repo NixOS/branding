@@ -117,3 +117,28 @@ def parse_attributes(node: Element, parsed: list[str], indent: str) -> None:
                 parsed.extend(parse_viewbox(indent, name, value))
             case _:
                 parsed.append(parse_misc(indent, name, value))
+
+
+def parse_node(
+    node: Element,
+    parsed: list[str],
+    indent: str = "",
+    depth: str = "@0",
+) -> list[str]:
+    """Recursively render an XML element as a list of lines.
+
+    `depth` is a per-node tag (`@0`, `@0/1`, `@0/1/3`, ...) appended to the
+    open/close lines so the diff algorithm can tell apart sibling elements
+    that share a name.
+    """
+    parsed.append(f"{indent}<{no_name_space(node.tag)} {depth}>")
+    parse_attributes(node, parsed, indent=indent)
+    for index, child in enumerate(node.findall("*")):
+        parse_node(
+            child,
+            parsed,
+            indent=indent + INDENT,
+            depth=depth + f"/{index}",
+        )
+    parsed.append(f"{indent}</{no_name_space(node.tag)} {depth}>")
+    return parsed

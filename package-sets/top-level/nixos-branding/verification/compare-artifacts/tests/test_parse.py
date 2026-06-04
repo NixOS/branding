@@ -12,6 +12,7 @@ from compare_artifacts.parse import (
     split_transforms,
     parse_transform,
     parse_attributes,
+    parse_node,
 )
 
 
@@ -232,3 +233,46 @@ class TestParseAttributes:
             "    [0000] (0, 0)",
             "    [0001] (1, 1)",
         ]
+
+
+class TestParseNode:
+    def test_minimal_element(self):
+        node = ET.fromstring("<svg />")
+        assert parse_node(node, []) == [
+            "<svg @0>",
+            "</svg @0>",
+        ]
+
+    def test_with_attribute(self):
+        node = ET.fromstring('<svg id="root" />')
+        assert parse_node(node, []) == [
+            "<svg @0>",
+            "  @id: root",
+            "</svg @0>",
+        ]
+
+    def test_nested_children(self):
+        node = ET.fromstring("<svg><g /><g /></svg>")
+        assert parse_node(node, []) == [
+            "<svg @0>",
+            "  <g @0/0>",
+            "  </g @0/0>",
+            "  <g @0/1>",
+            "  </g @0/1>",
+            "</svg @0>",
+        ]
+
+    def test_depth_disambiguates_siblings(self):
+        # Two <g> siblings get distinct depth tags so the differ doesn't
+        # confuse them.
+        node = ET.fromstring('<svg><g id="a" /><g id="b" /></svg>')
+        lines = parse_node(node, [])
+        assert "  <g @0/0>" in lines
+        assert "  <g @0/1>" in lines
+
+    def test_namespaced_tag_is_stripped(self):
+        # `{ns}tag` becomes `tag` thanks to no_name_space.
+        node = ET.fromstring('<svg xmlns="http://www.w3.org/2000/svg"><g /></svg>')
+        lines = parse_node(node, [])
+        assert lines[0] == "<svg @0>"
+        assert "  <g @0/0>" in lines
