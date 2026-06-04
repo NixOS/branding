@@ -184,6 +184,11 @@ Options:
                          Default: nixos-branding.all-artifacts
   --output PATH          Output HTML path.
                          Default: ./comparison_report.html
+  --summary PATH         If set, write a JSON file at PATH with the
+                         counts: {"changed": N, "added": N,
+                         "removed": N, "unchanged": N}. All values
+                         are integers. CI uses this so the report's
+                         HTML doesn't have to be parsed.
   --full                 Show full file diffs (no context trimming).
                          Mutually exclusive with --context.
   --context N            Lines of unchanged context around changes.
@@ -196,6 +201,12 @@ Exit codes:
   1   Runtime failure (invalid ref, nix build failed, IO error, etc.).
   2   Argument error (argparse).
 ```
+
+The `--summary` JSON file is emitted alongside the HTML output (not
+instead of) and contains exactly the four count keys with integer
+values. The shape is stable: adding new keys is OK, removing or
+renaming keys or changing their type is a breaking change for
+consumers (notably the CI workflow).
 
 `--full` and `--context N` are enforced as mutually exclusive via
 `add_mutually_exclusive_group`. The `--attr` value is passed unmodified to
