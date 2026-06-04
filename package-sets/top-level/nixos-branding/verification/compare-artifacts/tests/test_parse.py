@@ -1,3 +1,5 @@
+import xml.etree.ElementTree as ET
+
 import pytest
 
 from compare_artifacts.parse import (
@@ -9,6 +11,7 @@ from compare_artifacts.parse import (
     parse_points,
     split_transforms,
     parse_transform,
+    parse_attributes,
 )
 
 
@@ -179,4 +182,53 @@ class TestParseTransform:
         assert result == [
             "    @transform:",
             "      rotate(0)",
+        ]
+
+
+class TestParseAttributes:
+    def test_misc_attribute(self):
+        node = ET.fromstring('<svg id="foo" />')
+        parsed: list[str] = []
+        parse_attributes(node, parsed, indent="")
+        assert parsed == ["  @id: foo"]
+
+    def test_viewbox_attribute(self):
+        node = ET.fromstring('<svg viewBox="0 0 100 100" />')
+        parsed: list[str] = []
+        parse_attributes(node, parsed, indent="")
+        assert parsed == [
+            "  @viewBox:",
+            "    [0000] 0",
+            "    [0001] 0",
+            "    [0002] 100",
+            "    [0003] 100",
+        ]
+
+    def test_d_attribute(self):
+        node = ET.fromstring('<path d="M 0 0 L 1 1" />')
+        parsed: list[str] = []
+        parse_attributes(node, parsed, indent="")
+        assert parsed == [
+            "  @d:",
+            "    [0000] M 0 0",
+            "    [0001] L 1 1",
+        ]
+
+    def test_transform_attribute(self):
+        node = ET.fromstring('<g transform="rotate(45)" />')
+        parsed: list[str] = []
+        parse_attributes(node, parsed, indent="")
+        assert parsed == [
+            "  @transform:",
+            "    rotate(45)",
+        ]
+
+    def test_points_attribute(self):
+        node = ET.fromstring('<polygon points="0 0 1 1" />')
+        parsed: list[str] = []
+        parse_attributes(node, parsed, indent="")
+        assert parsed == [
+            "  @points:",
+            "    [0000] (0, 0)",
+            "    [0001] (1, 1)",
         ]

@@ -4,6 +4,7 @@ import math
 import re
 from collections.abc import Sequence
 from itertools import batched
+from xml.etree.ElementTree import Element
 
 INDENTAMOUNT = 2
 INDENTCHAR = " "
@@ -94,3 +95,25 @@ def parse_transform(indent: str, name: str, value: str) -> list[str]:
     for part in split_transforms(value):
         parsed.append(f"{indent}{part}")
     return parsed
+
+
+def parse_attributes(node: Element, parsed: list[str], indent: str) -> None:
+    """Dispatch each attribute on `node` to the appropriate parser.
+
+    Mutates `parsed` in place by appending one or more lines per attribute.
+    The dispatching is intentionally hard-coded: each named SVG attribute
+    has a render that produces more readable output than `parse_misc`.
+    """
+    indent += INDENT
+    for name, value in node.attrib.items():
+        match name:
+            case "d":
+                parsed.extend(parse_d(indent, name, value))
+            case "points":
+                parsed.extend(parse_points(indent, name, value))
+            case "transform":
+                parsed.extend(parse_transform(indent, name, value))
+            case "viewBox":
+                parsed.extend(parse_viewbox(indent, name, value))
+            case _:
+                parsed.append(parse_misc(indent, name, value))
