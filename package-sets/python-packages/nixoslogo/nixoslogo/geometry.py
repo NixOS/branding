@@ -4,6 +4,8 @@ from typing import Self
 
 from svg._types import Number
 
+from nixoslogo.helpers import round_to_sigfig
+
 
 def cosd(angle) -> float:
     return math.cos(math.radians(angle))
@@ -90,6 +92,9 @@ class Point(Sequence):
     def to_vector(self) -> "Vector":
         return Vector(self.value)
 
+    def round_to_sigfig(self, s: int = 12) -> Self:
+        return Point((round_to_sigfig(self.x, s), round_to_sigfig(self.y, s)))
+
 
 class Points(Sequence):
     def __init__(self, value: list[Point]):
@@ -111,6 +116,9 @@ class Points(Sequence):
     def to_list(self):
         nested = [(elem.x, elem.y) for elem in self]
         return [elem for point in nested for elem in point]
+
+    def round_to_sigfig(self, s: int = 12) -> Self:
+        return Points([point.round_to_sigfig(s) for point in self])
 
 
 class Vector(Sequence):

@@ -41,7 +41,7 @@ class Lambda(BaseRenderable):
                 point.y,
             )
             * 2
-            for point in self.make_lambda_points()
+            for point in self.make_lambda_points().round_to_sigfig()
         ]
         return tuple(
             predicate(elem)
@@ -65,7 +65,7 @@ class Lambda(BaseRenderable):
     def make_svg_elements(self):
         return (
             svg.Polygon(
-                points=self.make_lambda_points().to_list(),
+                points=self.make_lambda_points().round_to_sigfig().to_list(),
                 fill=self.color,
             ),
         )
@@ -122,8 +122,8 @@ class Lambda(BaseRenderable):
             [
                 Point(
                     (
-                        round_to_sigfig(point.x),
-                        -round_to_sigfig(point.y),
+                        point.x,
+                        -point.y,
                     )
                 )
                 for point in points
@@ -145,7 +145,7 @@ class Lambda(BaseRenderable):
             radius=radius,
             thickness=thickness,
             gap=gap,
-        )
+        ).round_to_sigfig()
 
         names = (
             "upper_notch",
@@ -276,7 +276,7 @@ class Logomark(BaseRenderable):
 
         return tuple(
             svg.Polygon(
-                points=lambda_points.to_list(),
+                points=lambda_points.round_to_sigfig().to_list(),
                 fill=fill,
             )
             for lambda_points, fill in zip(
@@ -329,7 +329,7 @@ class Logomark(BaseRenderable):
         return (svg.Defs(elements=linear_gradients),)
 
     def make_clean_flake_polygons_gradient(self):
-        lambda_points_gap = self.ilambda.make_lambda_points()
+        lambda_points_gap = self.ilambda.make_lambda_points().round_to_sigfig()
         return tuple(
             svg.Polygon(
                 points=lambda_points_gap.to_list(),

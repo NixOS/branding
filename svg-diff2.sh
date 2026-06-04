@@ -32,19 +32,34 @@ svg_diff() {
   svg_pretty "$a" "$xsl" "$indent" >"$left"
   svg_pretty "$b" "$xsl" "$indent" >"$right"
 
-  git --no-pager \
-    diff \
-    --no-index \
-    --no-ext-diff \
-    --color=always \
-    --unified=999999 \
-    --diff-algorithm=histogram \
-    --minimal \
-    "$left" "$right" |
-    delta \
-      --side-by-side \
-      --paging=never \
-      --file-modified-label "modified: $(basename -- "$a") --->"
+  # git --no-pager \
+  #   diff \
+  #   --no-index \
+  #   --no-ext-diff \
+  #   --color=always \
+  #   --unified=999999 \
+  #   --diff-algorithm=histogram \
+  #   --minimal \
+  #   "$left" "$right" |
+  #   delta \
+  #     --side-by-side \
+  #     --paging=never \
+  #     --file-modified-label "modified: $(basename -- "$a") --->"
+
+  # git --no-pager \
+  #   diff \
+  #   --no-index \
+  #   --no-ext-diff \
+  #   --color=always \
+  #   --unified=999999 \
+  #   --diff-algorithm=histogram \
+  #   --minimal \
+  #   --side-by-side \
+  #   "$left" "$right"
+
+  icdiff --line-numbers --no-headers \
+    "$left" "$right"
+
 }
 
 # Example direct call (uncomment to use like a script):

@@ -82,8 +82,8 @@ class DimensionedLambda(Lambda):
         )
 
     def make_lambda_polygons(self):
-        lambda_points_no_gap = self.make_lambda_points(gap=0)
-        lambda_points_gap = self.make_lambda_points()
+        lambda_points_no_gap = self.make_lambda_points(gap=0).round_to_sigfig()
+        lambda_points_gap = self.make_lambda_points().round_to_sigfig()
         return (
             svg.Polygon(
                 points=lambda_points_no_gap.to_list(),
@@ -114,7 +114,7 @@ class DimensionedLambda(Lambda):
 class DimensionedLambdaLinear(DimensionedLambda):
     def make_lambda_linear_dimensions(self):
         hexagon_points = self.make_hexagon_points(radius=self.radius)
-        lambda_points_no_gap = self.make_lambda_points(gap=0)
+        lambda_points_no_gap = self.make_lambda_points(gap=0).round_to_sigfig()
         lambda_points_gap = self.make_named_lambda_points()
 
         dim_main_diagonal = self.annotations.dimension_lines.make_dimension_line(
@@ -207,7 +207,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
 
 class DimensionedLambdaAngular(DimensionedLambda):
     def make_lambda_angular_dimensions(self):
-        lambda_points_no_gap = self.make_lambda_points()
+        lambda_points_no_gap = self.make_lambda_points().round_to_sigfig()
         # fmt: off
         options = [
             {"flip": True,  "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
@@ -260,7 +260,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
                 r=self.radius / 96,
                 fill=self.annotations.construction_lines.stroke,
             )
-            for point in self.make_lambda_points()
+            for point in self.make_lambda_points().round_to_sigfig()
         )
 
     def make_named_lambda_vertices(self):

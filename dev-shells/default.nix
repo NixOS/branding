@@ -72,4 +72,29 @@ mapAttrs (system: pkgs: {
     }
   ) { };
 
+  svg-diff = pkgs.callPackage (
+    {
+      mkShell,
+      poetry,
+      python3,
+    }:
+    mkShell {
+
+      packages = [
+
+        (python3.withPackages (ps: [
+          ps.icdiff
+        ]))
+
+      ];
+
+      buildInputs = [
+        checks.${system}.pre-commit-check.enabledPackages
+      ];
+
+      shellHook = checks.${system}.pre-commit-check.shellHook;
+
+    }
+  ) { };
+
 }) legacyPackages
