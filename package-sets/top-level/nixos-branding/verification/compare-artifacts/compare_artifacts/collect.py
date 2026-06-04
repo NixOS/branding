@@ -36,3 +36,39 @@ def glob_path_no_parent(root: Path, glob: str) -> set[Path]:
     return {
         rpath.relative_to(root) for rpath in root.rglob(glob, recurse_symlinks=True)
     }
+
+
+def collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]:
+    """Pair SVG files between two artifact trees and classify each pair.
+
+    Returns one `DiffSpec` per file appearing in either tree, sorted by
+    relative path. Includes `unchanged` specs so callers can show summary
+    counts; filtering them out is the caller's responsibility.
+    """
+    before_files = glob_path_no_parent(before_root, "*.svg")
+    after_files = glob_path_no_parent(after_root, "*.svg")
+    all_files = sorted(before_files | after_files)
+    diff_specs: list[DiffSpec] = []
+
+    for path in all_files:
+        match (path in before_files, path in after_files):
+            case (True, True):
+                before = path_to_parsed(before_root, path)
+                after = path_to_parsed(after_root, path)
+                state = "unchanged" if before == after else "changed"
+            case (True, False):
+                before = path_to_parsed(before_root, path)
+                after = []
+                state = "removed"
+            case (False, True):
+                before = []
+                after = path_to_parsed(after_root, path)
+                state = "added"
+            case _:
+                # Cannot happen — `all_files` is the union, so each path
+                # is in at least one of the sets.
+                raise AssertionError(f"unreachable: {path}")
+
+        diff_specs.append(DiffSpec(before=before, after=after, path=path, state=state))
+
+    return diff_specs
