@@ -414,9 +414,11 @@ HTML skeleton (simplified):
               difflib styles, badge colors */</style>
   </head>
   <body>
+    <input type="checkbox" id="dark-toggle" class="dark-toggle" />
     <aside class="sidebar">
       <section class="sidebar-summary">
         X changed · Y added · Z removed · U unchanged
+        <label for="dark-toggle" class="dark-button"></label>
       </section>
       <nav>
         <h3>clearspace <span class="count">(2)</span></h3>
@@ -464,6 +466,14 @@ Conventions:
   uses `position: sticky; top: 0; height: 100vh; overflow-y: auto;`.
 - **Summary header** appears in both the sidebar (compact) and the
   top of the main area (with ref / attr metadata).
+- **Dark mode toggle** is CSS-only. The report includes a hidden
+  `<input type="checkbox" class="dark-toggle">` at the top of `<body>`
+  and a visible `<label>` styled as a button in the sidebar. Dark
+  theme rules are gated on `body:has(.dark-toggle:checked) ...` so
+  toggling the checkbox flips the page colors with no JavaScript. The
+  default is light mode; toggle state does not persist across reloads
+  (pure CSS cannot do that). The report does not respect the OS
+  `prefers-color-scheme` — the toggle is the sole control.
 
 ## Testing
 
