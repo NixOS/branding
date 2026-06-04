@@ -11,6 +11,16 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  # Includes event_name so workflow_call invocations from external
+  # workflows don't share a concurrency group with PR or push runs on
+  # the same ref. Includes the PR number for PR events, and falls back
+  # to the ref for push/dispatch events.
+  group: check-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
 jobs:
   format:
     runs-on: ubuntu-latest
@@ -31,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Get latest or unreleased info
         id: query-release-info
-        uses: release-flow/keep-a-changelog-action@v2
+        uses: release-flow/keep-a-changelog-action@4c28a62e2fb964eb1897a0396276e9bcb36f91e7   # was v2
         with:
           command: query
           version: latest-or-unreleased
