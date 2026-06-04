@@ -172,6 +172,7 @@ Notes:
 ```
 compare-artifacts <ref-a> <ref-b> [--attr ATTR]
                                   [--output PATH]
+                                  [--summary PATH]
                                   [--full | --context N]
                                   [--keep]
 
