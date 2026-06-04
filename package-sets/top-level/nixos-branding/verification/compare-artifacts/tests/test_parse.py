@@ -7,6 +7,7 @@ from compare_artifacts.parse import (
     parse_viewbox,
     parse_d,
     parse_points,
+    split_transforms,
 )
 
 
@@ -132,3 +133,27 @@ class TestParsePoints:
         result = parse_points("", "points", value)
         # 12000 pairs → log10 ~ 5 → pad 5
         assert result[1].startswith("  [00000] ")
+
+
+class TestSplitTransforms:
+    def test_single(self):
+        assert split_transforms("translate(10, 20)") == ["translate(10, 20)"]
+
+    def test_chained(self):
+        assert split_transforms("translate(10, 20) rotate(45) scale(2)") == [
+            "translate(10, 20)",
+            "rotate(45)",
+            "scale(2)",
+        ]
+
+    def test_no_whitespace_between(self):
+        assert split_transforms("translate(10,20)rotate(45)") == [
+            "translate(10,20)",
+            "rotate(45)",
+        ]
+
+    def test_whitespace_inside_parens(self):
+        assert split_transforms("translate( 1 , 2 )") == ["translate( 1 , 2 )"]
+
+    def test_empty(self):
+        assert split_transforms("") == []

@@ -76,3 +76,12 @@ def parse_points(indent: str, name: str, value: str) -> list[str]:
     for index, elem in enumerate(pairs):
         parsed.append(f"{indent}[{index:0{pad}d}] ({elem[0]}, {elem[1]})")
     return parsed
+
+
+def split_transforms(transform_str: str) -> list[str]:
+    """Split an SVG `transform` attribute into individual function calls."""
+    # `[a-zA-Z]+\([^)]*\)` matches:
+    #   - [a-zA-Z]+   the function name (translate, rotate, ...)
+    #   - \([^)]*\)   everything inside the parentheses
+    pattern = r"[a-zA-Z]+\([^)]*\)"
+    return re.findall(pattern, transform_str)
