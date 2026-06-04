@@ -6,13 +6,14 @@ and HTML rendering. Installs SIGTERM/SIGHUP handlers that raise the
 """
 
 import argparse
+import json
 import signal
 import subprocess
 import sys
 from pathlib import Path
 
 from compare_artifacts.build import build_pair
-from compare_artifacts.collect import collect_files
+from compare_artifacts.collect import collect_files, counts
 from compare_artifacts.report import render_report
 from compare_artifacts.worktree import Interrupted, Worktree
 
@@ -45,6 +46,14 @@ def _build_parser() -> argparse.ArgumentParser:
         default="comparison_report.html",
         type=Path,
         help="Output HTML path (default: ./comparison_report.html).",
+    )
+    parser.add_argument(
+        "--summary",
+        type=Path,
+        default=None,
+        help="If set, write a JSON file at this path with the counts "
+        "(changed/added/removed/unchanged). The HTML output is "
+        "unchanged whether or not this flag is passed.",
     )
     diff_mode = parser.add_mutually_exclusive_group()
     diff_mode.add_argument(
@@ -89,6 +98,8 @@ def main() -> int:
                 attr=args.attr,
             )
             args.output.write_text(html_out)
+            if args.summary is not None:
+                args.summary.write_text(json.dumps(counts(specs)))
     except subprocess.CalledProcessError as e:
         # Distinguish git-worktree-add failure from nix-build failure by
         # the command vector recorded on the exception.
