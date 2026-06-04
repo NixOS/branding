@@ -1,6 +1,6 @@
 import pytest
 
-from compare_artifacts.parse import pad_min, no_name_space
+from compare_artifacts.parse import pad_min, no_name_space, parse_misc
 
 
 class TestPadMin:
@@ -38,3 +38,14 @@ class TestNoNameSpace:
 
     def test_empty_string(self):
         assert no_name_space("") == ""
+
+
+class TestParseMisc:
+    def test_basic_round_trip(self):
+        assert parse_misc("  ", "fill", "#abcdef") == "  @fill: #abcdef"
+
+    def test_no_indent(self):
+        assert parse_misc("", "id", "foo") == "@id: foo"
+
+    def test_empty_value(self):
+        assert parse_misc("", "class", "") == "@class: "

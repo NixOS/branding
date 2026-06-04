@@ -25,3 +25,8 @@ def no_name_space(tag: str) -> str:
     """
     _, _, only_tag = tag.rpartition("}")
     return only_tag
+
+
+def parse_misc(indent: str, name: str, value: str) -> str:
+    """Render a generic XML attribute as `@name: value`."""
+    return f"{indent}@{name}: {value}"
