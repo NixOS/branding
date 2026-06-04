@@ -18,6 +18,7 @@ python3Packages.buildPythonApplication {
   build-system = [ python3Packages.poetry-core ];
 
   nativeBuildInputs = [ makeWrapper ];
+  nativeCheckInputs = [ python3Packages.pytestCheckHook ];
 
   pythonImportsCheck = [ "compare_artifacts" ];
 
