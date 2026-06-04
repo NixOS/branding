@@ -6,7 +6,8 @@ Diff nixos-branding artifacts between two git refs.
 
 ```bash
 nix run .#nixos-branding.verification.compare-artifacts -- \
-    <ref-a> <ref-b> [--attr ATTR] [--output PATH] [--full | --context N] [--keep]
+    <ref-a> <ref-b> [--attr ATTR] [--output PATH] [--summary PATH] \
+                    [--full | --context N] [--keep]
 ```
 
 The tool:
@@ -19,6 +20,29 @@ The tool:
 1. Renders an HTML report at `comparison_report.html` (or `--output`)
    with a sticky sidebar grouped by subdirectory and per-file diff
    tables (context-only by default, full diffs with `--full`).
+
+## `--summary` output
+
+When `--summary PATH` is passed, the tool also writes a small JSON
+file at PATH alongside the HTML report. The JSON contains exactly
+four integer count keys:
+
+```json
+{
+  "changed": 5,
+  "added": 1,
+  "removed": 0,
+  "unchanged": 21
+}
+```
+
+The HTML output (`--output`) is unchanged whether or not `--summary`
+is passed. The JSON is for consumers that need machine-readable counts
+without parsing the HTML (notably the CI workflow that posts a sticky
+PR comment).
+
+The shape is stable: adding new keys is OK; removing or renaming
+existing keys, or changing their types, is a breaking change.
 
 ## Examples
 
