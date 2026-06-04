@@ -6,6 +6,7 @@ from compare_artifacts.parse import (
     parse_misc,
     parse_viewbox,
     parse_d,
+    parse_points,
 )
 
 
@@ -106,3 +107,28 @@ class TestParseD:
         result = parse_d("  ", "d", "M 1 2")
         assert result[0] == "  @d:"
         assert result[1] == "    [0000] M 1 2"
+
+
+class TestParsePoints:
+    def test_empty_value(self):
+        assert parse_points("", "points", "") == ["@points:"]
+
+    def test_single_pair(self):
+        assert parse_points("", "points", "10 20") == [
+            "@points:",
+            "  [0000] (10, 20)",
+        ]
+
+    def test_multi_pair(self):
+        assert parse_points("", "points", "0 0 100 0 50 86") == [
+            "@points:",
+            "  [0000] (0, 0)",
+            "  [0001] (100, 0)",
+            "  [0002] (50, 86)",
+        ]
+
+    def test_padding_widens_for_large_lists(self):
+        value = " ".join(["1 2"] * 12000)  # 12000 pairs
+        result = parse_points("", "points", value)
+        # 12000 pairs → log10 ~ 5 → pad 5
+        assert result[1].startswith("  [00000] ")

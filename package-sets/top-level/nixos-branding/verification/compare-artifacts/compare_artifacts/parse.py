@@ -65,3 +65,14 @@ def parse_d(indent: str, name: str, value: str) -> list[str]:
         else:
             parsed.append(f"{indent}[{index:0{pad}d}] {elem[0]} ")
     return parsed
+
+
+def parse_points(indent: str, name: str, value: str) -> list[str]:
+    """Render a `points="x1 y1 x2 y2 ..."` attribute as one indexed pair per line."""
+    parsed = [f"{indent}@{name}:"]
+    indent += INDENT
+    pairs = list(batched(value.split(), 2))
+    pad = pad_min(pairs)
+    for index, elem in enumerate(pairs):
+        parsed.append(f"{indent}[{index:0{pad}d}] ({elem[0]}, {elem[1]})")
+    return parsed
