@@ -30,3 +30,14 @@ def no_name_space(tag: str) -> str:
 def parse_misc(indent: str, name: str, value: str) -> str:
     """Render a generic XML attribute as `@name: value`."""
     return f"{indent}@{name}: {value}"
+
+
+def parse_viewbox(indent: str, name: str, value: str) -> list[str]:
+    """Render a `viewBox="x y w h"` attribute as one indexed line per value."""
+    parsed = [f"{indent}@{name}:"]
+    indent += INDENT
+    parts = value.split()
+    pad = pad_min(parts)
+    for index, elem in enumerate(parts):
+        parsed.append(f"{indent}[{index:0{pad}d}] {elem}")
+    return parsed

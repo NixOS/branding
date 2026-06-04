@@ -1,6 +1,6 @@
 import pytest
 
-from compare_artifacts.parse import pad_min, no_name_space, parse_misc
+from compare_artifacts.parse import pad_min, no_name_space, parse_misc, parse_viewbox
 
 
 class TestPadMin:
@@ -49,3 +49,21 @@ class TestParseMisc:
 
     def test_empty_value(self):
         assert parse_misc("", "class", "") == "@class: "
+
+
+class TestParseViewbox:
+    def test_four_values(self):
+        result = parse_viewbox("", "viewBox", "0 0 100 100")
+        assert result == [
+            "@viewBox:",
+            "  [0000] 0",
+            "  [0001] 0",
+            "  [0002] 100",
+            "  [0003] 100",
+        ]
+
+    def test_with_indent(self):
+        result = parse_viewbox("  ", "viewBox", "0 0 10 20")
+        # parse_viewbox adds INDENT (two spaces) to indent for the value lines.
+        assert result[0] == "  @viewBox:"
+        assert result[1] == "    [0000] 0"
