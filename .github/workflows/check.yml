@@ -97,6 +97,54 @@ jobs:
           path: comparison_summary.json
           if-no-files-found: error
 
+  compare-artifacts-comment:
+    runs-on: ubuntu-latest
+    needs: compare-artifacts-build
+    # Skip on fork PRs (read-only token can't post). Also implicitly
+    # only runs on pull_request events because compare-artifacts-build
+    # itself is gated to those.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: comparison_summary
+
+      - name: Validate and extract summary
+        id: summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Type-validate the JSON before interpolating into markdown.
+          # The summary is fork-controllable in same-repo branch PRs
+          # (it's produced by author code via `nix run`), so an
+          # unvalidated string interpolation would allow markdown
+          # injection (links, mentions, HTML).
+          jq -e 'all(.changed, .added, .removed, .unchanged; type == "number")' \
+             comparison_summary.json > /dev/null
+          SUMMARY=$(jq -r '"\(.changed) changed · \(.added) added · \(.removed) removed · \(.unchanged) unchanged"' \
+                    comparison_summary.json)
+          echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+      - uses: marocchino/sticky-pull-request-comment@f3bbb8300013c686241004a1c1b5d4045b10bc30   # was v2
+        with:
+          header: compare-artifacts
+          message: |
+            ## Artifact comparison
+
+            **${{ steps.summary.outputs.summary }}**
+
+            [Download report](${{ needs.compare-artifacts-build.outputs.report-url }}) — HTML file; open in a browser.
+
+            <details>
+            <summary>Compared</summary>
+
+            - Base: `${{ needs.compare-artifacts-build.outputs.before }}` (current `main` tip when this ran)
+            - After: `${{ needs.compare-artifacts-build.outputs.after }}` (merge commit; falls back to PR head if unmergeable)
+
+            </details>
+
   branding-guide-changelog:
     runs-on: ubuntu-latest
     steps:
