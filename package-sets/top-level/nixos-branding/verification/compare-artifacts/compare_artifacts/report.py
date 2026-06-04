@@ -16,7 +16,7 @@ import difflib
 import html
 from collections import defaultdict
 
-from compare_artifacts.collect import DiffSpec
+from compare_artifacts.collect import DiffSpec, counts
 
 
 STYLES = """
@@ -189,25 +189,18 @@ _STATE_TO_BADGE = {
 }
 
 
-def _counts(specs: list[DiffSpec]) -> dict[str, int]:
-    counts = {"added": 0, "changed": 0, "removed": 0, "unchanged": 0}
-    for spec in specs:
-        counts[spec.state] += 1
-    return counts
-
-
 def _visible(specs: list[DiffSpec]) -> list[DiffSpec]:
     return [s for s in specs if s.state != "unchanged"]
 
 
 def render_summary(specs: list[DiffSpec], ref_a: str, ref_b: str, attr: str) -> str:
-    counts = _counts(specs)
+    counts_ = counts(specs)
     return (
         '<header class="summary">'
-        f"<p><strong>{counts['changed']} changed</strong> · "
-        f"{counts['added']} added · "
-        f"{counts['removed']} removed · "
-        f"{counts['unchanged']} unchanged (hidden)</p>"
+        f"<p><strong>{counts_['changed']} changed</strong> · "
+        f"{counts_['added']} added · "
+        f"{counts_['removed']} removed · "
+        f"{counts_['unchanged']} unchanged (hidden)</p>"
         f"<p>ref-a: <code>{html.escape(ref_a)}</code> &nbsp; "
         f"ref-b: <code>{html.escape(ref_b)}</code></p>"
         f"<p>attr: <code>{html.escape(attr)}</code></p>"
@@ -231,17 +224,17 @@ def _group_by_subdir(visible: list[DiffSpec]) -> dict[str, list[tuple[int, DiffS
 
 
 def render_sidebar(specs: list[DiffSpec]) -> str:
-    counts = _counts(specs)
+    counts_ = counts(specs)
     visible = _visible(specs)
     groups = _group_by_subdir(visible)
 
     out = ['<aside class="sidebar">']
     out.append(
         '<section class="sidebar-summary">'
-        f"{counts['changed']} changed · "
-        f"{counts['added']} added · "
-        f"{counts['removed']} removed · "
-        f"{counts['unchanged']} unchanged"
+        f"{counts_['changed']} changed · "
+        f"{counts_['added']} added · "
+        f"{counts_['removed']} removed · "
+        f"{counts_['unchanged']} unchanged"
         '<br /><label for="dark-toggle" class="dark-button"></label>'
         "</section>"
     )

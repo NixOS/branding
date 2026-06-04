@@ -72,3 +72,17 @@ def collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]:
         diff_specs.append(DiffSpec(before=before, after=after, path=path, state=state))
 
     return diff_specs
+
+
+def counts(specs: list[DiffSpec]) -> dict[str, int]:
+    """Return the count of specs in each of the four states.
+
+    Always returns a dict with exactly four keys (`changed`, `added`,
+    `removed`, `unchanged`) with integer values. Used by `report.py`
+    for the on-page summary and by `cli.py`'s `--summary` flag for the
+    JSON sidecar that CI consumes.
+    """
+    result = {"changed": 0, "added": 0, "removed": 0, "unchanged": 0}
+    for spec in specs:
+        result[spec.state] += 1
+    return result

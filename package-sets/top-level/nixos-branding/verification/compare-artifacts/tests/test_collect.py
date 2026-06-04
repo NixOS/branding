@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-from compare_artifacts.collect import DiffSpec, collect_files
+from compare_artifacts.collect import DiffSpec, collect_files, counts
 
 
 # Tiny SVG fragments. The content has to differ visibly between A and B
@@ -96,3 +96,48 @@ class TestCollectFiles:
         write(after / "logo.svg", SVG_A)
         specs = collect_files(before, after)
         assert isinstance(specs[0], DiffSpec)
+
+
+class TestCounts:
+    def test_empty_list(self):
+        # All four keys must be present even when empty.
+        assert counts([]) == {
+            "changed": 0,
+            "added": 0,
+            "removed": 0,
+            "unchanged": 0,
+        }
+
+    def test_one_of_each(self, tmp_path):
+        before = tmp_path / "before"
+        after = tmp_path / "after"
+        # Same path on both sides, same content → unchanged.
+        write(before / "u.svg", SVG_A)
+        write(after / "u.svg", SVG_A)
+        # Same path, different content → changed.
+        write(before / "c.svg", SVG_A)
+        write(after / "c.svg", SVG_B)
+        # Only in before → removed.
+        write(before / "r.svg", SVG_A)
+        # Only in after → added.
+        write(after / "a.svg", SVG_A)
+
+        specs = collect_files(before, after)
+        assert counts(specs) == {
+            "changed": 1,
+            "added": 1,
+            "removed": 1,
+            "unchanged": 1,
+        }
+
+    def test_all_keys_always_present(self):
+        # Even if some states have zero entries, all four keys exist.
+        result = counts([])
+        assert set(result.keys()) == {"changed", "added", "removed", "unchanged"}
+
+    def test_values_are_int(self):
+        # The CI's jq type-validation requires integer values, not bool/float.
+        result = counts([])
+        for value in result.values():
+            assert isinstance(value, int)
+            assert not isinstance(value, bool)  # bool is a subclass of int
