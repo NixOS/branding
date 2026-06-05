@@ -16,7 +16,7 @@ package that:
   interferes with existing branch checkouts).
 - Builds the requested attribute on each worktree in parallel.
 - Globs the resulting trees for SVGs, classifies each file as
-  added / removed / changed / unchanged, and renders an HTML report with
+  added / deleted / modified / unchanged, and renders an HTML report with
   a sticky sidebar index, summary counts, and per-file diff tables.
 - Cleans up its worktrees afterward (with debug-friendly fallbacks).
 - Is invokable both locally and from CI via `nix run`.
@@ -33,7 +33,8 @@ package that:
 - Worktrees never collide with the user's existing checkouts or branches.
 - Report has navigation (sticky sidebar grouped by subdirectory), summary
   stats at the top, color-coded state badges, and only shows files that
-  changed/added/removed (unchanged files are filtered).
+  modified/added/deleted entries; unchanged files are shown by default
+  with a gray U badge, or filtered out with `--hide-unchanged`.
 - Diff display defaults to context-only (3 surrounding lines); a `--full`
   flag shows the entire file diff.
 - Internal failures and signal-driven exits (SIGTERM / SIGHUP) keep the
@@ -174,6 +175,7 @@ compare-artifacts <ref-a> <ref-b> [--attr ATTR]
                                   [--output PATH]
                                   [--summary PATH]
                                   [--full | --context N]
+                                  [--hide-unchanged]
                                   [--keep]
 
 Positional:
@@ -186,14 +188,18 @@ Options:
   --output PATH          Output HTML path.
                          Default: ./comparison_report.html
   --summary PATH         If set, write a JSON file at PATH with the
-                         counts: {"changed": N, "added": N,
-                         "removed": N, "unchanged": N}. All values
+                         counts: {"modified": N, "added": N,
+                         "deleted": N, "unchanged": N}. All values
                          are integers. CI uses this so the report's
                          HTML doesn't have to be parsed.
   --full                 Show full file diffs (no context trimming).
                          Mutually exclusive with --context.
   --context N            Lines of unchanged context around changes.
                          Default: 3. Must be >= 0.
+  --hide-unchanged       Exclude unchanged files from the sidebar
+                         and body. Summary counts include them but
+                         the report is otherwise terse. Default:
+                         unchanged files are shown.
   --keep                 Keep temp worktrees after the run.
   -h, --help             Show help.
 
@@ -255,7 +261,7 @@ consumers (notably the CI workflow).
       before: list[str]
       after: list[str]
       path: Path  # relative to the build output root
-      state: Literal["added", "removed", "changed", "unchanged"]
+      state: Literal["added", "deleted", "modified", "unchanged"]
   ```
 
   Also owns the small filesystem→parse bridge
@@ -264,7 +270,7 @@ consumers (notably the CI workflow).
   single I/O boundary into parsing, kept in `collect.py` so `parse.py`
   stays pure. `collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]` globs `*.svg` recursively under each root (following
   symlinks), builds the sorted union of relative paths, and produces
-  one `DiffSpec` per path classified as `added`, `removed`, `changed`,
+  one `DiffSpec` per path classified as `added`, `deleted`, `modified`,
   or `unchanged`. Returns all specs including `unchanged` so the
   renderer can count them for the summary; the renderer filters them
   out of sidebar and body.
@@ -330,8 +336,8 @@ print(f"Report written to {output}")
 1. **`collect_files(path_a, path_b)`** rglobs `*.svg` under each root,
    builds two `set[Path]` of relative paths, iterates the sorted union:
    - Both sides present → parse both; if equal, state is `unchanged`,
-     else `changed`.
-   - Only in `path_a` → `removed`; parsed before, empty after.
+     else `modified`.
+   - Only in `path_a` → `deleted`; parsed before, empty after.
    - Only in `path_b` → `added`; empty before, parsed after.
 1. **`render_report`** computes counts from the full spec list, then
    filters out `unchanged` for both sidebar and body. Renders one
@@ -398,12 +404,12 @@ Layout:
 │ Sticky sidebar (~280px)    │ Main content                                 │
 │                            │                                              │
 │ Summary stats              │ Summary header                               │
-│ ────────────               │ X changed · Y added · Z removed              │
-│ X changed                  │ U unchanged (hidden)                         │
+│ ────────────               │ X modified · Y added · Z deleted             │
+│ X modified                 │ U unchanged                                  │
 │ Y added                    │ ref-a: <sha>   ref-b: <sha>                  │
-│ Z removed                  │ attr: nixos-branding.all-artifacts           │
+│ Z deleted                  │ attr: nixos-branding.all-artifacts           │
 │ U unchanged                │                                              │
-│                            │ <section> per non-unchanged file:            │
+│                            │ <section> per file:                          │
 │ clearspace (2)             │   <h2>relative/path.svg [state]</h2>         │
 │  M logo.svg                │   <difflib.HtmlDiff table>                   │
 │  M logomark.svg            │                                              │
@@ -429,7 +435,7 @@ HTML skeleton (simplified):
     <input type="checkbox" id="dark-toggle" class="dark-toggle" />
     <aside class="sidebar">
       <section class="sidebar-summary">
-        X changed · Y added · Z removed · U unchanged
+        X modified · Y added · Z deleted · U unchanged
         <label for="dark-toggle" class="dark-button"></label>
       </section>
       <nav>
@@ -445,13 +451,13 @@ HTML skeleton (simplified):
     </aside>
     <main>
       <header class="summary">
-        <p><strong>X changed</strong> · Y added · Z removed ·
-           U unchanged (hidden)</p>
+        <p><strong>X modified</strong> · Y added · Z deleted ·
+           U unchanged</p>
         <p>ref-a: <code>...</code>   ref-b: <code>...</code></p>
         <p>attr: <code>...</code></p>
       </header>
       <section id="diff-0">
-        <h2>clearspace/logo.svg <span class="badge badge-M">changed</span></h2>
+        <h2>clearspace/logo.svg <span class="badge badge-M">modified</span></h2>
         <!-- difflib.HtmlDiff().make_table(...) output -->
       </section>
       ...
@@ -463,11 +469,15 @@ HTML skeleton (simplified):
 Conventions:
 
 - **Sidebar groups** are subdirectory names from the relative paths.
-  Subdirs with zero changed/added/removed entries do not appear.
-- **Per-subdir counts** show non-unchanged entries only (matches what
-  is actually listed under each).
+  Every subdir with at least one visible entry appears. With
+  `--hide-unchanged`, subdirs with zero modified/added/deleted entries
+  are filtered out.
+- **Per-subdir counts** show `(N)` when all entries are
+  modified/added/deleted, and `(M of N)` when some entries are
+  unchanged (M = non-unchanged, N = total visible).
 - **Badges** mirror git status short codes: `A` (green) for added,
-  `M` (yellow) for changed, `D` (red) for removed.
+  `M` (yellow) for modified, `D` (red) for deleted, `U` (gray) for
+  unchanged.
 - **Section IDs** use the file's position in the rendered list:
   `diff-0`, `diff-1`, ..., `diff-N`. This trivially avoids any
   slugification edge cases (path collisions like `a/b.svg` vs `a-b.svg`,
@@ -513,8 +523,8 @@ Unit tests run during `nix build` via `pytestCheckHook`.
 
   - empty/empty → empty list
   - same file, same content → `unchanged`
-  - same file, different content → `changed`
-  - file only in `before` → `removed`
+  - same file, different content → `modified`
+  - file only in `before` → `deleted`
   - file only in `after` → `added`
   - returned list is sorted by path
 
@@ -580,7 +590,9 @@ The existing `svg-multiline.py` at the repo root is removed once
 fixed during the rewrite:
 
 - `collect_files` assigns `state = "remove"` for files only in the
-  before tree; the `DiffSpec.state` literal is `"removed"`.
+  before tree; the `DiffSpec.state` literal is `"deleted"` (was
+  initially fixed to `"removed"` and later renamed to `"deleted"` to
+  align the letter with the word).
 - The `added` case calls `path_to_parsed(before_root, path)` instead
   of `path_to_parsed(after_root, path)`, so newly-added files are
   parsed from the wrong tree (and would fail to read if not also
