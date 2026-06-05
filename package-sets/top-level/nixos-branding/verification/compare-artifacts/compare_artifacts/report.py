@@ -19,6 +19,22 @@ from collections import defaultdict
 from compare_artifacts.collect import DiffSpec, counts
 
 
+def _summary_link(
+    first_idx_by_state: dict[str, int],
+    state: str,
+    count: int,
+    strong: bool = False,
+) -> str:
+    """Render a summary count fragment, wrapped in an anchor link if
+    the state has at least one visible occurrence."""
+    text = f"{count} {state}"
+    if strong:
+        text = f"<strong>{text}</strong>"
+    if count == 0 or state not in first_idx_by_state:
+        return text
+    return f'<a href="#diff-{first_idx_by_state[state]}">{text}</a>'
+
+
 STYLES = """
 body {
     margin: 0;
@@ -205,15 +221,16 @@ def render_summary(
     attr: str,
     *,
     hide_unchanged: bool,
+    first_idx_by_state: dict[str, int],
 ) -> str:
     counts_ = counts(specs)
     hidden_suffix = " (hidden)" if hide_unchanged else ""
     return (
         '<header class="summary">'
-        f"<p><strong>{counts_['modified']} modified</strong> · "
-        f"{counts_['added']} added · "
-        f"{counts_['deleted']} deleted · "
-        f"{counts_['unchanged']} unchanged{hidden_suffix}</p>"
+        f"<p>{_summary_link(first_idx_by_state, 'modified', counts_['modified'], strong=True)} · "
+        f"{_summary_link(first_idx_by_state, 'added', counts_['added'])} · "
+        f"{_summary_link(first_idx_by_state, 'deleted', counts_['deleted'])} · "
+        f"{_summary_link(first_idx_by_state, 'unchanged', counts_['unchanged'])}{hidden_suffix}</p>"
         f"<p>ref-a: <code>{html.escape(ref_a)}</code> &nbsp; "
         f"ref-b: <code>{html.escape(ref_b)}</code></p>"
         f"<p>attr: <code>{html.escape(attr)}</code></p>"
@@ -320,6 +337,10 @@ def render_report(
     hide_unchanged: bool,
 ) -> str:
     visible = _visible(specs, hide_unchanged)
+    first_idx_by_state: dict[str, int] = {}
+    for i, s in enumerate(visible):
+        if s.state not in first_idx_by_state:
+            first_idx_by_state[s.state] = i
     sections = "".join(
         render_diff_section(
             index,
@@ -332,7 +353,14 @@ def render_report(
         for index, spec in enumerate(visible)
     )
     sidebar = render_sidebar(specs, hide_unchanged)
-    summary = render_summary(specs, ref_a, ref_b, attr, hide_unchanged=hide_unchanged)
+    summary = render_summary(
+        specs,
+        ref_a,
+        ref_b,
+        attr,
+        hide_unchanged=hide_unchanged,
+        first_idx_by_state=first_idx_by_state,
+    )
     title = f"compare-artifacts: {html.escape(ref_a)} ↔ {html.escape(ref_b)}"
     return (
         "<!DOCTYPE html><html><head>"
