@@ -82,7 +82,8 @@ jobs:
             "${{ steps.refs.outputs.before }}" \
             "${{ steps.refs.outputs.after }}" \
             --output comparison_report.html \
-            --summary comparison_summary.json
+            --summary comparison_summary.json \
+            --context 3
 
       - id: artifact_report
         uses: actions/upload-artifact@v4
