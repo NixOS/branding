@@ -25,12 +25,14 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-nix
       - run: nix flake check --print-build-logs
 
   build-the-world:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-nix
       - run: nix run .#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
 
@@ -49,9 +51,10 @@ jobs:
       after: ${{ steps.refs.outputs.after }}
       report-url: ${{ steps.artifact_report.outputs.artifact-url }}
     steps:
-      - uses: ./.github/actions/setup-nix
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/setup-nix
 
       - name: Resolve refs
         id: refs

@@ -1,25 +1,18 @@
 name: 'Setup Nix'
 description: |
-  Checks out the repository, installs Nix, and restores the /nix/store
-  cache. Used by every job in check.yml that needs to run nix commands.
+  Installs Nix and restores the /nix/store cache. Used by every job in
+  check.yml that needs to run nix commands.
 
-inputs:
-  fetch-depth:
-    description: |
-      Git history depth. Default 1 (just the checkout commit). The
-      compare-artifacts-build job overrides to 0 because it needs to
-      resolve arbitrary refs (base.sha and merge_commit_sha) via
-      `git worktree add`.
-    required: false
-    default: '1'
+  IMPORTANT: the caller must run `actions/checkout@v4` BEFORE referencing
+  this composite action. GitHub Actions resolves the composite action's
+  path (`./.github/actions/setup-nix/action.yml`) against the runner's
+  workspace, which is empty until checkout completes. Including
+  `actions/checkout` inside this composite action is chicken-and-egg
+  and fails with "Can't find action.yml" before the first step runs.
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: ${{ inputs.fetch-depth }}
-
     - uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3          # was v31
     - uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a     # was v6
       with:
