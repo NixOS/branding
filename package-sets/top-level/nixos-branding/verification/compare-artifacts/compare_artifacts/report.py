@@ -67,7 +67,8 @@ aside.sidebar .sidebar-summary {
 }
 .badge {
     display: inline-block;
-    width: 1.2em;
+    min-width: 1.2em;
+    padding: 0 0.4em;
     text-align: center;
     font-weight: 700;
     border-radius: 3px;
@@ -78,6 +79,7 @@ aside.sidebar .sidebar-summary {
 .badge-A { background: #28a745; }
 .badge-M { background: #f0a500; }
 .badge-D { background: #d73a49; }
+.badge-U { background: #666; }
 main {
     flex-grow: 1;
     padding: 1em 2em;
