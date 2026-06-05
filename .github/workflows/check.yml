@@ -161,7 +161,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Get latest or unreleased info
         id: query-release-info
-        uses: release-flow/keep-a-changelog-action@4c28a62e2fb964eb1897a0396276e9bcb36f91e7   # was v2
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32   # was v3.0.0
         with:
           command: query
           version: latest-or-unreleased
