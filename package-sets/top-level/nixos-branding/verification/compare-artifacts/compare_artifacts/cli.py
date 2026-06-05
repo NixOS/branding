@@ -59,13 +59,24 @@ def _build_parser() -> argparse.ArgumentParser:
     diff_mode.add_argument(
         "--full",
         action="store_true",
-        help="Show full file diffs (no context trimming).",
+        help="Show full file diffs (no context trimming). WARNING: "
+        "combined with the show-all default (no --hide-unchanged), "
+        "the rendered HTML can grow to many MB for repos with "
+        "hundreds of large artifacts. Local dev use only; the CI "
+        "workflow does not pass --full.",
     )
     diff_mode.add_argument(
         "--context",
         type=_non_negative_int,
         default=3,
         help="Lines of unchanged context around changes (default: 3).",
+    )
+    parser.add_argument(
+        "--hide-unchanged",
+        action="store_true",
+        help="Exclude unchanged files from the sidebar and body. "
+        "Summary counts include them but the report is otherwise "
+        "terse. Default: unchanged files are shown.",
     )
     parser.add_argument(
         "--keep",
@@ -96,6 +107,7 @@ def main() -> int:
                 ref_a=args.ref_a,
                 ref_b=args.ref_b,
                 attr=args.attr,
+                hide_unchanged=args.hide_unchanged,
             )
             args.output.write_text(html_out)
             if args.summary is not None:

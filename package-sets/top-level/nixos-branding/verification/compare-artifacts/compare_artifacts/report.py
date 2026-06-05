@@ -192,18 +192,28 @@ _STATE_TO_BADGE = {
 }
 
 
-def _visible(specs: list[DiffSpec]) -> list[DiffSpec]:
-    return [s for s in specs if s.state != "unchanged"]
+def _visible(specs: list[DiffSpec], hide_unchanged: bool) -> list[DiffSpec]:
+    if hide_unchanged:
+        return [s for s in specs if s.state != "unchanged"]
+    return list(specs)
 
 
-def render_summary(specs: list[DiffSpec], ref_a: str, ref_b: str, attr: str) -> str:
+def render_summary(
+    specs: list[DiffSpec],
+    ref_a: str,
+    ref_b: str,
+    attr: str,
+    *,
+    hide_unchanged: bool,
+) -> str:
     counts_ = counts(specs)
+    hidden_suffix = " (hidden)" if hide_unchanged else ""
     return (
         '<header class="summary">'
         f"<p><strong>{counts_['modified']} modified</strong> · "
         f"{counts_['added']} added · "
         f"{counts_['deleted']} deleted · "
-        f"{counts_['unchanged']} unchanged (hidden)</p>"
+        f"{counts_['unchanged']} unchanged{hidden_suffix}</p>"
         f"<p>ref-a: <code>{html.escape(ref_a)}</code> &nbsp; "
         f"ref-b: <code>{html.escape(ref_b)}</code></p>"
         f"<p>attr: <code>{html.escape(attr)}</code></p>"
@@ -226,9 +236,9 @@ def _group_by_subdir(visible: list[DiffSpec]) -> dict[str, list[tuple[int, DiffS
     return groups
 
 
-def render_sidebar(specs: list[DiffSpec]) -> str:
+def render_sidebar(specs: list[DiffSpec], hide_unchanged: bool) -> str:
     counts_ = counts(specs)
-    visible = _visible(specs)
+    visible = _visible(specs, hide_unchanged)
     groups = _group_by_subdir(visible)
 
     out = ['<aside class="sidebar">']
@@ -302,8 +312,9 @@ def render_report(
     ref_a: str,
     ref_b: str,
     attr: str,
+    hide_unchanged: bool,
 ) -> str:
-    visible = _visible(specs)
+    visible = _visible(specs, hide_unchanged)
     sections = "".join(
         render_diff_section(
             index,
@@ -315,8 +326,8 @@ def render_report(
         )
         for index, spec in enumerate(visible)
     )
-    sidebar = render_sidebar(specs)
-    summary = render_summary(specs, ref_a, ref_b, attr)
+    sidebar = render_sidebar(specs, hide_unchanged)
+    summary = render_summary(specs, ref_a, ref_b, attr, hide_unchanged=hide_unchanged)
     title = f"compare-artifacts: {html.escape(ref_a)} ↔ {html.escape(ref_b)}"
     return (
         "<!DOCTYPE html><html><head>"
