@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Dependabot updates both tag-pinned and SHA-pinned action
+    # references. PRs from Dependabot follow normal review.

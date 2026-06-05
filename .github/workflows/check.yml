@@ -11,26 +11,148 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  # Includes event_name so workflow_call invocations from external
+  # workflows don't share a concurrency group with PR or push runs on
+  # the same ref. Includes the PR number for PR events, and falls back
+  # to the ref for push/dispatch events.
+  group: check-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Nix
-        uses: cachix/install-nix-action@v31
-      - name: Check formatting
-        run: nix flake check --print-build-logs
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+      - run: nix flake check --print-build-logs
 
   build-the-world:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Nix
-        uses: cachix/install-nix-action@v31
-      - name: Build all branding assets
-        run: nix run .\#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-nix
+      - run: nix run .#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
+
+  compare-artifacts-build:
+    runs-on: ubuntu-latest
+    needs: build-the-world
+    if: github.event_name == 'pull_request'
+    # No `pull-requests: write` here. Token theft from compromised
+    # author-controlled code (run via `nix run` below) yields a
+    # read-only token incapable of posting comments. The comment job
+    # downstream (compare-artifacts-comment) carries the write token.
+    permissions:
+      contents: read
+    outputs:
+      before: ${{ steps.refs.outputs.before }}
+      after: ${{ steps.refs.outputs.after }}
+      report-url: ${{ steps.artifact_report.outputs.artifact-url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-nix
+
+      - name: Resolve refs
+        id: refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # fetch-depth: 0 already pulled base + all reachable refs.
+          # Only the merge commit needs an explicit fetch because it
+          # lives at refs/pull/<N>/merge and isn't on any branch.
+          if [ -n "$MERGE_SHA" ]; then
+            git fetch origin "$MERGE_SHA" --quiet || true
+            AFTER_SHA="$MERGE_SHA"
+          else
+            echo "::warning::PR has no merge commit (likely unmergeable, or GitHub still computing mergeability); using head.sha"
+            AFTER_SHA="$HEAD_SHA"
+          fi
+
+          echo "before=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "after=$AFTER_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Compare artifacts
+        run: |
+          nix run .#nixos-branding.verification.compare-artifacts -- \
+            "${{ steps.refs.outputs.before }}" \
+            "${{ steps.refs.outputs.after }}" \
+            --output comparison_report.html \
+            --summary comparison_summary.json \
+            --context 3
+
+      - id: artifact_report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison_report
+          path: comparison_report.html
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comparison_summary
+          path: comparison_summary.json
+          if-no-files-found: error
+
+  compare-artifacts-comment:
+    runs-on: ubuntu-latest
+    needs: compare-artifacts-build
+    # Skip on fork PRs (read-only token can't post). Also implicitly
+    # only runs on pull_request events because compare-artifacts-build
+    # itself is gated to those.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: comparison_summary
+
+      - name: Validate and extract summary
+        id: summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Type-validate the JSON before interpolating into markdown.
+          # The summary is fork-controllable in same-repo branch PRs
+          # (it's produced by author code via `nix run`), so an
+          # unvalidated string interpolation would allow markdown
+          # injection (links, mentions, HTML).
+          jq -e 'all(.modified, .added, .deleted, .unchanged; type == "number")' \
+             comparison_summary.json > /dev/null
+          SUMMARY=$(jq -r '"\(.modified) modified · \(.added) added · \(.deleted) deleted · \(.unchanged) unchanged"' \
+                    comparison_summary.json)
+          echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+      - uses: marocchino/sticky-pull-request-comment@f3bbb8300013c686241004a1c1b5d4045b10bc30   # was v2
+        with:
+          # The action's action.yml does not provide a default for this
+          # input on the pinned SHA, so the workflow must pass the token
+          # explicitly. Without it the action exits with
+          # "Input required and not supplied: GITHUB_TOKEN".
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: compare-artifacts
+          message: |
+            ## Artifact comparison
+
+            **${{ steps.summary.outputs.summary }}**
+
+            [Download report](${{ needs.compare-artifacts-build.outputs.report-url }}) — HTML file; open in a browser.
+
+            <details>
+            <summary>Compared</summary>
+
+            - Base: `${{ needs.compare-artifacts-build.outputs.before }}` (current `main` tip when this ran)
+            - After: `${{ needs.compare-artifacts-build.outputs.after }}` (merge commit; falls back to PR head if unmergeable)
+
+            </details>
 
   branding-guide-changelog:
     runs-on: ubuntu-latest
@@ -39,7 +161,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Get latest or unreleased info
         id: query-release-info
-        uses: release-flow/keep-a-changelog-action@v2
+        uses: release-flow/keep-a-changelog-action@4c28a62e2fb964eb1897a0396276e9bcb36f91e7   # was v2
         with:
           command: query
           version: latest-or-unreleased
