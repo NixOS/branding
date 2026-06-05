@@ -133,6 +133,11 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@f3bbb8300013c686241004a1c1b5d4045b10bc30   # was v2
         with:
+          # The action's action.yml does not provide a default for this
+          # input on the pinned SHA, so the workflow must pass the token
+          # explicitly. Without it the action exits with
+          # "Input required and not supplied: GITHUB_TOKEN".
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: compare-artifacts
           message: |
             ## Artifact comparison

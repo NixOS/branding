@@ -143,26 +143,19 @@ The two jobs communicate exclusively via:
 ```yaml
 name: 'Setup Nix'
 description: |
-  Checks out the repository, installs Nix, and restores the /nix/store
-  cache. Used by every job in check.yml that needs to run nix commands.
+  Installs Nix and restores the /nix/store cache. Used by every job in
+  check.yml that runs nix commands.
 
-inputs:
-  fetch-depth:
-    description: |
-      Git history depth. Default 1 (just the checkout commit). The
-      compare-artifacts-build job overrides to 0 because it needs to
-      resolve arbitrary refs (base.sha and merge_commit_sha) via
-      `git worktree add`.
-    required: false
-    default: '1'
+  IMPORTANT: the caller must run `actions/checkout@v4` BEFORE referencing
+  this composite action. GitHub Actions resolves the composite action's
+  path (`./.github/actions/setup-nix/action.yml`) against the runner's
+  workspace, which is empty until checkout completes. An earlier design
+  put `actions/checkout` INSIDE this composite action, which fails with
+  "Can't find action.yml" before the first step runs.
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: ${{ inputs.fetch-depth }}
-
     - uses: cachix/install-nix-action@<commit-sha>          # SHA-pin: resolve to v31 tip
     - uses: nix-community/cache-nix-action@<commit-sha>     # SHA-pin: resolve to v6 tip
       with:
@@ -174,10 +167,12 @@ runs:
 
 Notes:
 
-- `fetch-depth` is exposed as an input because `format` and
-  `build-the-world` work with the default shallow clone, but
-  `compare-artifacts-build` needs full history to resolve `base.sha`
-  and the merge commit via `git worktree add --detach <ref>`.
+- `actions/checkout` is NOT part of the composite action. Each calling
+  job declares its own `- uses: actions/checkout@v4` step before the
+  composite-action reference. Most jobs use the default shallow clone;
+  `compare-artifacts-build` passes `with: { fetch-depth: 0 }` because
+  it needs full history to resolve `base.sha` and the merge commit
+  via `git worktree add --detach <ref>`.
 - The `/nix/store` cache benefits all Nix-using jobs (`format`,
   `build-the-world`, `compare-artifacts-build`). Cache key includes
   the OS and the hash of `flake.lock` so a dependency update
@@ -222,12 +217,14 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-nix
       - run: nix flake check --print-build-logs
 
   build-the-world:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-nix
       - run: nix run .#nixos-branding.verification.verify-nixos-branding-all --print-build-logs
 
@@ -245,9 +242,10 @@ jobs:
       after: ${{ steps.refs.outputs.after }}
       report-url: ${{ steps.artifact_report.outputs.artifact-url }}
     steps:
-      - uses: ./.github/actions/setup-nix
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/setup-nix
 
       - name: Resolve refs
         id: refs
@@ -326,6 +324,11 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@<commit-sha>   # SHA-pin: resolve to v2 tip; Dependabot updates
         with:
+          # The pinned SHA's action.yml does not default this input from
+          # the workflow's github.token context; the workflow must pass
+          # the token explicitly or the step fails with
+          # "Input required and not supplied: GITHUB_TOKEN".
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           header: compare-artifacts
           message: |
             ## Artifact comparison
@@ -555,10 +558,23 @@ the Actions runner is the only execution environment. The plan:
   the tag itself.
 - **Local composite action visibility before checkout.** A composite
   action referenced as `uses: ./.github/actions/setup-nix` must exist
-  in the working tree before its first invocation. GitHub's runner
-  handles this by pre-fetching the action source before evaluating the
-  first step — which happens to be the `actions/checkout` inside the
-  composite action itself. The pattern is supported but non-obvious;
-  document here so a future maintainer doesn't try to "fix" the
-  apparent chicken-and-egg by moving the checkout out of the
-  composite action.
+  in the working tree before the first step runs. GitHub's runner does
+  NOT pre-fetch local composite actions, so any structure where
+  `actions/checkout` lives INSIDE the composite action fails before
+  the first step with `##[error]Can't find 'action.yml' ... Did you forget to run actions/checkout before running your local action?`.
+  The fix is to place `actions/checkout@v4` as the first step of every
+  job that uses the composite action. The composite action itself
+  contains only the Nix install + cache-restore steps; the caller is
+  responsible for the checkout. The `fetch-depth` input on the
+  composite action — originally intended to let
+  `compare-artifacts-build` request a full clone — is removed because
+  each job's own `actions/checkout` step now declares its own depth
+  (most jobs use the default shallow clone; `compare-artifacts-build`
+  passes `with: { fetch-depth: 0 }`).
+- **`marocchino/sticky-pull-request-comment` requires explicit
+  `GITHUB_TOKEN`.** The pinned SHA's `action.yml` does not default the
+  token input from the workflow's `${{ github.token }}` context, so
+  the workflow must pass `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`
+  in the step's `with:` block. Omitting it produces `##[error]Input required and not supplied: GITHUB_TOKEN`. The job-scoped
+  `permissions: pull-requests: write` is still required; passing the
+  token without the permission yields a 403 on the comment POST.
