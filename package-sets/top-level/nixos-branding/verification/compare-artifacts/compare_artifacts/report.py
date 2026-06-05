@@ -3,7 +3,7 @@
 `render_report` produces a self-contained HTML document with:
 
   - A sticky sidebar grouped by top-level subdirectory, with color-coded
-    state badges (A/M/D).
+    state badges (A/M/D/U).
   - A summary header in the main area showing counts and ref / attr
     metadata.
   - One `<section>` per non-unchanged file, containing
@@ -186,8 +186,9 @@ body:has(.dark-toggle:checked) .diff_sub {
 
 _STATE_TO_BADGE = {
     "added": "A",
-    "changed": "M",
-    "removed": "D",
+    "modified": "M",
+    "deleted": "D",
+    "unchanged": "U",
 }
 
 
@@ -199,9 +200,9 @@ def render_summary(specs: list[DiffSpec], ref_a: str, ref_b: str, attr: str) -> 
     counts_ = counts(specs)
     return (
         '<header class="summary">'
-        f"<p><strong>{counts_['changed']} changed</strong> · "
+        f"<p><strong>{counts_['modified']} modified</strong> · "
         f"{counts_['added']} added · "
-        f"{counts_['removed']} removed · "
+        f"{counts_['deleted']} deleted · "
         f"{counts_['unchanged']} unchanged (hidden)</p>"
         f"<p>ref-a: <code>{html.escape(ref_a)}</code> &nbsp; "
         f"ref-b: <code>{html.escape(ref_b)}</code></p>"
@@ -233,9 +234,9 @@ def render_sidebar(specs: list[DiffSpec]) -> str:
     out = ['<aside class="sidebar">']
     out.append(
         '<section class="sidebar-summary">'
-        f"{counts_['changed']} changed · "
+        f"{counts_['modified']} modified · "
         f"{counts_['added']} added · "
-        f"{counts_['removed']} removed · "
+        f"{counts_['deleted']} deleted · "
         f"{counts_['unchanged']} unchanged"
         '<br /><label for="dark-toggle" class="dark-button"></label>'
         "</section>"

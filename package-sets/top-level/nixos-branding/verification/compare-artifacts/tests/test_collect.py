@@ -40,7 +40,7 @@ class TestCollectFiles:
         write(after / "logo.svg", SVG_B)
         specs = collect_files(before, after)
         assert len(specs) == 1
-        assert specs[0].state == "changed"
+        assert specs[0].state == "modified"
         assert specs[0].before != specs[0].after
 
     def test_added(self, tmp_path):
@@ -63,7 +63,7 @@ class TestCollectFiles:
         specs = collect_files(before, after)
         assert len(specs) == 1
         # Regression: the original code wrote "remove" here.
-        assert specs[0].state == "removed"
+        assert specs[0].state == "deleted"
         assert specs[0].before != []
         assert specs[0].after == []
 
@@ -87,7 +87,7 @@ class TestCollectFiles:
         write(after / "clearspace" / "logo.svg", SVG_B)
         specs = collect_files(before, after)
         assert specs[0].path == Path("clearspace") / "logo.svg"
-        assert specs[0].state == "changed"
+        assert specs[0].state == "modified"
 
     def test_returns_diffspec_instances(self, tmp_path):
         before = tmp_path / "before"
@@ -102,9 +102,9 @@ class TestCounts:
     def test_empty_list(self):
         # All four keys must be present even when empty.
         assert counts([]) == {
-            "changed": 0,
+            "modified": 0,
             "added": 0,
-            "removed": 0,
+            "deleted": 0,
             "unchanged": 0,
         }
 
@@ -114,26 +114,26 @@ class TestCounts:
         # Same path on both sides, same content → unchanged.
         write(before / "u.svg", SVG_A)
         write(after / "u.svg", SVG_A)
-        # Same path, different content → changed.
+        # Same path, different content → modified.
         write(before / "c.svg", SVG_A)
         write(after / "c.svg", SVG_B)
-        # Only in before → removed.
+        # Only in before → deleted.
         write(before / "r.svg", SVG_A)
         # Only in after → added.
         write(after / "a.svg", SVG_A)
 
         specs = collect_files(before, after)
         assert counts(specs) == {
-            "changed": 1,
+            "modified": 1,
             "added": 1,
-            "removed": 1,
+            "deleted": 1,
             "unchanged": 1,
         }
 
     def test_all_keys_always_present(self):
         # Even if some states have zero entries, all four keys exist.
         result = counts([])
-        assert set(result.keys()) == {"changed", "added", "removed", "unchanged"}
+        assert set(result.keys()) == {"modified", "added", "deleted", "unchanged"}
 
     def test_values_are_int(self):
         # The CI's jq type-validation requires integer values, not bool/float.

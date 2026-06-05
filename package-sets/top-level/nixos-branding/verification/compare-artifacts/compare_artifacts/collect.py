@@ -19,7 +19,7 @@ class DiffSpec:
     before: list[str]
     after: list[str]
     path: Path  # relative to the build output root
-    state: Literal["added", "removed", "changed", "unchanged"]
+    state: Literal["added", "deleted", "modified", "unchanged"]
 
 
 def path_to_parsed(root: Path, rel: Path) -> list[str]:
@@ -55,11 +55,11 @@ def collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]:
             case (True, True):
                 before = path_to_parsed(before_root, path)
                 after = path_to_parsed(after_root, path)
-                state = "unchanged" if before == after else "changed"
+                state = "unchanged" if before == after else "modified"
             case (True, False):
                 before = path_to_parsed(before_root, path)
                 after = []
-                state = "removed"
+                state = "deleted"
             case (False, True):
                 before = []
                 after = path_to_parsed(after_root, path)
@@ -77,12 +77,12 @@ def collect_files(before_root: Path, after_root: Path) -> list[DiffSpec]:
 def counts(specs: list[DiffSpec]) -> dict[str, int]:
     """Return the count of specs in each of the four states.
 
-    Always returns a dict with exactly four keys (`changed`, `added`,
-    `removed`, `unchanged`) with integer values. Used by `report.py`
+    Always returns a dict with exactly four keys (`modified`, `added`,
+    `deleted`, `unchanged`) with integer values. Used by `report.py`
     for the on-page summary and by `cli.py`'s `--summary` flag for the
     JSON sidecar that CI consumes.
     """
-    result = {"changed": 0, "added": 0, "removed": 0, "unchanged": 0}
+    result = {"modified": 0, "added": 0, "deleted": 0, "unchanged": 0}
     for spec in specs:
         result[spec.state] += 1
     return result

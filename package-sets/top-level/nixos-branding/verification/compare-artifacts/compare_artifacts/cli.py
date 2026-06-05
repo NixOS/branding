@@ -52,7 +52,7 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="If set, write a JSON file at this path with the counts "
-        "(changed/added/removed/unchanged). The HTML output is "
+        "(modified/added/deleted/unchanged). The HTML output is "
         "unchanged whether or not this flag is passed.",
     )
     diff_mode = parser.add_mutually_exclusive_group()

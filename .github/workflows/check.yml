@@ -121,9 +121,9 @@ jobs:
           # (it's produced by author code via `nix run`), so an
           # unvalidated string interpolation would allow markdown
           # injection (links, mentions, HTML).
-          jq -e 'all(.changed, .added, .removed, .unchanged; type == "number")' \
+          jq -e 'all(.modified, .added, .deleted, .unchanged; type == "number")' \
              comparison_summary.json > /dev/null
-          SUMMARY=$(jq -r '"\(.changed) changed · \(.added) added · \(.removed) removed · \(.unchanged) unchanged"' \
+          SUMMARY=$(jq -r '"\(.modified) modified · \(.added) added · \(.deleted) deleted · \(.unchanged) unchanged"' \
                     comparison_summary.json)
           echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
 
