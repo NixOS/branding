@@ -17,7 +17,7 @@ the merged state of `main` would change.
 - Every PR to `main` automatically gets a fresh `comparison_report.html`
   attached as a downloadable workflow artifact.
 - A sticky PR comment summarizes the counts
-  (`X changed · Y added · Z removed · U unchanged`) and links to the
+  (`X modified · Y added · Z deleted · U unchanged`) and links to the
   artifact.
 - The comparison is the "post-merge delta": `pull_request.base.sha`
   (current `main` tip when the workflow fires) vs
@@ -61,7 +61,7 @@ This design depends on one change to the `compare-artifacts` tool that
 does not yet exist:
 
 - **`--summary PATH` flag** writing a sidecar JSON file with the four
-  count keys (`changed`, `added`, `removed`, `unchanged`). The CI job
+  count keys (`modified`, `added`, `deleted`, `unchanged`). The CI job
   uses the JSON to render the sticky comment without parsing HTML.
 
 The CI work cannot ship until the `--summary` flag does. The expected
@@ -278,7 +278,8 @@ jobs:
             "${{ steps.refs.outputs.before }}" \
             "${{ steps.refs.outputs.after }}" \
             --output comparison_report.html \
-            --summary comparison_summary.json
+            --summary comparison_summary.json \
+            --context 3
 
       - id: artifact_report
         uses: actions/upload-artifact@v4
@@ -317,9 +318,9 @@ jobs:
           # (it's produced by author code via `nix run`), so an
           # unvalidated string interpolation would allow markdown
           # injection (links, mentions, HTML).
-          jq -e 'all(.changed, .added, .removed, .unchanged; type == "number")' \
+          jq -e 'all(.modified, .added, .deleted, .unchanged; type == "number")' \
              comparison_summary.json > /dev/null
-          SUMMARY=$(jq -r '"\(.changed) changed · \(.added) added · \(.removed) removed · \(.unchanged) unchanged"' \
+          SUMMARY=$(jq -r '"\(.modified) modified · \(.added) added · \(.deleted) deleted · \(.unchanged) unchanged"' \
                     comparison_summary.json)
           echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
 
@@ -452,7 +453,7 @@ updates:
   comment is out of date. Documented but not auto-resolved; if a
   reviewer needs current data they re-trigger the workflow.
 - **`compare-artifacts` succeeds but produces an empty diff
-  (`0 changed · 0 added · 0 removed`).** Normal case for most PRs. The
+  (`0 modified · 0 added · 0 deleted`).** Normal case for most PRs. The
   comment posts with the zero counts. The report is still uploaded so
   reviewers can confirm the lack of changes.
 - **First-run with a cold cache.** Both `base.sha` and the merge
@@ -474,7 +475,7 @@ the Actions runner is the only execution environment. The plan:
    behave correctly.
 1. **Exercise four scenarios on the draft PR:**
    - A push that touches no artifact-affecting code → report shows
-     all zeros for changed/added/removed; sticky comment posts on the
+     all zeros for modified/added/deleted; sticky comment posts on the
      same-repo PR.
    - A push that intentionally modifies artifacts (e.g., a small
      `nixoslogo` tweak) → non-zero counts; the comment matches.
