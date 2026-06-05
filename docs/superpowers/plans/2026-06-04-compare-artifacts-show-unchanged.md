@@ -46,9 +46,22 @@ Use `compare-artifacts:` for Python changes, `ci:` for workflow changes,
 by `ruff`; YAML/TOML are untouched; markdown by `mdformat`. If treefmt
 reformats a file, re-stage and re-commit (do NOT amend).
 
-**GPG signing** is enabled. If `git commit` fails with a GPG timeout,
-STOP and ask the user to unlock the key. Do NOT bypass signing with
-`-c commit.gpgsign=false`.
+**Multi-file commits and treefmt:** when a single commit covers multiple
+files (Task 2 in particular), and treefmt reformats only one of them,
+the engineer's instinct is to `git add <reformatted-file>` and retry —
+but this loses the staged state of the other files. Always re-stage
+ALL paths from the original `git add` command, then re-commit. The
+exact `git add` arglist is shown in each task's commit step; copy it
+verbatim on a retry.
+
+**GPG signing** is enabled. If `git commit` fails with a GPG timeout:
+
+- **Human engineer:** unlock the key in another terminal (e.g.,
+  `echo test | gpg --clearsign > /dev/null`) and retry the commit.
+- **Subagent:** return immediately to the orchestrator with the GPG
+  error message verbatim. Do NOT retry the commit; do NOT bypass with
+  `-c commit.gpgsign=false`. The orchestrator surfaces the prompt to
+  the human user.
 
 ## File map
 
@@ -190,6 +203,35 @@ the tests, and the CI workflow's `jq` queries. **All of these must
 land in the same commit** — otherwise intermediate commits emit new
 JSON keys but the CI workflow queries old keys, breaking CI on
 those SHAs.
+
+### Task 2 operating notes
+
+**Rollback policy.** Steps 1–5 modify files in the working tree. If
+any subsequent verification step (6: pytest, 7: nix build, 8: smoke
+test, 9: yamllint) fails, do NOT commit. Two options:
+
+- **Fix forward:** identify the issue, edit the offending file, and
+  re-run the failing step. Then continue.
+- **Restart:** discard all 5 files' changes with
+  `git restore -- package-sets/top-level/nixos-branding/verification/compare-artifacts/compare_artifacts/collect.py package-sets/top-level/nixos-branding/verification/compare-artifacts/compare_artifacts/cli.py package-sets/top-level/nixos-branding/verification/compare-artifacts/compare_artifacts/report.py package-sets/top-level/nixos-branding/verification/compare-artifacts/tests/test_collect.py .github/workflows/check.yml`
+  then restart from step 1.
+
+Never commit a partial rename; the JSON-key mismatch between the
+tool and the CI workflow will break subsequent runs.
+
+**Test failure expectations.** Between steps 1 (collect.py changes,
+which alter the Literal and `counts()` keys) and step 4 (tests
+updated to match), running `pytest` would fail. Do NOT run the test
+suite until step 4 completes. Step 6 is the first pytest run in this
+task.
+
+**`render_diff_section` is a no-op verification checkpoint.** The spec
+lists `render_diff_section` as affected by the rename, but no code
+change is needed: it interpolates `spec.state` verbatim into the
+badge content, so the new state strings ("modified", "deleted")
+propagate automatically. No edit; just confirm by reading
+`report.py:render_diff_section` after step 2 that the interpolation
+still uses `{spec.state}`.
 
 **Files:**
 
@@ -856,28 +898,58 @@ nix build .#nixos-branding.verification.compare-artifacts
 
 Expected: build passes; tests run.
 
-### Step 7: Smoke-test both modes
+### Step 7: Smoke-test both modes with synthetic specs
+
+`main main` produces zero diffs, so we use synthetic data to exercise
+the actual filter behavior with mixed states. Run from inside the
+package directory:
 
 ```bash
-# Default (show all)
-./result/bin/compare-artifacts main main --output /tmp/show-all.html
+cd /home/djacu/dev/nixos/branding/package-sets/top-level/nixos-branding/verification/compare-artifacts
+nix shell nixpkgs#python313 --command python -c "
+import sys; sys.path.insert(0, '.')
+from pathlib import Path
+from compare_artifacts.collect import DiffSpec
+from compare_artifacts.report import render_report
+specs = [
+    DiffSpec(before=['<svg>'], after=['<svg>'], path=Path('a/u.svg'), state='unchanged'),
+    DiffSpec(before=['<svg a>'], after=['<svg b>'], path=Path('a/m.svg'), state='modified'),
+    DiffSpec(before=[], after=['<svg>'], path=Path('a/added.svg'), state='added'),
+    DiffSpec(before=['<svg>'], after=[], path=Path('a/del.svg'), state='deleted'),
+]
+# Default: show all
+Path('/tmp/show-all.html').write_text(render_report(specs, context=3, full=False, ref_a='a', ref_b='b', attr='x', hide_unchanged=False))
 # With --hide-unchanged
-./result/bin/compare-artifacts main main --output /tmp/hide-unchanged.html --hide-unchanged
-ls -la /tmp/show-all.html /tmp/hide-unchanged.html
+Path('/tmp/hide-unchanged.html').write_text(render_report(specs, context=3, full=False, ref_a='a', ref_b='b', attr='x', hide_unchanged=True))
+print('wrote /tmp/show-all.html and /tmp/hide-unchanged.html')
+"
 ```
-
-Expected: `show-all.html` is larger (96 sections) than `hide-unchanged.html`
-(0 sections since all 96 are unchanged here).
 
 Open both in a browser. Verify:
 
-- `show-all.html`: sidebar has 96 entries, all with U badges (gray).
-  Summary header says "0 modified · 0 added · 0 deleted · 96 unchanged"
-  WITHOUT "(hidden)".
+- `/tmp/show-all.html`:
 
-- `hide-unchanged.html`: sidebar is empty (no entries since all are
-  unchanged). Summary says "0 modified · 0 added · 0 deleted · 96
-  unchanged (hidden)".
+  - Sidebar has all 4 entries: `u.svg` (gray U), `m.svg` (yellow M),
+    `added.svg` (green A), `del.svg` (red D).
+  - Body has 4 `<section>`s in the same order.
+  - Summary header says "1 modified · 1 added · 1 deleted · 1
+    unchanged" WITHOUT "(hidden)".
+
+- `/tmp/hide-unchanged.html`:
+
+  - Sidebar has only 3 entries (no U badge).
+  - Body has 3 sections.
+  - Summary header says "1 modified · 1 added · 1 deleted · 1
+    unchanged (hidden)" WITH "(hidden)".
+
+Then verify the `--full` warning text appears in `--help`:
+
+```bash
+cd /home/djacu/dev/nixos/branding
+./result/bin/compare-artifacts --help | grep -A 4 "show full file"
+```
+
+Expected output includes the warning sentence about MB-scale HTML.
 
 - [ ] **Step 8: Commit**
 
@@ -937,6 +1009,12 @@ The `entries` variable is a list of `(index, spec)` tuples (per
 `_group_by_subdir`'s return type), so `s.state` is accessed via tuple
 unpacking in the generator.
 
+Note on the `non_unchanged == total` branch: this fires whenever a
+subdir has zero unchanged entries — not only under `--hide-unchanged`.
+For example, a subdir that has 3 modified files and 0 unchanged in
+default mode also displays `(3)` (not `(3 of 3)`). The collapse rule
+is purely about the equality, not about which mode is active.
+
 ### Step 2: Verify Nix build
 
 ```bash
@@ -946,32 +1024,62 @@ nix build .#nixos-branding.verification.compare-artifacts
 
 Expected: build passes.
 
-### Step 3: Smoke-test the count format
+### Step 3: Smoke-test BOTH branches with synthetic specs
+
+`main main` only exercises the `(M of N)` branch (all entries are
+unchanged). Use synthetic data to also exercise the `(N)` branch.
+Run from inside the package directory:
 
 ```bash
-./result/bin/compare-artifacts main main --output /tmp/count-test.html
+cd /home/djacu/dev/nixos/branding/package-sets/top-level/nixos-branding/verification/compare-artifacts
+nix shell nixpkgs#python313 --command python -c "
+import sys; sys.path.insert(0, '.')
+from pathlib import Path
+from compare_artifacts.collect import DiffSpec
+from compare_artifacts.report import render_report
+
+# Mixed subdir: 1 modified + 2 unchanged → (1 of 3). Pure subdir: 2
+# modified + 0 unchanged → (2).
+specs = [
+    DiffSpec(before=['<a>'], after=['<b>'], path=Path('mixed/file1.svg'), state='modified'),
+    DiffSpec(before=['<a>'], after=['<a>'], path=Path('mixed/file2.svg'), state='unchanged'),
+    DiffSpec(before=['<a>'], after=['<a>'], path=Path('mixed/file3.svg'), state='unchanged'),
+    DiffSpec(before=['<a>'], after=['<b>'], path=Path('pure/file1.svg'), state='modified'),
+    DiffSpec(before=[], after=['<a>'], path=Path('pure/file2.svg'), state='added'),
+]
+Path('/tmp/count-default.html').write_text(render_report(specs, context=3, full=False, ref_a='a', ref_b='b', attr='x', hide_unchanged=False))
+Path('/tmp/count-hidden.html').write_text(render_report(specs, context=3, full=False, ref_a='a', ref_b='b', attr='x', hide_unchanged=True))
+print('wrote /tmp/count-default.html and /tmp/count-hidden.html')
+"
 ```
 
-Open `/tmp/count-test.html`. Expected: each subdirectory header
-shows `(0 of N)` where N is the count of SVGs in that subdir (since
-all are unchanged on main-vs-main). Format like:
+Open `/tmp/count-default.html`. In the sidebar, verify the two
+subdir headers show:
 
 ```
-clearspace (0 of 3)
-dimensioned (0 of 9)
-internal (0 of 64)
-...
+mixed (1 of 3)        ← exercises the (M of N) branch
+pure (2)              ← exercises the (N) collapse branch
 ```
 
-Then run with `--hide-unchanged`:
+Open `/tmp/count-hidden.html`. With `--hide-unchanged`, unchanged
+entries are filtered before grouping, so `mixed` has only 1 visible
+entry. Expected:
+
+```
+mixed (1)             ← M==N because unchanged was filtered
+pure (2)              ← same as default
+```
+
+Then for a real-data sanity check:
 
 ```bash
-./result/bin/compare-artifacts main main --output /tmp/count-test-hidden.html --hide-unchanged
+cd /home/djacu/dev/nixos/branding
+./result/bin/compare-artifacts main main --output /tmp/count-real.html
 ```
 
-Expected: sidebar is empty (no subdir headers since all entries are
-filtered out). If there were diffs, each subdir would show `(N)`
-(without "of") because M == N when unchanged is excluded.
+Expected: every subdir shows `(0 of N)` because all entries are
+unchanged on `main main`. This is the `M=0, N=positive` case of
+`(M of N)`.
 
 - [ ] **Step 4: Commit**
 
@@ -1310,10 +1418,12 @@ Replace with:
 Find the line "Renders an HTML report at `comparison_report.html` (or
 `--output`) with a sticky sidebar grouped by subdirectory and per-file
 diff tables (context-only by default, full diffs with `--full`)." This
-ends the Usage section's pipeline list.
+ends the Usage section's pipeline list (the source uses `1.` for every
+item — markdown auto-numbering — so don't try to find a specific item
+number; find the line by its content).
 
-Right after the closing `1.` of that list and before the next `##`
-heading, add:
+After that line and the blank line that follows it, but BEFORE the
+`## Examples` H2 heading, insert:
 
 ```markdown
 By default the report includes every artifact, with unchanged files
@@ -1540,11 +1650,30 @@ nix build .#nixos-branding.verification.compare-artifacts
 
 Expected: build passes; all 56 tests pass in the sandbox.
 
-- [ ] **Step 2: Run end-to-end with two real refs**
+- [ ] **Step 2: Identify two refs that produce different artifacts**
 
-Pick two refs that produce different artifacts (the CI integration
-spec mentions `9c6d172^` vs `main` produces no diffs; pick refs that
-DO diff if you want to exercise the full path):
+The CI integration's earlier verification noted that `9c6d172^` vs
+`main` produces zero artifact diffs (the nixoslogo 0.1.0→0.2.0 bump
+was content-preserving). For real end-to-end testing we need two
+refs that actually change rendered SVG output. Find candidates:
+
+```bash
+cd /home/djacu/dev/nixos/branding
+git log --oneline --all -- package-sets/python-packages/nixoslogo/ | head -20
+```
+
+Look for commits with messages like "fix rounding", "tweak path",
+"update color", etc. — anything touching the rendering logic. Pick
+two that bracket such a change. If nothing obvious appears in
+recent history, fall back to comparing across a longer range
+(e.g., a known-old ref vs current `main`).
+
+Alternative if no diffing pair is readily available: synthesize a
+test commit on a throw-away branch that tweaks one nixoslogo input
+(e.g., a color literal), build artifacts at HEAD vs HEAD~1, then
+delete the throw-away branch after verification.
+
+- [ ] **Step 3: Run end-to-end with the two refs**
 
 ```bash
 ./result/bin/compare-artifacts <ref-a> <ref-b> \
