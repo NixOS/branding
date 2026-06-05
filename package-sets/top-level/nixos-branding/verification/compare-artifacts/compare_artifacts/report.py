@@ -253,9 +253,14 @@ def render_sidebar(specs: list[DiffSpec], hide_unchanged: bool) -> str:
     )
     out.append("<nav>")
     for subdir, entries in groups.items():
+        total = len(entries)
+        non_unchanged = sum(1 for _, s in entries if s.state != "unchanged")
+        if non_unchanged == total:
+            count_str = f"({total})"
+        else:
+            count_str = f"({non_unchanged} of {total})"
         out.append(
-            f"<h3>{html.escape(subdir)} "
-            f'<span class="count">({len(entries)})</span></h3>'
+            f'<h3>{html.escape(subdir)} <span class="count">{count_str}</span></h3>'
         )
         out.append("<ul>")
         for index, spec in entries:
