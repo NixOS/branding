@@ -131,7 +131,7 @@ jobs:
                     comparison_summary.json)
           echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
 
-      - uses: marocchino/sticky-pull-request-comment@f3bbb8300013c686241004a1c1b5d4045b10bc30   # was v2
+      - uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0   # was v2
         with:
           # The action's action.yml does not provide a default for this
           # input on the pinned SHA, so the workflow must pass the token
