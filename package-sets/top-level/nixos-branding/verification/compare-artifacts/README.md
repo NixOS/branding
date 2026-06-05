@@ -7,7 +7,7 @@ Diff nixos-branding artifacts between two git refs.
 ```bash
 nix run .#nixos-branding.verification.compare-artifacts -- \
     <ref-a> <ref-b> [--attr ATTR] [--output PATH] [--summary PATH] \
-                    [--full | --context N] [--keep]
+                    [--full | --context N] [--hide-unchanged] [--keep]
 ```
 
 The tool:
@@ -16,10 +16,14 @@ The tool:
 1. Runs `nix build --no-link --print-out-paths .#<attr>` on each
    worktree in parallel (default attr: `nixos-branding.all-artifacts`).
 1. Globs `*.svg` from both build outputs, pairs files by relative path,
-   classifies each as added / removed / changed / unchanged.
+   classifies each as added / deleted / modified / unchanged.
 1. Renders an HTML report at `comparison_report.html` (or `--output`)
    with a sticky sidebar grouped by subdirectory and per-file diff
    tables (context-only by default, full diffs with `--full`).
+
+By default the report includes every artifact, with unchanged files
+shown in gray. Pass `--hide-unchanged` for a terser report focused on
+the modified/added/deleted entries only.
 
 ## `--summary` output
 
@@ -29,9 +33,9 @@ four integer count keys:
 
 ```json
 {
-  "changed": 5,
+  "modified": 5,
   "added": 1,
-  "removed": 0,
+  "deleted": 0,
   "unchanged": 21
 }
 ```
