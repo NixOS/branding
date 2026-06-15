@@ -133,6 +133,7 @@ class ClearSpace(Enum):
     NONE = auto()
     MINIMAL = auto()
     RECOMMENDED = auto()
+    ICON = auto()
 
 
 class ColorStyle(Enum):

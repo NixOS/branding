@@ -10,5 +10,6 @@ ilc = LogoClearspace(
     logo_name="logomark",
     space_object=space_object,
     annotations=annotations,
+    show_icon_clearspace=True,
 )
 ilc.write_svg()

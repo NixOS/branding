@@ -32,7 +32,7 @@ class NixosLogo(BaseRenderable):
         logotype_cap_height: float | None = None,
         logotype_color: str = "black",
         logotype_style: LogotypeStyle = LogotypeStyle.REGULAR,
-        logotype_spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
+        logotype_spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
         logotype_characters: str = "NixOS",
         logotype_transform: svg.Translate | None = None,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,

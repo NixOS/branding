@@ -19,6 +19,7 @@ class LogoClearspace(BaseRenderable):
         logo_name: str,
         space_object: BaseRenderable,
         annotations: Annotations,
+        show_icon_clearspace: bool = False,
         **kwargs,
     ):
         self.logo = logo
@@ -28,6 +29,14 @@ class LogoClearspace(BaseRenderable):
 
         self.recommended = self.logo(clear_space=ClearSpace.RECOMMENDED)
         self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)
+
+        self.show_icon_clearspace = show_icon_clearspace
+
+        if self.show_icon_clearspace:
+            self.icon = self.logo(clear_space=ClearSpace.ICON)
+        else:
+            self.icon = None
+
         super().__init__(**kwargs)
 
     @property
@@ -48,6 +57,17 @@ class LogoClearspace(BaseRenderable):
         )
 
     def make_svg_elements(self):
+        if self.show_icon_clearspace:
+            print(self.icon)
+            return (
+                self.make_greyscale_def(),
+                self.make_grid_lines(),
+                self.make_clearspace_lines(),
+                self.icon.make_svg_elements(),
+                self.recommended.make_svg_elements(),
+                self.make_space_object_elements(),
+            )
+
         return (
             self.make_greyscale_def(),
             self.make_grid_lines(),
@@ -170,7 +190,17 @@ class LogoClearspace(BaseRenderable):
     def make_clearspace_lines(self):
         recommended_annotation = self.annotations.make_annotation(text="RECOMMENDED")
         minimal_annotation = self.annotations.make_annotation(text="MINIMAL")
+        if self.show_icon_clearspace:
+            icon_annotation = self.annotations.make_annotation(text="ICON")
         return (
+            svg.Rect(
+                x=self.recommended.canvas.min_x,
+                y=self.recommended.canvas.min_y,
+                width=100,
+                height=100,
+                fill="red",
+                stroke=5,
+            ),
             svg.Rect(
                 x=self.recommended.canvas.min_x,
                 y=self.recommended.canvas.min_y,
