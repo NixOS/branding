@@ -89,13 +89,13 @@ jobs:
             --context 3
 
       - id: artifact_report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: comparison_report
           path: comparison_report.html
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: comparison_summary
           path: comparison_summary.json
