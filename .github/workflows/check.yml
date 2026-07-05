@@ -168,9 +168,11 @@ jobs:
           changelog: ./package-sets/top-level/nixos-branding/nixos-branding-guide/CHANGELOG.md
 
       - name: Display release info
+        env:
+          VERSION: ${{ steps.query-release-info.outputs.version }}
+          RELEASE_DATE: ${{ steps.query-release-info.outputs.release-date }}
+          NOTES: ${{ steps.query-release-info.outputs.release-notes }}
         run: |
-          echo "Version: ${{ steps.query-release-info.outputs.version }}"
-          echo "Date: ${{ steps.query-release-info.outputs.release-date }}"
-          cat <<'EOF'
-          "${{ steps.query-release-info.outputs.release-notes }}"
-          EOF
+          printf 'Version: %s\n' "$VERSION"
+          printf 'Date: %s\n' "$RELEASE_DATE"
+          printf '%s\n' "$NOTES"
