@@ -25,7 +25,7 @@ jobs:
         env:
           TAGNAME: ${{ github.ref_name }}
         id: split
-        run: echo "version=${TAGNAME##*-v}" >> $GITHUB_OUTPUT
+        run: echo "version=${TAGNAME##*-v}" >> "$GITHUB_OUTPUT"
       - name: Check version against tag
         env:
           TAGVERSION: ${{ steps.split.outputs.version }}
