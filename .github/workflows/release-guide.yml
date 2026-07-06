@@ -25,7 +25,7 @@ jobs:
         env:
           TAGNAME: ${{ github.ref_name }}
         id: split
-        run: echo "version=${TAGNAME##*-v}" >> $GITHUB_OUTPUT
+        run: echo "version=${TAGNAME##*-v}" >> "$GITHUB_OUTPUT"
       - name: Check version against tag
         env:
           TAGVERSION: ${{ steps.split.outputs.version }}
@@ -56,17 +56,18 @@ jobs:
           version: latest
           changelog: ./package-sets/top-level/nixos-branding/nixos-branding-guide/CHANGELOG.md
       - name: Display release info
+        env:
+          VERSION: ${{ steps.query-release-info.outputs.version }}
+          RELEASE_DATE: ${{ steps.query-release-info.outputs.release-date }}
+          NOTES: ${{ steps.query-release-info.outputs.release-notes }}
         run: |
-          echo "Version: ${{ steps.query-release-info.outputs.version }}"
-          echo "Date: ${{ steps.query-release-info.outputs.release-date }}"
-          cat <<'EOF'
-          "${{ steps.query-release-info.outputs.release-notes }}"
-          EOF
+          printf 'Version: %s\n' "$VERSION"
+          printf 'Date: %s\n' "$RELEASE_DATE"
+          printf '%s\n' "$NOTES"
       - name: Release notes to file
-        run: |
-          cat <<'EOF' > release
-          "${{ steps.query-release-info.outputs.release-notes }}"
-          EOF
+        env:
+          NOTES: ${{ steps.query-release-info.outputs.release-notes }}
+        run: printf '%s\n' "$NOTES" > release
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
