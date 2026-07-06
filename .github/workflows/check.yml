@@ -188,3 +188,20 @@ jobs:
           printf 'Version: %s\n' "$VERSION"
           printf 'Date: %s\n' "$RELEASE_DATE"
           printf '%s\n' "$NOTES"
+
+  workflow-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-nix
+      - name: Audit workflows with zizmor
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: nix run .#zizmor -- .github/
+      - name: Verify action pins and version comments with pinact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: nix run .#pinact -- run --check
