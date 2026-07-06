@@ -10,5 +10,10 @@ updates:
       - "/.github/actions/*"
     schedule:
       interval: weekly
+    cooldown:
+      # Wait this many days before opening an update PR for a freshly
+      # published release, so a compromised release has time to be caught
+      # and yanked before it is auto-adopted (zizmor dependabot-cooldown).
+      default-days: 7
     # Dependabot updates both tag-pinned and SHA-pinned action
     # references. PRs from Dependabot follow normal review.
