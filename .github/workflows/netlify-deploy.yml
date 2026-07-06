@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       - name: Install Nix
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3  # v31.10.6
       - name: Build Deployed Assets
         run: |
           nix build .\#nixos-branding.deployed-assets \
@@ -21,7 +21,7 @@ jobs:
           mkdir --parents ./build
           cp --recursive --dereference ./result-deploy/* ./build
       - name: 'Publish to Netlify'
-        uses: 'nwtgck/actions-netlify@v4.0.0'
+        uses: nwtgck/actions-netlify@d22a32a27c918fe470bbc562e984f80ec48c2668  # v4.0.0
         env:
           NETLIFY_AUTH_TOKEN: '${{ secrets.NETLIFY_AUTH_TOKEN }}'
           NETLIFY_SITE_ID: '${{ secrets.NETLIFY_SITE_ID }}'
