@@ -5,6 +5,11 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  statuses: write
+  deployments: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
