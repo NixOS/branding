@@ -59,11 +59,12 @@ jobs:
       - name: Resolve refs
         id: refs
         shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          MERGE_SHA="${{ github.event.pull_request.merge_commit_sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
           # fetch-depth: 0 already pulled base + all reachable refs.
           # Only the merge commit needs an explicit fetch because it
@@ -80,10 +81,13 @@ jobs:
           echo "after=$AFTER_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Compare artifacts
+        env:
+          BEFORE: ${{ steps.refs.outputs.before }}
+          AFTER: ${{ steps.refs.outputs.after }}
         run: |
           nix run .#nixos-branding.verification.compare-artifacts -- \
-            "${{ steps.refs.outputs.before }}" \
-            "${{ steps.refs.outputs.after }}" \
+            "$BEFORE" \
+            "$AFTER" \
             --output comparison_report.html \
             --summary comparison_summary.json \
             --context 3
