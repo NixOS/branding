@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release create publishes the release
+      id-token: write # sign the build-provenance attestation via OIDC
+      attestations: write # write the build-provenance attestation
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
@@ -54,6 +56,10 @@ jobs:
           nix build .\#nixos-branding.release-assets \
             --print-build-logs \
             --out-link result-assets
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373  # v4.1.1
+        with:
+          subject-path: result-assets/*
       - name: Get latest release info
         id: query-release-info
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32  # v3.0.0
