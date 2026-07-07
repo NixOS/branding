@@ -5,6 +5,11 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  # Never interrupt an in-progress deploy; queue the next run instead.
+  group: netlify-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:

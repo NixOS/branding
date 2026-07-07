@@ -6,6 +6,11 @@ on:
     tags:
       - "nixos-branding-guide-v*.*.*"
 
+concurrency:
+  # Serialize release runs for a tag; never interrupt a release in progress.
+  group: release-guide-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:

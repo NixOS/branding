@@ -5,6 +5,11 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  # Never interrupt an in-progress publish; queue the next run instead.
+  group: release-npm-package-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:
