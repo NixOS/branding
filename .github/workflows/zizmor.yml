@@ -1,0 +1,44 @@
+name: Workflow security report
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/**"
+      - flake.lock
+  pull_request:
+    paths:
+      - ".github/**"
+      - flake.lock
+
+concurrency:
+  group: zizmor-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: zizmor pedantic audit (report-only)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      security-events: write # upload the SARIF report to code scanning
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-nix
+      - name: Run zizmor (pedantic, SARIF)
+        # SARIF mode exits 0 even with findings, so this reports rather than
+        # blocks; the blocking gate is the regular-persona run in check.yml.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: nix run .#zizmor -- --format sarif --pedantic . > results.sarif
+      - name: Upload SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a  # v4.36.3
+        with:
+          sarif_file: results.sarif
+          category: zizmor
