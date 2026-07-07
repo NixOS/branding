@@ -5,13 +5,20 @@ on:
   workflow_call:
   workflow_dispatch:
 
-permissions:
-  id-token: write # Required for OIDC
-  contents: read
+concurrency:
+  # Never interrupt an in-progress publish; queue the next run instead.
+  group: release-npm-package-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
 
 jobs:
   build-npm-package:
+    name: Build and publish npm package
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
