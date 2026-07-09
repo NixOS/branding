@@ -58,6 +58,8 @@ class Lambda(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
+            case ClearSpace.ICON:
+                return self.elements_y_max / 8
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
@@ -216,6 +218,8 @@ class Logomark(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
+            case ClearSpace.ICON:
+                return self.elements_y_max / 8
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
