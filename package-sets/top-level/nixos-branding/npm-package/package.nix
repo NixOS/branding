@@ -69,6 +69,7 @@ stdenvNoCC.mkDerivation {
     ${nodePackages.prettier}/bin/prettier --write $out/package.json
 
     cp -RL -r ${all-artifacts}/* $out/artifacts/
-    cp ${nixos-color-palette-tailwind}/tailwind.js $out/colors/tailwind.js
+    cp ${nixos-color-palette-tailwind}/tailwind.js $out/colors/
+    cp ${nixos-color-palette-tailwind}/tailwind.css $out/colors/
   '';
 }
