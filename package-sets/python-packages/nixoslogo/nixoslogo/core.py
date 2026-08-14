@@ -90,6 +90,7 @@ with open(get_nixos_color_palette_file(), "rb") as f:
 PALETTE_DEFAULT_COLORS = NIXOS_COLOR_PALETTE["logos"]["default"]
 PALETTE_RAINBOW_COLORS = NIXOS_COLOR_PALETTE["logos"]["rainbow"]
 PALETTE_TRANS_COLORS = NIXOS_COLOR_PALETTE["logos"]["trans"]
+PALETTE_DISABILITY_COLORS = NIXOS_COLOR_PALETTE["logos"]["disability"]
 PALETTE_PRIMARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["primary"]
 PALETTE_SECONDARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["secondary"]
 PALETTE_ACCENT_COLORS = NIXOS_COLOR_PALETTE["palette"]["accent"]
@@ -112,6 +113,12 @@ TRANS_COLORS = tuple(
     map(
         lambda color: Color("oklch", color["value"]),
         PALETTE_TRANS_COLORS,
+    )
+)
+DISABILITY_COLORS = tuple(
+    map(
+        lambda color: Color("oklch", color["value"]),
+        PALETTE_DISABILITY_COLORS,
     )
 )
 
@@ -149,6 +156,7 @@ class LogomarkColors(Enum):
     DEFAULT = (NIXOS_DARK_BLUE, NIXOS_LIGHT_BLUE)
     RAINBOW = RAINBOW_COLORS
     TRANS = TRANS_COLORS
+    DISABILITY = DISABILITY_COLORS
     BLACK = (NIXOS_BLACK,)
     WHITE = (NIXOS_WHITE,)
 
