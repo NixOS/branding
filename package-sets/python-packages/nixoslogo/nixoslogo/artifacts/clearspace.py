@@ -37,7 +37,7 @@ class LogoClearspace(BaseRenderable):
     def _get_clearspace(self) -> float:
         return self.recommended._get_clearspace()
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",

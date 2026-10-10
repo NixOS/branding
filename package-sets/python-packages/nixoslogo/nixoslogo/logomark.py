@@ -149,7 +149,7 @@ class Lambda(BaseRenderable):
         )
         return {name: point for name, point in zip(names, points)}
 
-    def make_filename(self, colors="default", extras: tuple[str] = ()):
+    def make_filename(self, colors="default", extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -340,7 +340,7 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",

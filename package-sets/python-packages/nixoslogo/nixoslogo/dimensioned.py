@@ -100,7 +100,7 @@ class DimensionedLambda(Lambda):
             ),
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -195,7 +195,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
             + self.make_lambda_linear_dimensions()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -241,7 +241,7 @@ class DimensionedLambdaAngular(DimensionedLambda):
             + self.make_lambda_angular_dimensions()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -351,7 +351,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
             + self.make_named_lambda_vertices()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -443,7 +443,7 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
             + self.make_parametric_annotations()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -555,7 +555,7 @@ class DimensionedLogomark(Logomark):
             + self.make_flake_linear_dimensions()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -642,7 +642,7 @@ class DimensionedLogomarkGradient(Logomark):
             + self.make_dimensioned_gradient_lines()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -694,7 +694,7 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
     def make_svg_elements(self):
         return super().make_svg_elements() + self.make_gradient_annotations()
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -712,7 +712,7 @@ class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
             + super().make_svg_elements()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 super().make_filename(),
@@ -813,7 +813,7 @@ class DimensionedLogotype(Logotype):
             + super().make_svg_elements()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -880,7 +880,7 @@ class DimensionedLogo(NixosLogo):
             + super().make_svg_elements()
         )
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",

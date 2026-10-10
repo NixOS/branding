@@ -23,7 +23,7 @@ class LogomarkRotate(Logomark):
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -64,7 +64,7 @@ class LogomarkMirror(Logomark):
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -96,7 +96,7 @@ class LogoCrop(NixosLogo):
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -137,7 +137,7 @@ class LogoScale(NixosLogo):
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -167,7 +167,7 @@ class LogoColorsWithLambdaPrime(NixosLogo):
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
