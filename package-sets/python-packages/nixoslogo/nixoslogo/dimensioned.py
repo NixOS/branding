@@ -23,14 +23,13 @@ class DimensionedLambda(Lambda):
         self.annotations = annotations
         self.clear_space = clear_space
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            self.canvas = Canvas(
-                min_x=-2 * self.radius,
-                min_y=-2 * self.radius,
-                width=4 * self.radius,
-                height=4 * self.radius,
-            )
+    def _make_canvas(self) -> Canvas:
+        return Canvas(
+            min_x=-2 * self.radius,
+            min_y=-2 * self.radius,
+            width=4 * self.radius,
+            height=4 * self.radius,
+        )
 
     def make_diagonal_line(self, radius: Number) -> list[Number]:
         hexagon_points = self.make_hexagon_points(radius)
@@ -463,14 +462,13 @@ class DimensionedLogomark(Logomark):
         super().__init__(**kwargs)
         self.annotations = annotations
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            self.canvas = Canvas(
-                min_x=-4 * self.ilambda.radius,
-                min_y=-4 * self.ilambda.radius,
-                width=8 * self.ilambda.radius,
-                height=8 * self.ilambda.radius,
-            )
+    def _make_canvas(self) -> Canvas:
+        return Canvas(
+            min_x=-4 * self.ilambda.radius,
+            min_y=-4 * self.ilambda.radius,
+            width=8 * self.ilambda.radius,
+            height=8 * self.ilambda.radius,
+        )
 
     def make_flake_construction_lines(self):
         return (
@@ -576,14 +574,13 @@ class DimensionedLogomarkGradient(Logomark):
         super().__init__(**kwargs)
         self.annotations = annotations
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            self.canvas = Canvas(
-                min_x=-2 * self.ilambda.radius,
-                min_y=-2 * self.ilambda.radius,
-                width=4 * self.ilambda.radius,
-                height=4 * self.ilambda.radius,
-            )
+    def _make_canvas(self) -> Canvas:
+        return Canvas(
+            min_x=-2 * self.ilambda.radius,
+            min_y=-2 * self.ilambda.radius,
+            width=4 * self.ilambda.radius,
+            height=4 * self.ilambda.radius,
+        )
 
     def make_dimensioned_gradient_lines(self):
         gradient_end_points = self.make_gradient_end_points()

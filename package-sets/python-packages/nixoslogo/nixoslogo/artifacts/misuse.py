@@ -107,22 +107,21 @@ class LogoCrop(NixosLogo):
             + list(extras)
         )
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            min_x, min_y, max_x, max_y = self.elements_bounding_box
-            clear_space = self._get_clearspace()
+    def _make_canvas(self) -> Canvas:
+        min_x, min_y, max_x, max_y = self.elements_bounding_box
+        clear_space = self._get_clearspace()
 
-            min_x += clear_space
-            min_y -= clear_space
-            max_x -= clear_space
-            max_y += clear_space
+        min_x += clear_space
+        min_y -= clear_space
+        max_x -= clear_space
+        max_y += clear_space
 
-            self.canvas = Canvas(
-                min_x=min_x,
-                min_y=min_y,
-                width=max_x - min_x,
-                height=max_y - min_y,
-            )
+        return Canvas(
+            min_x=min_x,
+            min_y=min_y,
+            width=max_x - min_x,
+            height=max_y - min_y,
+        )
 
 
 class LogoScale(NixosLogo):
