@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from functools import partial
 from pathlib import Path
+from typing import NotRequired, TypedDict, cast
 
 import svg
 import tomllib
@@ -12,20 +13,29 @@ from lxml import etree
 from nixoslogo.colors import Color
 from nixoslogo.layout import Canvas
 
+# === Types ===
+
+
+class PaletteColor(TypedDict):
+    name: str
+    value: list[float]
+    tints: NotRequired[dict[str, list[float]]]
+
+
 # === Functions ===
 
 
-def get_path_from_envvar(envvar) -> Path:
+def get_path_from_envvar(envvar: str) -> Path:
     path = os.getenv(envvar)
     if not path:
         raise EnvironmentError(
             f"{envvar} is not set. "
-            "Please provide a font path explicitly or set the environment variable."
+            + "Please provide a font path explicitly or set the environment variable."
         )
     return Path(path)
 
 
-def get_color_by_name(palette, name):
+def get_color_by_name(palette: list[PaletteColor], name: str) -> PaletteColor:
     return list(filter(lambda color: color["name"] == name, palette))[0]
 
 
@@ -87,12 +97,22 @@ DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
 with open(get_nixos_color_palette_file(), "rb") as f:
     NIXOS_COLOR_PALETTE = tomllib.load(f)
 
-PALETTE_DEFAULT_COLORS = NIXOS_COLOR_PALETTE["logos"]["default"]
-PALETTE_RAINBOW_COLORS = NIXOS_COLOR_PALETTE["logos"]["rainbow"]
-PALETTE_TRANS_COLORS = NIXOS_COLOR_PALETTE["logos"]["trans"]
-PALETTE_PRIMARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["primary"]
-PALETTE_SECONDARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["secondary"]
-PALETTE_ACCENT_COLORS = NIXOS_COLOR_PALETTE["palette"]["accent"]
+PALETTE_DEFAULT_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["default"]
+)
+PALETTE_RAINBOW_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["rainbow"]
+)
+PALETTE_TRANS_COLORS = cast(list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["trans"])
+PALETTE_PRIMARY_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["primary"]
+)
+PALETTE_SECONDARY_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["secondary"]
+)
+PALETTE_ACCENT_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["accent"]
+)
 
 NIXOS_DARK_BLUE = Color(
     "oklch",
@@ -166,10 +186,10 @@ class BaseRenderable(ABC):
         self,
         canvas: Canvas | None = None,
         background_color: str | None = None,
-        **kwargs,
+        **kwargs: object,
     ):
         self.canvas = canvas
-        self.background_color = background_color
+        self.background_color: str | None = background_color
         self._init_canvas()
 
     @property
@@ -224,7 +244,7 @@ class BaseRenderable(ABC):
             elements=self.make_svg_background() + self.make_svg_elements(),
         )
 
-    def write_svg(self, filename=None):
+    def write_svg(self, filename: str | None = None):
         if filename is None:
             filename = self.make_filename()
         filename = filename.replace("/", "_")
