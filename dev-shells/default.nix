@@ -36,6 +36,7 @@ mapAttrs (system: pkgs: {
         (python3.withPackages (ps: [
           ps.nixoslogo-editable
           ps.fontforge
+          ps.types-lxml
         ]))
 
       ];
