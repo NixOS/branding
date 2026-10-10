@@ -5,10 +5,10 @@ import svg
 
 @dataclass(kw_only=True)
 class Canvas:
-    min_x: int
-    min_y: int
-    width: int
-    height: int
+    min_x: float
+    min_y: float
+    width: float
+    height: float
 
     @property
     def max_y(self):
