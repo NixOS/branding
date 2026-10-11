@@ -88,7 +88,7 @@ class DimensionedLambda(Lambda):
                 stroke=self.annotations.object_lines.stroke,
                 stroke_width=self.annotations.object_lines.stroke_width,
                 fill=self.annotations.object_lines.fill,
-                stroke_dasharray=4,
+                stroke_dasharray=[4],
             ),
             svg.Polygon(
                 points=lambda_points_gap.to_list(),
@@ -902,7 +902,7 @@ if __name__ == "__main__":
 
     annotations = Annotations.small()
     annotations.construction_lines.stroke = "black"
-    annotations.construction_lines.stroke_dasharray = 16
+    annotations.construction_lines.stroke_dasharray = [16]
 
     loader = FontLoader(capHeight=512)
 
