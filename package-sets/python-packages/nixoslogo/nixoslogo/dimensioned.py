@@ -454,12 +454,15 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
 
 
 class DimensionedLogomark(Logomark):
+    ilambda: DimensionedLambda
+
     def __init__(
         self,
         annotations: Annotations,
+        ilambda: DimensionedLambda,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(ilambda=ilambda, **kwargs)
         self.annotations = annotations
 
     def _make_canvas(self) -> Canvas:
@@ -566,12 +569,15 @@ class DimensionedLogomark(Logomark):
 
 
 class DimensionedLogomarkGradient(Logomark):
+    ilambda: DimensionedLambda
+
     def __init__(
         self,
         annotations: Annotations,
+        ilambda: DimensionedLambda,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(ilambda=ilambda, **kwargs)
         self.annotations = annotations
 
     def _make_canvas(self) -> Canvas:
