@@ -80,19 +80,20 @@ class TextAnnotations(BaseRenderable):
             x_offset += glyph.glyph.width
 
     def _scale_glyphs(self):
-        if self.scale is None and self.cap_height is None:
-            return
-
         if self.scale is not None and self.cap_height is not None:
             raise ValueError("Only one of scale or cap_height can be set.")
 
         if self.cap_height is not None:
-            self.scale = self.original_cap_height / self.cap_height
+            scale = self.original_cap_height / self.cap_height
+        elif self.scale is not None:
+            scale = self.scale
+            self.cap_height = self.original_cap_height / scale
         else:
-            self.cap_height = self.original_cap_height / self.scale
+            return
 
+        self.scale = scale
         for glyph in self.glyphs:
-            glyph.layer.transform((1 / self.scale, 0, 0, 1 / self.scale, 0, 0))
+            glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
 
     def _get_clearspace(self):
         return 0
