@@ -3,6 +3,7 @@ import itertools
 import math
 
 import svg
+from svg._types import Length
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
@@ -305,15 +306,15 @@ class Logomark(BaseRenderable):
                     **gradient_end_points,
                     elements=[
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[0]}%",
+                            offset=Length(self._gradient_stop_offsets[0], "%"),
                             stop_color=color_dark,
                         ),
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[1]}%",
+                            offset=Length(self._gradient_stop_offsets[1], "%"),
                             stop_color=color_midpoint,
                         ),
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[2]}%",
+                            offset=Length(self._gradient_stop_offsets[2], "%"),
                             stop_color=color_original,
                         ),
                     ],
