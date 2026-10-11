@@ -11,6 +11,7 @@ from nixoslogo.core import (
     ClearSpace,
     ColorStyle,
     LogomarkColors,
+    flatten_svg_elements,
 )
 from nixoslogo.geometry import Point, Points, Vector, cosd, sind
 
@@ -61,8 +62,8 @@ class Lambda(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
-    def make_svg_elements(self):
-        return (
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.Polygon(
                 points=self.make_lambda_points().to_list(),
                 fill=self.color,
@@ -233,12 +234,12 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ColorStyle: {self.color_style}")
 
-    def make_svg_elements(self):
+    def make_svg_elements(self) -> list[svg.Element]:
         match self.color_style:
             case ColorStyle.FLAT:
-                return self.make_clean_flake_polygons_flat()
+                return flatten_svg_elements(self.make_clean_flake_polygons_flat())
             case ColorStyle.GRADIENT:
-                return (
+                return flatten_svg_elements(
                     self.make_flake_gradients_defs(),
                     self.make_clean_flake_polygons_gradient(),
                 )

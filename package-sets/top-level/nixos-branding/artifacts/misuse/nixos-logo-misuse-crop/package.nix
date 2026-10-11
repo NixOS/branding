@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logo-misuse-crop";
-  outputHash = "sha256-cQLXt06V6c3kW0WfijsyfO6GnTw/Rchhr+AW5PMhWuQ=";
+  outputHash = "sha256-K0Q6CcGLOjWAsUznnbmJSQH7KZx4Upg4szOClXQaPZI=";
   script = ./script.py;
 }

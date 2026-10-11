@@ -11,6 +11,7 @@ from nixoslogo.core import (
     LogoLayout,
     LogomarkColors,
     LogotypeStyle,
+    flatten_svg_elements,
 )
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import (
@@ -135,8 +136,8 @@ class NixosLogo(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
-    def make_svg_elements(self):
-        return (
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             self.logomark.make_svg_elements(),
             svg.G(
                 transform=[self.logotype_transform],

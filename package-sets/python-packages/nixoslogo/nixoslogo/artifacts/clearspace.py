@@ -3,7 +3,7 @@ import logging
 import svg
 
 from nixoslogo.annotations import Annotations
-from nixoslogo.core import BaseRenderable, ClearSpace
+from nixoslogo.core import BaseRenderable, ClearSpace, flatten_svg_elements
 from nixoslogo.logging_config import setup_logging
 from nixoslogo.logo import Lambda, NixosLogo
 from nixoslogo.logomark import Logomark
@@ -47,8 +47,8 @@ class LogoClearspace(BaseRenderable):
             + list(extras)
         )
 
-    def make_svg_elements(self):
-        return (
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             self.make_greyscale_def(),
             self.make_grid_lines(),
             self.make_clearspace_lines(),

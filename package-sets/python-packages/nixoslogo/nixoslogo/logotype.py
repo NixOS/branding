@@ -17,6 +17,7 @@ from nixoslogo.core import (
     BaseRenderable,
     ClearSpace,
     LogotypeStyle,
+    flatten_svg_elements,
     get_nixos_logotype_font_file,
 )
 from nixoslogo.logging_config import setup_logging
@@ -260,8 +261,8 @@ class Glyph(BaseRenderable):
             case _:
                 raise Exception("Unknown LogotypeStyle")
 
-    def make_svg_elements(self):
-        return (self.make_svg_element(),)
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(self.make_svg_element())
 
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
@@ -349,8 +350,8 @@ class Logotype(BaseRenderable):
         with_lead_spacing = (characters_box[0] - self.spacings[0],) + characters_box[1:]
         return with_lead_spacing
 
-    def make_svg_elements(self):
-        return tuple(elem.make_svg_element() for elem in self.glyphs)
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(*(elem.make_svg_element() for elem in self.glyphs))
 
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(

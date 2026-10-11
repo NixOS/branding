@@ -2,7 +2,7 @@ import logging
 
 import svg
 
-from nixoslogo.core import ClearSpace, LogotypeStyle
+from nixoslogo.core import ClearSpace, LogotypeStyle, flatten_svg_elements
 from nixoslogo.layout import Canvas
 from nixoslogo.logging_config import setup_logging
 from nixoslogo.logo import NixosLogo
@@ -43,8 +43,8 @@ class LogomarkRotate(Logomark):
             self.circumradius,
         )
 
-    def make_svg_elements(self):
-        return (
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.G(
                 transform=[svg.Rotate(30)],
                 elements=super().make_svg_elements(),
@@ -75,8 +75,8 @@ class LogomarkMirror(Logomark):
             + list(extras)
         )
 
-    def make_svg_elements(self):
-        return (
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.G(
                 transform=[svg.Scale(-1, 1)],
                 elements=super().make_svg_elements(),

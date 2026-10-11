@@ -10,6 +10,7 @@ from nixoslogo.core import (
     CHARACTER_GLYPHNAME_MAP,
     DEFAULT_JURA_TRANSFORMS,
     BaseRenderable,
+    flatten_svg_elements,
     get_nixos_annotation_font_file,
 )
 from nixoslogo.geometry import Point
@@ -94,8 +95,8 @@ class TextAnnotations(BaseRenderable):
     def _get_clearspace(self):
         return 0
 
-    def make_svg_elements(self):
-        return tuple(elem.make_svg_element() for elem in self.glyphs)
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(*(elem.make_svg_element() for elem in self.glyphs))
 
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(

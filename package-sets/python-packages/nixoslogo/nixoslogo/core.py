@@ -1,10 +1,11 @@
 import os
 import string
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from enum import Enum, auto
 from functools import partial
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
+from typing import NotRequired, TypeAlias, TypedDict, cast
 
 import svg
 import tomllib
@@ -22,7 +23,20 @@ class PaletteColor(TypedDict):
     tints: NotRequired[dict[str, list[float]]]
 
 
+SvgElements: TypeAlias = "svg.Element | Sequence[SvgElements]"
+
+
 # === Functions ===
+
+
+def flatten_svg_elements(*elements: SvgElements) -> list[svg.Element]:
+    flat: list[svg.Element] = []
+    for element in elements:
+        if isinstance(element, Sequence):
+            flat.extend(flatten_svg_elements(*element))
+        else:
+            flat.append(element)
+    return flat
 
 
 def get_path_from_envvar(envvar: str) -> Path:
@@ -199,7 +213,7 @@ class BaseRenderable(ABC):
     def _get_clearspace(self) -> float: ...
 
     @abstractmethod
-    def make_svg_elements(self): ...
+    def make_svg_elements(self) -> list[svg.Element]: ...
 
     @abstractmethod
     def make_filename(self, extras: tuple[str, ...] = ()) -> str: ...
@@ -229,11 +243,13 @@ class BaseRenderable(ABC):
             self.canvas.min_y + self.canvas.height,
         )
 
-    def make_svg_background(self):
+    def make_svg_background(self) -> list[svg.Element]:
         return (
-            ()
+            []
             if self.background_color is None
-            else self.canvas.make_svg_background(fill=self.background_color)
+            else flatten_svg_elements(
+                self.canvas.make_svg_background(fill=self.background_color)
+            )
         )
 
     def make_svg(self):
