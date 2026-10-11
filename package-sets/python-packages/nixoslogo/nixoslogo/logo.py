@@ -112,7 +112,7 @@ class NixosLogo(BaseRenderable):
                 raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
 
     @property
-    def elements_bounding_box(self):
+    def elements_bounding_box(self) -> tuple[float, float, float, float]:
         logomark_box = self.logomark.elements_bounding_box
         logotype_box = self.logotype.elements_bounding_box
         logotype_box_translated = (
@@ -121,13 +121,14 @@ class NixosLogo(BaseRenderable):
             logotype_box[2] + self.logotype_transform.x,
             logotype_box[3] + self.logotype_transform.y,
         )
-        return [
+        min_x, min_y, max_x, max_y = (
             predicate(elem)
             for predicate, elem in zip(
                 (min, min, max, max),
                 list(zip(*(logomark_box, logotype_box_translated))),
             )
-        ]
+        )
+        return (min_x, min_y, max_x, max_y)
 
     def _get_clearspace(self):
         match self.clear_space:
