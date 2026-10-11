@@ -140,7 +140,7 @@ class FontLoader:
 class Glyph(BaseRenderable):
     def __init__(
         self,
-        character: str | None,
+        character: str,
         loader: FontLoader | None = None,
         color: str = "black",
         style: LogotypeStyle = LogotypeStyle.REGULAR,
@@ -281,7 +281,7 @@ class Logotype(BaseRenderable):
         loader: FontLoader | None = None,
         color: str = "black",
         style: LogotypeStyle = LogotypeStyle.REGULAR,
-        spacings: tuple[int] = DEFAULT_LOGOTYPE_SPACINGS,
+        spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):

@@ -1,11 +1,12 @@
 import hashlib
 import math
+from typing import cast
 
 import jsonpickle
 
 
-def stable_hash(thing):
-    dump = jsonpickle.encode(thing)
+def stable_hash(thing: object) -> str:
+    dump = cast(str, jsonpickle.encode(thing))
     return hashlib.md5(dump.encode("utf-8")).digest().hex()
 
 

@@ -44,7 +44,7 @@ class TextAnnotations(BaseRenderable):
 
         super().__init__(**kwargs)
 
-    def _map_characters(self, character):
+    def _map_characters(self, character: str) -> str:
         return CHARACTER_GLYPHNAME_MAP.get(character, character)
 
     def _load_glyphs(self):
