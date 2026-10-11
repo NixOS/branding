@@ -46,10 +46,9 @@ class Point(Sequence[float]):
     def __add__(self, other: "Point | Vector") -> "Point":
         if isinstance(other, Point):
             return Point((self.x + other.x, self.y + other.y))
-        elif isinstance(other, Vector):
+        if isinstance(other, Vector):
             return Point((self.x + other[0], self.y + other[1]))
-        else:
-            raise Exception(f"Not sure how to add {type(other)} to Point.")
+        return NotImplemented
 
     @overload
     def __sub__(self, other: "Point") -> "Vector": ...
@@ -60,10 +59,9 @@ class Point(Sequence[float]):
     def __sub__(self, other: "Point | Vector") -> "Point | Vector":
         if isinstance(other, Point):
             return Vector((self.x - other.x, self.y - other.y))
-        elif isinstance(other, Vector):
+        if isinstance(other, Vector):
             return Point((self.x - other[0], self.y - other[1]))
-        else:
-            raise Exception(f"Not sure how to add {type(other)} to Point.")
+        return NotImplemented
 
     def __truediv__(self, other: float) -> "Point":
         return Point(tuple(elem / other for elem in self))
@@ -183,10 +181,9 @@ class Vector(Sequence[float]):
         return Vector(tuple(other * elem for elem in self))
 
     def __matmul__(self, other: "Point | Vector") -> list[float]:
-        if isinstance(other, Point | Vector):
-            return [s * o for s, o in zip(self, other)]
-        else:
-            raise Exception(f"Not sure how to add {type(other)} to Point.")
+        if not isinstance(other, Point | Vector):
+            return NotImplemented
+        return [s * o for s, o in zip(self, other)]
 
     def __truediv__(self, other: float) -> "Vector":
         return Vector(tuple(elem / other for elem in self))
@@ -240,9 +237,6 @@ class Matrix(Sequence[Vector]):
         return Matrix(tuple(Vector(row) for row in zip(*self)))
 
     def __matmul__(self, other: Point | Vector) -> list[float]:
-        if isinstance(other, Point | Vector):
-            return [sum(row @ other) for row in self]
-        else:
-            raise Exception(
-                f"Not sure how to matrix multiply {type(self)} and {type(other)}."
-            )
+        if not isinstance(other, Point | Vector):
+            return NotImplemented
+        return [sum(row @ other) for row in self]
