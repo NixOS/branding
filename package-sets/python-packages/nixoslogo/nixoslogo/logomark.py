@@ -1,10 +1,10 @@
 import fractions
 import itertools
 import math
+from typing import TypedDict, override
 
 import svg
 from svg._types import Length
-from typing import TypedDict, override
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (

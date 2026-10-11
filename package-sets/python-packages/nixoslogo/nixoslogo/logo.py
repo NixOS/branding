@@ -1,5 +1,5 @@
-from typing import override
 import math
+from typing import override
 
 import svg
 

@@ -1,10 +1,10 @@
-from typing import override
 import atexit
 import logging
 import shutil
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
+from typing import override
 
 import fontforge
 import svg
