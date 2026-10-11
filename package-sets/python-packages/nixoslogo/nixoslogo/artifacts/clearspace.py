@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class LogoClearspace(BaseRenderable):
     def __init__(
         self,
-        logo: BaseRenderable,
+        logo: type[BaseRenderable],
         logo_name: str,
         space_object: BaseRenderable,
         annotations: Annotations,
