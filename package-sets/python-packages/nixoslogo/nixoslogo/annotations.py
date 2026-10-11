@@ -146,7 +146,7 @@ class DimensionLines(LineGroup):
         flip=False,
         side="left",
         offset=1,
-        reference=1,
+        reference: float = 1,
         text=None,
         text_offset=False,
         fractional=True,
@@ -173,7 +173,9 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(round(measured_line.length()), reference)
+                    text = fractions.Fraction(
+                        round(measured_line.length()), round(reference)
+                    )
                 else:
                     text = round(measured_line.length() / reference, precision)
 
@@ -267,7 +269,7 @@ class DimensionLines(LineGroup):
         flip=False,
         side="left",
         offset=1,
-        reference=1,
+        reference: float = 1,
         text=None,
         text_offset=False,
         fractional=True,
@@ -298,7 +300,9 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(round(measured_line.length()), reference)
+                    text = fractions.Fraction(
+                        round(measured_line.length()), round(reference)
+                    )
                 else:
                     text = round(measured_line.length() / reference, precision)
 
