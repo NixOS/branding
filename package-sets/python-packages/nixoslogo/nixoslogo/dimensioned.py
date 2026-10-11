@@ -1,4 +1,5 @@
 import math
+from typing import TypedDict
 
 import svg
 
@@ -9,6 +10,12 @@ from nixoslogo.layout import Canvas
 from nixoslogo.logo import NixosLogo
 from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Logotype
+
+
+class DimensionLineOptions(TypedDict):
+    side: str
+    flip: bool
+    offset: float
 
 
 class DimensionedLambda(Lambda):
@@ -154,7 +161,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
         )
 
         # fmt: off
-        options = [
+        options: list[DimensionLineOptions] = [
             {"side": "right", "flip": True,  "offset": 1 / 4},
             {"side": "right", "flip": True,  "offset": 15 / 32},
             {"side": "left",  "flip": True,  "offset": 1 / 4},
@@ -331,8 +338,8 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
             svg.G(
                 transform=[
                     svg.Translate(point.x, point.y),
-                ]
-                + translation(annotation),
+                    *translation(annotation),
+                ],
                 elements=annotation.make_svg_elements(),
             )
             for point, annotation, translation in named_annotations.values()
