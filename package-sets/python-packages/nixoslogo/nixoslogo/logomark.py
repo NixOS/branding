@@ -298,7 +298,7 @@ class Logomark(BaseRenderable):
     def make_flake_gradients_defs(self):
         gradient_end_points = self.make_gradient_end_points()
 
-        linear_gradients = []
+        linear_gradients: list[svg.Element] = []
         for color, color_name in zip(self.colors_value, self.css_color_names):
             color_original = color.convert("srgb").to_string(hex=True)
             color_midpoint = color.darken(1).convert("srgb").to_string(hex=True)
