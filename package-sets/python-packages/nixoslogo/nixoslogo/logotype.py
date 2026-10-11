@@ -67,7 +67,7 @@ class FontLoader:
             if self.scale_glyph:
                 self._scale_glyph(character, transforms)
             if self.offset_glyph:
-                self._offset_glyph(character, transforms)
+                self._offset_glyph(character)
 
     def _ref_size(self, capHeight: float | None) -> tuple[float, float]:
         """
@@ -96,7 +96,7 @@ class FontLoader:
             )
         )
 
-    def _offset_glyph(self, character: str, transforms: dict[str, int]):
+    def _offset_glyph(self, character: str):
         """Offset a glyph; primarily used to remove the left side bearing."""
         self.font[character].transform(
             (
