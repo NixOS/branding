@@ -123,13 +123,13 @@ class FontLoader:
             # Close the font file if it's open
             self.font.close()
             logger.debug(f"Font file closed: {self._font_path}")
-        except Exception as e:
+        except RuntimeError as e:
             logger.error(f"Error closing font file: {self._font_path}, {e}")
         # Remove the temporary directory and its contents
         try:
-            shutil.rmtree(self._tempdir, ignore_errors=True)
+            shutil.rmtree(self._tempdir)
             logger.debug(f"Temporary directory removed: {self._tempdir}")
-        except Exception as e:
+        except OSError as e:
             logger.error(f"Error removing temporary directory: {self._tempdir}, {e}")
 
     def __del__(self):
