@@ -52,7 +52,7 @@ class FontLoader:
         self._tempdir: Path = Path(tempfile.mkdtemp(prefix="fontforge_"))
         logger.debug(f"Temporary directory created: {self._tempdir}")
         self._font_path: Path = self._tempdir / source_path.name
-        shutil.copy2(source_path, self._font_path)
+        _ = shutil.copy2(source_path, self._font_path)
         logger.debug(f"Font file copied: {self._font_path}")
 
         self.font = fontforge.open(str(self._font_path))
@@ -60,7 +60,7 @@ class FontLoader:
         self._cleaned_up: bool = False
 
         # Register the cleanup function to be called when the Python process exits
-        atexit.register(self._cleanup_once)
+        _ = atexit.register(self._cleanup_once)
 
     def _setup_glyphs(self):
         for character, transforms in self.transforms_map.items():
