@@ -3,7 +3,6 @@ import itertools
 import math
 
 import svg
-from svg._types import Number
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
@@ -70,7 +69,7 @@ class Lambda(BaseRenderable):
             ),
         )
 
-    def make_hexagon_points(self, radius: Number) -> Points:
+    def make_hexagon_points(self, radius: float) -> Points:
         angles = [math.radians(angle) for angle in range(0, 360, 60)]
         return Points(
             [
@@ -86,9 +85,9 @@ class Lambda(BaseRenderable):
 
     def make_lambda_points(
         self,
-        radius: Number | None = None,
-        thickness: Number | None = None,
-        gap: Number | None = None,
+        radius: float | None = None,
+        thickness: float | None = None,
+        gap: float | None = None,
     ) -> Points:
         radius = radius if radius is not None else self.radius
         thickness = thickness if thickness is not None else self.thickness
@@ -123,9 +122,9 @@ class Lambda(BaseRenderable):
 
     def make_named_lambda_points(
         self,
-        radius: Number | None = None,
-        thickness: Number | None = None,
-        gap: Number | None = None,
+        radius: float | None = None,
+        thickness: float | None = None,
+        gap: float | None = None,
     ) -> dict[str, Point]:
         radius = radius if radius is not None else self.radius
         thickness = thickness if thickness is not None else self.thickness

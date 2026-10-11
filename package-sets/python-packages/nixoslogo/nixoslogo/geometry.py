@@ -1,8 +1,6 @@
 import math
 from collections.abc import Sequence
-from typing import Self
-
-from svg._types import Number
+from typing import overload
 
 
 def cosd(angle) -> float:
@@ -33,7 +31,7 @@ class Point(Sequence):
     def __neg__(self):
         return Point(tuple(-elem for elem in self))
 
-    def __add__(self, other: Self | "Vector") -> Self:
+    def __add__(self, other: "Point | Vector") -> "Point":
         if isinstance(other, Point):
             return Point((self.x + other.x, self.y + other.y))
         elif isinstance(other, Vector):
@@ -41,7 +39,13 @@ class Point(Sequence):
         else:
             raise Exception(f"Not sure how to add {type(other)} to Point.")
 
-    def __sub__(self, other: Self | "Vector") -> Self:
+    @overload
+    def __sub__(self, other: "Point") -> "Vector": ...
+
+    @overload
+    def __sub__(self, other: "Vector") -> "Point": ...
+
+    def __sub__(self, other: "Point | Vector") -> "Point | Vector":
         if isinstance(other, Point):
             return Vector((self.x - other.x, self.y - other.y))
         elif isinstance(other, Vector):
@@ -49,7 +53,7 @@ class Point(Sequence):
         else:
             raise Exception(f"Not sure how to add {type(other)} to Point.")
 
-    def __truediv__(self, other: Number) -> Self:
+    def __truediv__(self, other: float) -> "Point":
         return Point(tuple(elem / other for elem in self))
 
     @property
@@ -62,10 +66,10 @@ class Point(Sequence):
         """The y property."""
         return self.value[1]
 
-    def distance(self, other: Self) -> float:
+    def distance(self, other: "Point") -> float:
         return (self - other).length()
 
-    def normal(self, reference: Self):
+    def normal(self, reference: "Point") -> "Vector":
         normal = Vector(
             (
                 +(self.y - reference.y),
@@ -74,7 +78,7 @@ class Point(Sequence):
         )
         return normal.normalize()
 
-    def rotate(self, angle: Number):
+    def rotate(self, angle: float) -> "Point":
         rotation_matrix = Matrix(
             (
                 Vector(
@@ -130,46 +134,46 @@ class Vector(Sequence):
     def __str__(self):
         return f"{self.value}"
 
-    def __add__(self, other: Self) -> Self:
+    def __add__(self, other: "Vector") -> "Vector":
         return Vector(tuple(s + o for s, o in zip(self, other)))
 
     def __neg__(self):
         return Vector(tuple(-elem for elem in self))
 
-    def __sub__(self, other: Self) -> Self:
+    def __sub__(self, other: "Vector") -> "Vector":
         return self + (-other)
 
-    def __mul__(self, other: Self) -> Self:
+    def __mul__(self, other: "Vector") -> "Vector":
         return Vector(tuple(s * o for s, o in zip(self, other)))
 
-    def __rmul__(self, other: Number) -> Self:
+    def __rmul__(self, other: float) -> "Vector":
         return Vector(tuple(other * elem for elem in self))
 
-    def __matmul__(self, other: Self | Point) -> Self:
+    def __matmul__(self, other: "Point | Vector") -> list[float]:
         if isinstance(other, Point | Vector):
             return [s * o for s, o in zip(self, other)]
         else:
             raise Exception(f"Not sure how to add {type(other)} to Point.")
 
-    def __truediv__(self, other: Number) -> Self:
+    def __truediv__(self, other: float) -> "Vector":
         return Vector(tuple(elem / other for elem in self))
 
-    def _modulus_squared(self) -> Number:
+    def _modulus_squared(self) -> float:
         return self.dot(self)
 
     def length(self) -> float:
         return math.sqrt(self._modulus_squared())
 
-    def dot(self, other: Self) -> float:
+    def dot(self, other: "Vector") -> float:
         return sum((self * other))
 
-    def normalize(self) -> Self:
+    def normalize(self) -> "Vector":
         return self / self.length()
 
-    def normal(self) -> Self:
+    def normal(self) -> "Vector":
         return Vector((self[1], -self[0])).normalize()
 
-    def angle_from(self, other: Self) -> float:
+    def angle_from(self, other: "Vector") -> float:
         return math.acos(self.dot(other) / (self.length() * other.length()))
 
     def to_point(self) -> Point:
@@ -190,10 +194,10 @@ class Matrix(Sequence):
     def __str__(self):
         return "(" + ",\n ".join(str(elem) for elem in self.value) + ")"
 
-    def transpose(self) -> Self:
-        return Matrix(tuple(zip(*self)))
+    def transpose(self) -> "Matrix":
+        return Matrix(tuple(Vector(row) for row in zip(*self)))
 
-    def __matmul__(self, other: Point | Vector) -> Self:
+    def __matmul__(self, other: Point | Vector) -> list[float]:
         if isinstance(other, Point | Vector):
             return [sum(row @ other) for row in self]
         else:

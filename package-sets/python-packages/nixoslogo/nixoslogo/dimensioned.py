@@ -1,7 +1,6 @@
 import math
 
 import svg
-from svg._types import Number
 
 from nixoslogo.annotations import Annotations
 from nixoslogo.core import ClearSpace, flatten_svg_elements
@@ -31,7 +30,7 @@ class DimensionedLambda(Lambda):
             height=4 * self.radius,
         )
 
-    def make_diagonal_line(self, radius: Number) -> list[Number]:
+    def make_diagonal_line(self, radius: float) -> Points:
         hexagon_points = self.make_hexagon_points(radius)
         return Points([hexagon_points[1], hexagon_points[4]])
 
