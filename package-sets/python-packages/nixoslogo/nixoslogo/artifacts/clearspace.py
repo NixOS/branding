@@ -59,17 +59,17 @@ class LogoClearspace(BaseRenderable):
     def make_greyscale_def(self):
         return (
             svg.Defs(
-                elements=(
+                elements=[
                     svg.Filter(
                         id="greyscale-50",
-                        elements=(
+                        elements=[
                             svg.FeColorMatrix(
                                 type="matrix",
                                 values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0",
                             ),
-                        ),
+                        ],
                     ),
-                ),
+                ],
             ),
         )
 
@@ -192,25 +192,25 @@ class LogoClearspace(BaseRenderable):
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
             svg.G(
-                transform=(
+                transform=[
                     svg.Translate(
                         self.recommended.canvas.min_x
                         + recommended_annotation.elements_height * 0.5,
                         self.recommended.canvas.min_y
                         + recommended_annotation.elements_height * 1.5,
                     ),
-                ),
+                ],
                 elements=recommended_annotation.make_svg_elements(),
             ),
             svg.G(
-                transform=(
+                transform=[
                     svg.Translate(
                         self.minimal.canvas.min_x
                         + minimal_annotation.elements_height * 0.5,
                         self.minimal.canvas.min_y
                         + minimal_annotation.elements_height * 1.5,
                     ),
-                ),
+                ],
                 elements=minimal_annotation.make_svg_elements(),
             ),
         )
