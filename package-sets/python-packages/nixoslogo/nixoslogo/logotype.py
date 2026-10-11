@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 import fontforge
 import svg
@@ -215,8 +215,8 @@ class Glyph(BaseRenderable):
 
     @property
     @override
-    def elements_bounding_box(self):
-        return self.layer.boundingBox()
+    def elements_bounding_box(self) -> tuple[float, float, float, float]:
+        return cast("tuple[float, float, float, float]", self.layer.boundingBox())
 
     @override
     def _get_clearspace(self):
@@ -329,7 +329,7 @@ class Logotype(BaseRenderable):
 
     @property
     @override
-    def elements_bounding_box(self):
+    def elements_bounding_box(self) -> tuple[float, float, float, float]:
         characters_box = tuple(
             f(elem)
             for f, elem in zip(

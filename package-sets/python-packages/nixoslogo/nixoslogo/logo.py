@@ -115,11 +115,13 @@ class NixosLogo(BaseRenderable):
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         logomark_box = self.logomark.elements_bounding_box
         logotype_box = self.logotype.elements_bounding_box
+        offset_x = float(self.logotype_transform.x)
+        offset_y = float(self.logotype_transform.y or 0)
         logotype_box_translated = (
-            logotype_box[0] + self.logotype_transform.x,
-            logotype_box[1] + self.logotype_transform.y,
-            logotype_box[2] + self.logotype_transform.x,
-            logotype_box[3] + self.logotype_transform.y,
+            logotype_box[0] + offset_x,
+            logotype_box[1] + offset_y,
+            logotype_box[2] + offset_x,
+            logotype_box[3] + offset_y,
         )
         min_x, min_y, max_x, max_y = (
             predicate(elem)
