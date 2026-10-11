@@ -18,6 +18,14 @@ class DimensionLineOptions(TypedDict):
     offset: float
 
 
+class DimensionAngleOptions(TypedDict):
+    flip: bool
+    large: bool
+    side: str
+    ratio: float
+    text: str
+
+
 class DimensionedLambda(Lambda):
     def __init__(
         self,
@@ -214,7 +222,7 @@ class DimensionedLambdaAngular(DimensionedLambda):
     def make_lambda_angular_dimensions(self):
         lambda_points_no_gap = self.make_lambda_points()
         # fmt: off
-        options = [
+        options: list[DimensionAngleOptions] = [
             {"flip": True,  "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
             {"flip": True,  "large": False, "side": "left",  "ratio": 1 / 2, "text": "A"},
             {"flip": True,  "large": False, "side": "left",  "ratio": 3 / 8, "text": "B"},

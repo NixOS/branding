@@ -159,16 +159,16 @@ class DimensionLines(LineGroup):
 
     def make_dimension_line(
         self,
-        point1,
-        point2,
-        flip=False,
-        side="left",
+        point1: Point,
+        point2: Point,
+        flip: bool = False,
+        side: str = "left",
         offset: float = 1,
         reference: float = 1,
-        text=None,
-        text_offset=False,
-        fractional=True,
-        precision=3,
+        text: str | None = None,
+        text_offset: bool = False,
+        fractional: bool = True,
+        precision: int = 3,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -191,14 +191,16 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(
+                    label = fractions.Fraction(
                         round(measured_line.length()), round(reference)
                     )
                 else:
-                    text = round(measured_line.length() / reference, precision)
+                    label = round(measured_line.length() / reference, precision)
+            else:
+                label = text
 
             text_annotation = TextAnnotations(
-                characters=str(text),
+                characters=str(label),
                 loader=self.font_loader,
                 **self.font_config,
             )
@@ -282,16 +284,16 @@ class DimensionLines(LineGroup):
 
     def make_dimension_line_outer(
         self,
-        point1,
-        point2,
-        flip=False,
-        side="left",
+        point1: Point,
+        point2: Point,
+        flip: bool = False,
+        side: str = "left",
         offset: float = 1,
         reference: float = 1,
-        text=None,
-        text_offset=False,
-        fractional=True,
-        precision=3,
+        text: str | None = None,
+        text_offset: bool = False,
+        fractional: bool = True,
+        precision: int = 3,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -318,14 +320,16 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(
+                    label = fractions.Fraction(
                         round(measured_line.length()), round(reference)
                     )
                 else:
-                    text = round(measured_line.length() / reference, precision)
+                    label = round(measured_line.length() / reference, precision)
+            else:
+                label = text
 
             text_annotation = TextAnnotations(
-                characters=str(text),
+                characters=str(label),
                 loader=self.font_loader,
                 **self.font_config,
             )
@@ -409,14 +413,14 @@ class DimensionLines(LineGroup):
 
     def make_dimension_angle(
         self,
-        point1,
-        point2,
-        reference,
-        flip,
-        large,
-        side,
-        ratio,
-        text=None,
+        point1: Point,
+        point2: Point,
+        reference: Point,
+        flip: bool,
+        large: bool,
+        side: str,
+        ratio: float,
+        text: str | None = None,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -536,7 +540,7 @@ class Annotations:
             font_config=self.font_config,
         )
 
-    def make_annotation(self, text):
+    def make_annotation(self, text: str) -> TextAnnotations:
         return TextAnnotations(
             characters=str(text),
             loader=self.font_loader,
