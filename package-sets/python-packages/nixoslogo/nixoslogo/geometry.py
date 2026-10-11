@@ -15,7 +15,7 @@ def sind(angle: float) -> float:
 
 class Point(Sequence[float]):
     def __init__(self, value: Sequence[float]):
-        self.value = value
+        self.value: Sequence[float] = value
         super().__init__()
 
     @overload
@@ -105,7 +105,7 @@ class Point(Sequence[float]):
 
 class Points(Sequence[Point]):
     def __init__(self, value: list[Point]):
-        self.value = value
+        self.value: list[Point] = value
         super().__init__()
 
     @overload
@@ -134,7 +134,7 @@ class Points(Sequence[Point]):
 
 class Vector(Sequence[float]):
     def __init__(self, value: Sequence[float]):
-        self.value = value
+        self.value: Sequence[float] = value
         super().__init__()
 
     @overload
@@ -203,7 +203,7 @@ class Vector(Sequence[float]):
 
 class Matrix(Sequence[Vector]):
     def __init__(self, value: Sequence[Vector]):
-        self.value = value
+        self.value: Sequence[Vector] = value
         super().__init__()
 
     @overload

@@ -35,8 +35,8 @@ class DimensionedLambda(Lambda):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.annotations = annotations
-        self.clear_space = clear_space
+        self.annotations: Annotations = annotations
+        self.clear_space: ClearSpace = clear_space
 
     def _make_canvas(self) -> Canvas:
         return Canvas(
@@ -478,7 +478,7 @@ class DimensionedLogomark(Logomark):
         **kwargs,
     ):
         super().__init__(ilambda=ilambda, **kwargs)
-        self.annotations = annotations
+        self.annotations: Annotations = annotations
 
     def _make_canvas(self) -> Canvas:
         return Canvas(
@@ -593,7 +593,7 @@ class DimensionedLogomarkGradient(Logomark):
         **kwargs,
     ):
         super().__init__(ilambda=ilambda, **kwargs)
-        self.annotations = annotations
+        self.annotations: Annotations = annotations
 
     def _make_canvas(self) -> Canvas:
         return Canvas(
@@ -750,7 +750,7 @@ class DimensionedLogotype(Logotype):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.annotations = annotations
+        self.annotations: Annotations = annotations
 
     def svg_bounding_box(self):
         bbox = self.elements_bounding_box
@@ -852,7 +852,7 @@ class DimensionedLogo(NixosLogo):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.annotations = annotations
+        self.annotations: Annotations = annotations
 
     def dimension_cap_height(self):
         return (

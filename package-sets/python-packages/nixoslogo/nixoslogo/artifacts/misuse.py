@@ -17,7 +17,7 @@ class LogomarkRotate(Logomark):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
@@ -58,7 +58,7 @@ class LogomarkMirror(Logomark):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
@@ -90,7 +90,7 @@ class LogoCrop(NixosLogo):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
@@ -130,7 +130,7 @@ class LogoScale(NixosLogo):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
@@ -158,7 +158,7 @@ class LogoColorsWithLambdaPrime(NixosLogo):
         logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             logotype_style=logotype_style,

@@ -39,17 +39,17 @@ class NixosLogo(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.lambda_radius = lambda_radius
-        self.lambda_thickness = lambda_thickness
-        self.lambda_gap = lambda_gap
-        self.logo_layout = logo_layout
-        self.logomark_colors = logomark_colors
-        self.logomark_color_style = logomark_color_style
-        self.logotype_color = logotype_color
-        self.logotype_style = logotype_style
-        self.logotype_spacings = logotype_spacings
-        self.logotype_characters = logotype_characters
-        self.clear_space = clear_space
+        self.lambda_radius: int = lambda_radius
+        self.lambda_thickness: float = lambda_thickness
+        self.lambda_gap: float = lambda_gap
+        self.logo_layout: LogoLayout = logo_layout
+        self.logomark_colors: LogomarkColors | tuple[Color, ...] = logomark_colors
+        self.logomark_color_style: ColorStyle = logomark_color_style
+        self.logotype_color: str = logotype_color
+        self.logotype_style: LogotypeStyle = logotype_style
+        self.logotype_spacings: tuple[int, ...] = logotype_spacings
+        self.logotype_characters: str = logotype_characters
+        self.clear_space: ClearSpace = clear_space
 
         self._init_snowflake()
         self.logotype_cap_height: float = (

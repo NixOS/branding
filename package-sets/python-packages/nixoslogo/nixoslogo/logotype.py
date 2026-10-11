@@ -4,7 +4,6 @@ import shutil
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
 import fontforge
 import svg
@@ -32,15 +31,15 @@ class FontLoader:
     def __init__(
         self,
         get_font_file: Callable[[], Path] = get_nixos_logotype_font_file,
-        transforms_map: dict[str, Any] = DEFAULT_ROUTE159_TRANSFORMS,
+        transforms_map: dict[str, dict[str, int]] = DEFAULT_ROUTE159_TRANSFORMS,
         capHeight: float | None = None,
         scale_glyph: bool = True,
         offset_glyph: bool = True,
     ):
-        self.get_font_file = get_font_file
-        self.transforms_map = transforms_map
-        self.scale_glyph = scale_glyph
-        self.offset_glyph = offset_glyph
+        self.get_font_file: Callable[[], Path] = get_font_file
+        self.transforms_map: dict[str, dict[str, int]] = transforms_map
+        self.scale_glyph: bool = scale_glyph
+        self.offset_glyph: bool = offset_glyph
 
         self._open_font_file()
         self.capHeight, self.scale = self._ref_size(capHeight)
@@ -147,11 +146,11 @@ class Glyph(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.character = character
+        self.character: str = character
         self.loader: FontLoader = loader if loader is not None else FontLoader()
-        self.color = color
-        self.style = style
-        self.clear_space = clear_space
+        self.color: str = color
+        self.style: LogotypeStyle = style
+        self.clear_space: ClearSpace = clear_space
 
         self.font = self.loader.font
         self.glyph = self.font[self.character]
@@ -285,12 +284,12 @@ class Logotype(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.characters = characters
+        self.characters: str = characters
         self.loader: FontLoader = loader if loader is not None else FontLoader()
-        self.color = color
-        self.style = style
-        self.spacings = spacings
-        self.clear_space = clear_space
+        self.color: str = color
+        self.style: LogotypeStyle = style
+        self.spacings: tuple[int, ...] = spacings
+        self.clear_space: ClearSpace = clear_space
 
         self._load_glyphs()
         self.cap_height = self.glyphs[0].loader.capHeight

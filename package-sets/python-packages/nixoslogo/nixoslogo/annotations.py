@@ -30,11 +30,11 @@ class TextAnnotations(BaseRenderable):
         cap_height: float | None = None,
         **kwargs,
     ):
-        self.characters = characters
-        self.loader = loader
-        self.color = color
-        self.scale = scale
-        self.cap_height = cap_height
+        self.characters: str = characters
+        self.loader: FontLoader = loader
+        self.color: str = color
+        self.scale: float | None = scale
+        self.cap_height: float | None = cap_height
 
         self._load_glyphs()
         self.original_cap_height = self.loader.capHeight
@@ -154,8 +154,8 @@ class DimensionLines(LineGroup):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.font_loader = font_loader
-        self.font_config = font_config
+        self.font_loader: FontLoader = font_loader
+        self.font_config: FontConfig = font_config
 
     def make_dimension_line(
         self,
@@ -531,7 +531,7 @@ class Annotations:
             transforms_map=transforms_map,
             offset_glyph=False,
         )
-        self.font_config = font_config
+        self.font_config: FontConfig = font_config
         self.object_lines = ObjectLines(**object_lines_config)
         self.construction_lines = ConstructionLines(**construction_lines_config)
         self.dimension_lines = DimensionLines(

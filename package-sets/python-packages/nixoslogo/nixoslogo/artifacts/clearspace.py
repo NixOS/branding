@@ -21,10 +21,10 @@ class LogoClearspace(BaseRenderable):
         annotations: Annotations,
         **kwargs,
     ):
-        self.logo = logo
-        self.logo_name = logo_name
-        self.space_object = space_object
-        self.annotations = annotations
+        self.logo: type[BaseRenderable] = logo
+        self.logo_name: str = logo_name
+        self.space_object: BaseRenderable = space_object
+        self.annotations: Annotations = annotations
 
         self.recommended = self.logo(clear_space=ClearSpace.RECOMMENDED)
         self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)

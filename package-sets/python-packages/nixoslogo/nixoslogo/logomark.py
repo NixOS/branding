@@ -34,11 +34,11 @@ class Lambda(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.radius = radius
-        self.thickness = thickness
-        self.gap = gap
-        self.color = color
-        self.clear_space = clear_space
+        self.radius: int = radius
+        self.thickness: float = thickness
+        self.gap: float = gap
+        self.color: str = color
+        self.clear_space: ClearSpace = clear_space
         super().__init__(**kwargs)
 
     @property
@@ -188,8 +188,8 @@ class Logomark(BaseRenderable):
         self.colors_value: tuple[Color, ...] = (
             colors.value if isinstance(colors, LogomarkColors) else colors
         )
-        self.color_style = color_style
-        self.clear_space = clear_space
+        self.color_style: ColorStyle = color_style
+        self.clear_space: ClearSpace = clear_space
 
         self._make_css_color_names()
 
