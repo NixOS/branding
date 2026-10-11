@@ -147,9 +147,8 @@ class LogoScale(NixosLogo):
             + list(extras)
         )
 
-    def _init_cap_height(self):
-        if self.logotype_cap_height is None:
-            self.logotype_cap_height = self.lambda_radius
+    def _default_cap_height(self) -> float:
+        return self.lambda_radius
 
 
 class LogoColorsWithLambdaPrime(NixosLogo):

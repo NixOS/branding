@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 
 
 class FontLoader:
-    capHeight: int
+    capHeight: float
     scale: float
 
     def __init__(
         self,
         get_font_file: Callable[[], Path] = get_nixos_logotype_font_file,
         transforms_map: dict[str, Any] = DEFAULT_ROUTE159_TRANSFORMS,
-        capHeight: int | None = None,
+        capHeight: float | None = None,
         scale_glyph: bool = True,
         offset_glyph: bool = True,
     ):
@@ -69,7 +69,7 @@ class FontLoader:
             if self.offset_glyph:
                 self._offset_glyph(character, transforms)
 
-    def _ref_size(self, capHeight: int | None) -> tuple[int, float]:
+    def _ref_size(self, capHeight: float | None) -> tuple[float, float]:
         """
         Conditionally update the font size.
 

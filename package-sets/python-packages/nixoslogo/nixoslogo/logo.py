@@ -42,22 +42,32 @@ class NixosLogo(BaseRenderable):
         self.lambda_radius = lambda_radius
         self.lambda_thickness = lambda_thickness
         self.lambda_gap = lambda_gap
-        self.loader = loader
         self.logo_layout = logo_layout
         self.logomark_colors = logomark_colors
         self.logomark_color_style = logomark_color_style
-        self.logotype_cap_height = logotype_cap_height
         self.logotype_color = logotype_color
         self.logotype_style = logotype_style
         self.logotype_spacings = logotype_spacings
         self.logotype_characters = logotype_characters
-        self.logotype_transform = logotype_transform
         self.clear_space = clear_space
 
         self._init_snowflake()
-        self._init_cap_height()
+        self.logotype_cap_height: float = (
+            logotype_cap_height
+            if logotype_cap_height is not None
+            else self._default_cap_height()
+        )
+        self.loader: FontLoader = (
+            loader
+            if loader is not None
+            else FontLoader(capHeight=self.logotype_cap_height)
+        )
         self._init_logotype()
-        self._init_layout()
+        self.logotype_transform: svg.Translate = (
+            logotype_transform
+            if logotype_transform is not None
+            else self._default_transform()
+        )
 
         super().__init__(**kwargs)
 
@@ -74,15 +84,10 @@ class NixosLogo(BaseRenderable):
             clear_space=self.clear_space,
         )
 
-    def _init_cap_height(self):
-        if self.logotype_cap_height is None:
-            self.logotype_cap_height = (
-                self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
-            )
+    def _default_cap_height(self) -> float:
+        return self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
 
     def _init_logotype(self):
-        if self.loader is None:
-            self.loader = FontLoader(capHeight=self.logotype_cap_height)
         self.logotype = Logotype(
             characters=self.logotype_characters,
             loader=self.loader,
@@ -91,21 +96,20 @@ class NixosLogo(BaseRenderable):
             spacings=self.logotype_spacings,
         )
 
-    def _init_layout(self):
-        if self.logotype_transform is None:
-            match self.logo_layout:
-                case LogoLayout.HORIZONTAL:
-                    self.logotype_transform = svg.Translate(
-                        self.logomark.circumradius,
-                        self.logotype_cap_height / 2,
-                    )
-                case LogoLayout.VERTICAL:
-                    self.logotype_transform = svg.Translate(
-                        -self.logotype.elements_width / 2,
-                        self.logomark.inradius + self.logotype_cap_height * 1.25,
-                    )
-                case _:
-                    raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
+    def _default_transform(self) -> svg.Translate:
+        match self.logo_layout:
+            case LogoLayout.HORIZONTAL:
+                return svg.Translate(
+                    self.logomark.circumradius,
+                    self.logotype_cap_height / 2,
+                )
+            case LogoLayout.VERTICAL:
+                return svg.Translate(
+                    -self.logotype.elements_width / 2,
+                    self.logomark.inradius + self.logotype_cap_height * 1.25,
+                )
+            case _:
+                raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
 
     @property
     def elements_bounding_box(self):
