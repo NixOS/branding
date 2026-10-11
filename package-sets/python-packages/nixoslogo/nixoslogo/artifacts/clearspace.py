@@ -5,8 +5,8 @@ import svg
 from nixoslogo.annotations import Annotations
 from nixoslogo.core import BaseRenderable, ClearSpace, flatten_svg_elements
 from nixoslogo.logging_config import setup_logging
-from nixoslogo.logo import Lambda, NixosLogo
-from nixoslogo.logomark import Logomark
+from nixoslogo.logo import NixosLogo
+from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Glyph, Logotype
 
 logger = logging.getLogger(__name__)
