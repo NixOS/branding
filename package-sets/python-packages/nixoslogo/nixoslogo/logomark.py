@@ -182,7 +182,7 @@ class Logomark(BaseRenderable):
         **kwargs,
     ):
         self.ilambda = ilambda
-        self.colors_name = (
+        self.colors_name: str = (
             colors.name if isinstance(colors, LogomarkColors) else "custom"
         )
         self.colors_value: tuple[Color, ...] = (
@@ -191,9 +191,9 @@ class Logomark(BaseRenderable):
         self.color_style: ColorStyle = color_style
         self.clear_space: ClearSpace = clear_space
 
-        self._make_css_color_names()
+        self.css_color_names: tuple[str, ...] = self._make_css_color_names()
 
-        self._gradient_stop_offsets = [0, 25, 100]
+        self._gradient_stop_offsets: list[int] = [0, 25, 100]
 
         super().__init__(**kwargs)
 
@@ -232,17 +232,15 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
-    def _make_css_color_names(self):
+    def _make_css_color_names(self) -> tuple[str, ...]:
         match self.color_style:
             case ColorStyle.FLAT:
-                self.css_color_names = tuple(
+                return tuple(
                     color.convert("srgb").to_string(hex=True)
                     for color in self.colors_value
                 )
             case ColorStyle.GRADIENT:
-                self.css_color_names = tuple(
-                    color.gradient_color_name() for color in self.colors_value
-                )
+                return tuple(color.gradient_color_name() for color in self.colors_value)
             case _:
                 raise Exception(f"Unknown ColorStyle: {self.color_style}")
 

@@ -26,8 +26,8 @@ class LogoClearspace(BaseRenderable):
         self.space_object: BaseRenderable = space_object
         self.annotations: Annotations = annotations
 
-        self.recommended = self.logo(clear_space=ClearSpace.RECOMMENDED)
-        self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)
+        self.recommended: BaseRenderable = self.logo(clear_space=ClearSpace.RECOMMENDED)
+        self.minimal: BaseRenderable = self.logo(clear_space=ClearSpace.MINIMAL)
         super().__init__(**kwargs)
 
     @property

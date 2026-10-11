@@ -1,4 +1,4 @@
-from typing import Self
+from typing import ClassVar, Self
 
 from coloraide import Color as ColorBase
 
@@ -6,8 +6,8 @@ from .helpers import stable_hash
 
 
 class Color(ColorBase):
-    GRADIENT_LIGHTNESS_DELTA = -0.04
-    GRADIENT_CHROMA_DELTA = -0.01
+    GRADIENT_LIGHTNESS_DELTA: ClassVar[float] = -0.04
+    GRADIENT_CHROMA_DELTA: ClassVar[float] = -0.01
 
     def darken(self, scale: float) -> Self:
         """Clones and darkens the color. Only used for Lch-like colorspaces."""

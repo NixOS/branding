@@ -37,8 +37,8 @@ class TextAnnotations(BaseRenderable):
         self.cap_height: float | None = cap_height
 
         self._load_glyphs()
-        self.original_cap_height = self.loader.capHeight
-        self.original_scale = self.loader.scale
+        self.original_cap_height: float = self.loader.capHeight
+        self.original_scale: float = self.loader.scale
         self._set_spacings()
         self._scale_glyphs()
 
@@ -48,7 +48,7 @@ class TextAnnotations(BaseRenderable):
         return CHARACTER_GLYPHNAME_MAP.get(character, character)
 
     def _load_glyphs(self):
-        self.glyphs = tuple(
+        self.glyphs: tuple[Glyph, ...] = tuple(
             Glyph(
                 loader=self.loader,
                 character=self._map_characters(character),
@@ -526,15 +526,17 @@ class Annotations:
         get_font_file: Callable[[], Path] = get_nixos_annotation_font_file,
         transforms_map: dict[str, dict[str, int]] = DEFAULT_JURA_TRANSFORMS,
     ):
-        self.font_loader = FontLoader(
+        self.font_loader: FontLoader = FontLoader(
             get_font_file=get_font_file,
             transforms_map=transforms_map,
             offset_glyph=False,
         )
         self.font_config: FontConfig = font_config
-        self.object_lines = ObjectLines(**object_lines_config)
-        self.construction_lines = ConstructionLines(**construction_lines_config)
-        self.dimension_lines = DimensionLines(
+        self.object_lines: ObjectLines = ObjectLines(**object_lines_config)
+        self.construction_lines: ConstructionLines = ConstructionLines(
+            **construction_lines_config
+        )
+        self.dimension_lines: DimensionLines = DimensionLines(
             **dimension_lines_config,
             font_loader=self.font_loader,
             font_config=self.font_config,

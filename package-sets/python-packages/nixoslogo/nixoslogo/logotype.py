@@ -48,15 +48,15 @@ class FontLoader:
     def _open_font_file(self):
         source_path = self.get_font_file()
         logger.debug(f"Original font file: {source_path}")
-        self._tempdir = Path(tempfile.mkdtemp(prefix="fontforge_"))
+        self._tempdir: Path = Path(tempfile.mkdtemp(prefix="fontforge_"))
         logger.debug(f"Temporary directory created: {self._tempdir}")
-        self._font_path = self._tempdir / source_path.name
+        self._font_path: Path = self._tempdir / source_path.name
         shutil.copy2(source_path, self._font_path)
         logger.debug(f"Font file copied: {self._font_path}")
 
         self.font = fontforge.open(str(self._font_path))
         logger.debug(f"Font file loaded: {self._font_path}")
-        self._cleaned_up = False
+        self._cleaned_up: bool = False
 
         # Register the cleanup function to be called when the Python process exits
         atexit.register(self._cleanup_once)
@@ -292,14 +292,14 @@ class Logotype(BaseRenderable):
         self.clear_space: ClearSpace = clear_space
 
         self._load_glyphs()
-        self.cap_height = self.glyphs[0].loader.capHeight
-        self.scale = self.glyphs[0].loader.scale
+        self.cap_height: float = self.glyphs[0].loader.capHeight
+        self.scale: float = self.glyphs[0].loader.scale
         self._set_spacings()
 
         super().__init__(**kwargs)
 
     def _load_glyphs(self):
-        self.glyphs = tuple(
+        self.glyphs: tuple[Glyph, ...] = tuple(
             Glyph(
                 loader=self.loader,
                 character=character,

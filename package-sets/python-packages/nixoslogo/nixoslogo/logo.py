@@ -72,12 +72,12 @@ class NixosLogo(BaseRenderable):
         super().__init__(**kwargs)
 
     def _init_snowflake(self):
-        self.ilambda = Lambda(
+        self.ilambda: Lambda = Lambda(
             radius=self.lambda_radius,
             thickness=self.lambda_thickness,
             gap=self.lambda_gap,
         )
-        self.logomark = Logomark(
+        self.logomark: Logomark = Logomark(
             ilambda=self.ilambda,
             colors=self.logomark_colors,
             color_style=self.logomark_color_style,
@@ -88,7 +88,7 @@ class NixosLogo(BaseRenderable):
         return self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
 
     def _init_logotype(self):
-        self.logotype = Logotype(
+        self.logotype: Logotype = Logotype(
             characters=self.logotype_characters,
             loader=self.loader,
             color=self.logotype_color,
