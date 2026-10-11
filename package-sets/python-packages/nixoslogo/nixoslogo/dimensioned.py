@@ -22,7 +22,6 @@ class DimensionLineOptions(TypedDict):
 class DimensionAngleOptions(TypedDict):
     flip: bool
     large: bool
-    side: str
     ratio: float
     text: str
 
@@ -228,15 +227,15 @@ class DimensionedLambdaAngular(DimensionedLambda):
         lambda_points_no_gap = self.make_lambda_points()
         # fmt: off
         options: list[DimensionAngleOptions] = [
-            {"flip": True,  "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 1 / 2, "text": "A"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 3 / 8, "text": "B"},
-            {"flip": False, "large": False, "side": "right", "ratio": 1 / 2, "text": "A"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 1 / 2, "text": "B"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 1 / 2, "text": "B"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 1 / 2, "text": "B"},
-            {"flip": False, "large": False, "side": "left",  "ratio": 1 / 2, "text": "B"},
-            {"flip": True,  "large": False, "side": "left",  "ratio": 3 / 8, "text": "B"},
+            {"flip": True,  "large": False, "ratio": 1 / 2, "text": "A"},
+            {"flip": True,  "large": False, "ratio": 1 / 2, "text": "A"},
+            {"flip": True,  "large": False, "ratio": 3 / 8, "text": "B"},
+            {"flip": False, "large": False, "ratio": 1 / 2, "text": "A"},
+            {"flip": True,  "large": False, "ratio": 1 / 2, "text": "B"},
+            {"flip": True,  "large": False, "ratio": 1 / 2, "text": "B"},
+            {"flip": True,  "large": False, "ratio": 1 / 2, "text": "B"},
+            {"flip": False, "large": False, "ratio": 1 / 2, "text": "B"},
+            {"flip": True,  "large": False, "ratio": 3 / 8, "text": "B"},
         ]
         # fmt: on
 

@@ -422,7 +422,6 @@ class DimensionLines(LineGroup):
         reference: Point,
         flip: bool,
         large: bool,
-        side: str,
         ratio: float,
         text: str | None = None,
     ):
