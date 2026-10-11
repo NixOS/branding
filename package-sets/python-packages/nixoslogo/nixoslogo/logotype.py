@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 class FontLoader:
+    capHeight: int
+    scale: float
+
     def __init__(
         self,
         get_font_file: Callable[[], Path] = get_nixos_logotype_font_file,
@@ -36,11 +39,11 @@ class FontLoader:
     ):
         self.get_font_file = get_font_file
         self.transforms_map = transforms_map
-        self.capHeight = capHeight
         self.scale_glyph = scale_glyph
         self.offset_glyph = offset_glyph
 
         self._open_font_file()
+        self.capHeight, self.scale = self._ref_size(capHeight)
         self._setup_glyphs()
 
     def _open_font_file(self):
@@ -60,27 +63,25 @@ class FontLoader:
         atexit.register(self._cleanup_once)
 
     def _setup_glyphs(self):
-        self._set_ref_size()
-
         for character, transforms in self.transforms_map.items():
             if self.scale_glyph:
                 self._scale_glyph(character, transforms)
             if self.offset_glyph:
                 self._offset_glyph(character, transforms)
 
-    def _set_ref_size(self):
+    def _ref_size(self, capHeight: int | None) -> tuple[int, float]:
         """
         Conditionally update the font size.
 
         The glyphs can be scaled by updating the `em` attribute.
         `capHeight` goes to zero because we are flipping glyphs so that is stored off for later use.
         """
-        if self.capHeight is None:
-            self.scale = 1
-            self.capHeight = int(self.font.capHeight)
-        else:
-            self.scale = self.capHeight / self.font.capHeight
-            self.font.em = round(self.font.em * self.scale)
+        if capHeight is None:
+            return int(self.font.capHeight), 1
+
+        scale = capHeight / self.font.capHeight
+        self.font.em = round(self.font.em * scale)
+        return capHeight, scale
 
     def _scale_glyph(self, character, transforms):
         """Scale a glyph; primarily used for vertically flipping."""
@@ -147,21 +148,16 @@ class Glyph(BaseRenderable):
         **kwargs,
     ):
         self.character = character
-        self.loader = loader
+        self.loader: FontLoader = loader if loader is not None else FontLoader()
         self.color = color
         self.style = style
         self.clear_space = clear_space
 
-        self._init_loader()
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
 
         super().__init__(**kwargs)
-
-    def _init_loader(self):
-        if self.loader is None:
-            self.loader = FontLoader()
 
     def get_path(self, layer):
         path = []
@@ -289,25 +285,19 @@ class Logotype(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.loader = loader
         self.characters = characters
-        self.loader = loader
+        self.loader: FontLoader = loader if loader is not None else FontLoader()
         self.color = color
         self.style = style
         self.spacings = spacings
         self.clear_space = clear_space
 
-        self._init_loader()
         self._load_glyphs()
         self.cap_height = self.glyphs[0].loader.capHeight
         self.scale = self.glyphs[0].loader.scale
         self._set_spacings()
 
         super().__init__(**kwargs)
-
-    def _init_loader(self):
-        if self.loader is None:
-            self.loader = FontLoader()
 
     def _load_glyphs(self):
         self.glyphs = tuple(
