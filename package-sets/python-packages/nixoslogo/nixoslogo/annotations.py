@@ -3,13 +3,16 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NotRequired, TypedDict, override
 
 import svg
+from svg._types import Number
 
 from nixoslogo.core import (
     CHARACTER_GLYPHNAME_MAP,
     DEFAULT_JURA_TRANSFORMS,
     BaseRenderable,
+    flatten_svg_elements,
     get_nixos_annotation_font_file,
 )
 from nixoslogo.geometry import Point
@@ -27,25 +30,25 @@ class TextAnnotations(BaseRenderable):
         cap_height: float | None = None,
         **kwargs,
     ):
-        self.characters = characters
-        self.loader = loader
-        self.color = color
-        self.scale = scale
-        self.cap_height = cap_height
+        self.characters: str = characters
+        self.loader: FontLoader = loader
+        self.color: str = color
+        self.scale: float | None = scale
+        self.cap_height: float | None = cap_height
 
         self._load_glyphs()
-        self.original_cap_height = self.loader.capHeight
-        self.original_scale = self.loader.scale
+        self.original_cap_height: float = self.loader.capHeight
+        self.original_scale: float = self.loader.scale
         self._set_spacings()
         self._scale_glyphs()
 
         super().__init__(**kwargs)
 
-    def _map_characters(self, character):
+    def _map_characters(self, character: str) -> str:
         return CHARACTER_GLYPHNAME_MAP.get(character, character)
 
     def _load_glyphs(self):
-        self.glyphs = tuple(
+        self.glyphs: tuple[Glyph, ...] = tuple(
             Glyph(
                 loader=self.loader,
                 character=self._map_characters(character),
@@ -55,6 +58,7 @@ class TextAnnotations(BaseRenderable):
         )
 
     @property
+    @override
     def elements_bounding_box(self):
         characters_box = tuple(
             f(elem)
@@ -77,27 +81,31 @@ class TextAnnotations(BaseRenderable):
             x_offset += glyph.glyph.width
 
     def _scale_glyphs(self):
-        if self.scale is None and self.cap_height is None:
-            return
-
         if self.scale is not None and self.cap_height is not None:
             raise ValueError("Only one of scale or cap_height can be set.")
 
         if self.cap_height is not None:
-            self.scale = self.original_cap_height / self.cap_height
+            scale = self.original_cap_height / self.cap_height
+        elif self.scale is not None:
+            scale = self.scale
+            self.cap_height = self.original_cap_height / scale
         else:
-            self.cap_height = self.original_cap_height / self.scale
+            return
 
+        self.scale = scale
         for glyph in self.glyphs:
-            glyph.layer.transform((1 / self.scale, 0, 0, 1 / self.scale, 0, 0))
+            glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
 
+    @override
     def _get_clearspace(self):
         return 0
 
-    def make_svg_elements(self):
-        return tuple(elem.make_svg_element() for elem in self.glyphs)
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(*(elem.make_svg_element() for elem in self.glyphs))
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 self.characters.lower(),
@@ -108,12 +116,27 @@ class TextAnnotations(BaseRenderable):
         )
 
 
+class LineConfig(TypedDict):
+    name: str
+    stroke: str
+    stroke_width: int
+    stroke_dasharray: list[Number]
+    fill: NotRequired[str]
+
+
+class FontConfig(TypedDict):
+    scale: float | None
+    cap_height: float
+    color: str
+    stroke_dasharray: list[Number]
+
+
 @dataclass
 class LineGroup:
     name: str
     stroke: str
     stroke_width: int
-    stroke_dasharray: int
+    stroke_dasharray: list[Number]
     fill: str = "transparent"
 
 
@@ -131,25 +154,25 @@ class DimensionLines(LineGroup):
     def __init__(
         self,
         font_loader: FontLoader,
-        font_config: dict,
+        font_config: FontConfig,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.font_loader = font_loader
-        self.font_config = font_config
+        self.font_loader: FontLoader = font_loader
+        self.font_config: FontConfig = font_config
 
     def make_dimension_line(
         self,
-        point1,
-        point2,
-        flip=False,
-        side="left",
-        offset=1,
-        reference=1,
-        text=None,
-        text_offset=False,
-        fractional=True,
-        precision=3,
+        point1: Point,
+        point2: Point,
+        flip: bool = False,
+        side: str = "left",
+        offset: float = 1,
+        reference: float = 1,
+        text: str | None = None,
+        text_offset: bool = False,
+        fractional: bool = True,
+        precision: int = 3,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -172,12 +195,16 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(round(measured_line.length()), reference)
+                    label = fractions.Fraction(
+                        round(measured_line.length()), round(reference)
+                    )
                 else:
-                    text = round(measured_line.length() / reference, precision)
+                    label = round(measured_line.length() / reference, precision)
+            else:
+                label = text
 
             text_annotation = TextAnnotations(
-                characters=str(text),
+                characters=str(label),
                 loader=self.font_loader,
                 **self.font_config,
             )
@@ -261,16 +288,16 @@ class DimensionLines(LineGroup):
 
     def make_dimension_line_outer(
         self,
-        point1,
-        point2,
-        flip=False,
-        side="left",
-        offset=1,
-        reference=1,
-        text=None,
-        text_offset=False,
-        fractional=True,
-        precision=3,
+        point1: Point,
+        point2: Point,
+        flip: bool = False,
+        side: str = "left",
+        offset: float = 1,
+        reference: float = 1,
+        text: str | None = None,
+        text_offset: bool = False,
+        fractional: bool = True,
+        precision: int = 3,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -297,12 +324,16 @@ class DimensionLines(LineGroup):
         else:
             if text is None:
                 if fractional:
-                    text = fractions.Fraction(round(measured_line.length()), reference)
+                    label = fractions.Fraction(
+                        round(measured_line.length()), round(reference)
+                    )
                 else:
-                    text = round(measured_line.length() / reference, precision)
+                    label = round(measured_line.length() / reference, precision)
+            else:
+                label = text
 
             text_annotation = TextAnnotations(
-                characters=str(text),
+                characters=str(label),
                 loader=self.font_loader,
                 **self.font_config,
             )
@@ -386,14 +417,13 @@ class DimensionLines(LineGroup):
 
     def make_dimension_angle(
         self,
-        point1,
-        point2,
-        reference,
-        flip,
-        large,
-        side,
-        ratio,
-        text=None,
+        point1: Point,
+        point2: Point,
+        reference: Point,
+        flip: bool,
+        large: bool,
+        ratio: float,
+        text: str | None = None,
     ):
         if flip:
             point1, point2 = point2, point1
@@ -492,28 +522,30 @@ class DimensionLines(LineGroup):
 class Annotations:
     def __init__(
         self,
-        object_lines_config: dict,
-        construction_lines_config: dict,
-        dimension_lines_config: dict,
-        font_config: dict,
+        object_lines_config: LineConfig,
+        construction_lines_config: LineConfig,
+        dimension_lines_config: LineConfig,
+        font_config: FontConfig,
         get_font_file: Callable[[], Path] = get_nixos_annotation_font_file,
-        transforms_map: dict = DEFAULT_JURA_TRANSFORMS,
+        transforms_map: dict[str, dict[str, int]] = DEFAULT_JURA_TRANSFORMS,
     ):
-        self.font_loader = FontLoader(
+        self.font_loader: FontLoader = FontLoader(
             get_font_file=get_font_file,
             transforms_map=transforms_map,
             offset_glyph=False,
         )
-        self.font_config = font_config
-        self.object_lines = ObjectLines(**object_lines_config)
-        self.construction_lines = ConstructionLines(**construction_lines_config)
-        self.dimension_lines = DimensionLines(
+        self.font_config: FontConfig = font_config
+        self.object_lines: ObjectLines = ObjectLines(**object_lines_config)
+        self.construction_lines: ConstructionLines = ConstructionLines(
+            **construction_lines_config
+        )
+        self.dimension_lines: DimensionLines = DimensionLines(
             **dimension_lines_config,
             font_loader=self.font_loader,
             font_config=self.font_config,
         )
 
-    def make_annotation(self, text):
+    def make_annotation(self, text: str) -> TextAnnotations:
         return TextAnnotations(
             characters=str(text),
             loader=self.font_loader,
@@ -527,25 +559,25 @@ class Annotations:
                 "name": "object",
                 "stroke": "green",
                 "stroke_width": 4,
-                "stroke_dasharray": 4,
+                "stroke_dasharray": [4],
             },
             construction_lines_config={
                 "name": "construction",
                 "stroke": "blue",
                 "stroke_width": 2,
-                "stroke_dasharray": 4,
+                "stroke_dasharray": [4],
             },
             dimension_lines_config={
                 "name": "dimension",
                 "stroke": "red",
                 "stroke_width": 1,
-                "stroke_dasharray": 4,
+                "stroke_dasharray": [4],
             },
             font_config={
                 "scale": None,
                 "cap_height": 24,
                 "color": "black",
-                "stroke_dasharray": 4,
+                "stroke_dasharray": [4],
             },
         )
 
@@ -556,25 +588,25 @@ class Annotations:
                 "name": "object",
                 "stroke": "green",
                 "stroke_width": 8,
-                "stroke_dasharray": 8,
+                "stroke_dasharray": [8],
             },
             construction_lines_config={
                 "name": "construction",
                 "stroke": "blue",
                 "stroke_width": 4,
-                "stroke_dasharray": 8,
+                "stroke_dasharray": [8],
             },
             dimension_lines_config={
                 "name": "dimension",
                 "stroke": "red",
                 "stroke_width": 2,
-                "stroke_dasharray": 8,
+                "stroke_dasharray": [8],
             },
             font_config={
                 "scale": None,
                 "cap_height": 48,
                 "color": "black",
-                "stroke_dasharray": 8,
+                "stroke_dasharray": [8],
             },
         )
 
@@ -585,25 +617,25 @@ class Annotations:
                 "name": "object",
                 "stroke": "green",
                 "stroke_width": 16,
-                "stroke_dasharray": 16,
+                "stroke_dasharray": [16],
             },
             construction_lines_config={
                 "name": "construction",
                 "stroke": "blue",
                 "stroke_width": 8,
-                "stroke_dasharray": 16,
+                "stroke_dasharray": [16],
             },
             dimension_lines_config={
                 "name": "dimension",
                 "stroke": "red",
                 "stroke_width": 4,
-                "stroke_dasharray": 16,
+                "stroke_dasharray": [16],
             },
             font_config={
                 "scale": None,
                 "cap_height": 96,
                 "color": "black",
-                "stroke_dasharray": 16,
+                "stroke_dasharray": [16],
             },
         )
 

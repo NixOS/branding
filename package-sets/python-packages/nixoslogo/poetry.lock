@@ -12,9 +12,6 @@ files = [
     {file = "coloraide-6.1.tar.gz", hash = "sha256:cfd0c7c4801a4e070ed1106365ad72b5db207a0d7ab15b1936265def1918350d"},
 ]
 
-[package.dependencies]
-typing-extensions = {version = "*", markers = "python_version < \"3.11\""}
-
 [[package]]
 name = "jsonpickle"
 version = "4.1.1"
@@ -205,20 +202,7 @@ files = [
 [package.extras]
 dev = ["isort", "mypy", "pytest"]
 
-[[package]]
-name = "typing-extensions"
-version = "4.15.0"
-description = "Backported and Experimental Type Hints for Python 3.9+"
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-markers = "python_version < \"3.11\""
-files = [
-    {file = "typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"},
-    {file = "typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"},
-]
-
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.9"
-content-hash = "fc193b110f7e602b7eb744e6ef70b665cadb5d3f5995099ca956ea9d85876675"
+python-versions = ">=3.12"
+content-hash = "78043a0b8e093c703246fe998d22fb7fa3974c82cafa985ca51bd0af4fbcb0e8"

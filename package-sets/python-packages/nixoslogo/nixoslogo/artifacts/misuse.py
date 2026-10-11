@@ -1,8 +1,9 @@
 import logging
+from typing import override
 
 import svg
 
-from nixoslogo.core import ClearSpace, LogotypeStyle
+from nixoslogo.core import ClearSpace, LogotypeStyle, flatten_svg_elements
 from nixoslogo.layout import Canvas
 from nixoslogo.logging_config import setup_logging
 from nixoslogo.logo import NixosLogo
@@ -17,13 +18,14 @@ class LogomarkRotate(Logomark):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -35,6 +37,7 @@ class LogomarkRotate(Logomark):
         )
 
     @property
+    @override
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return (
             -self.inradius,
@@ -43,8 +46,9 @@ class LogomarkRotate(Logomark):
             self.circumradius,
         )
 
-    def make_svg_elements(self):
-        return (
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.G(
                 transform=[svg.Rotate(30)],
                 elements=super().make_svg_elements(),
@@ -58,13 +62,14 @@ class LogomarkMirror(Logomark):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -75,8 +80,9 @@ class LogomarkMirror(Logomark):
             + list(extras)
         )
 
-    def make_svg_elements(self):
-        return (
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.G(
                 transform=[svg.Scale(-1, 1)],
                 elements=super().make_svg_elements(),
@@ -90,13 +96,14 @@ class LogoCrop(NixosLogo):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -107,22 +114,22 @@ class LogoCrop(NixosLogo):
             + list(extras)
         )
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            min_x, min_y, max_x, max_y = self.elements_bounding_box
-            clear_space = self._get_clearspace()
+    @override
+    def _make_canvas(self) -> Canvas:
+        min_x, min_y, max_x, max_y = self.elements_bounding_box
+        clear_space = self._get_clearspace()
 
-            min_x += clear_space
-            min_y -= clear_space
-            max_x -= clear_space
-            max_y += clear_space
+        min_x += clear_space
+        min_y -= clear_space
+        max_x -= clear_space
+        max_y += clear_space
 
-            self.canvas = Canvas(
-                min_x=min_x,
-                min_y=min_y,
-                width=max_x - min_x,
-                height=max_y - min_y,
-            )
+        return Canvas(
+            min_x=min_x,
+            min_y=min_y,
+            width=max_x - min_x,
+            height=max_y - min_y,
+        )
 
 
 class LogoScale(NixosLogo):
@@ -131,13 +138,14 @@ class LogoScale(NixosLogo):
         clear_space: ClearSpace = ClearSpace.MINIMAL,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
@@ -148,9 +156,9 @@ class LogoScale(NixosLogo):
             + list(extras)
         )
 
-    def _init_cap_height(self):
-        if self.logotype_cap_height is None:
-            self.logotype_cap_height = self.lambda_radius
+    @override
+    def _default_cap_height(self) -> float:
+        return self.lambda_radius
 
 
 class LogoColorsWithLambdaPrime(NixosLogo):
@@ -160,14 +168,15 @@ class LogoColorsWithLambdaPrime(NixosLogo):
         logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME,
         **kwargs,
     ):
-        self.clear_space = clear_space
+        self.clear_space: ClearSpace = clear_space
         super().__init__(
             clear_space=clear_space,
             logotype_style=logotype_style,
             **kwargs,
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",

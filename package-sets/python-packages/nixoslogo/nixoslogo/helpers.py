@@ -1,15 +1,18 @@
 import hashlib
 import math
+from typing import cast
 
 import jsonpickle
 
-
-def stable_hash(thing):
-    dump = jsonpickle.encode(thing)
-    return hashlib.md5(dump.encode("utf-8")).digest().hex()
+from nixoslogo.geometry import Point
 
 
-def arc_sagitta(point1, point2, radius, large, sweep):
+def stable_hash(thing: object) -> str:
+    dump = cast(str, jsonpickle.encode(thing))
+    return hashlib.md5(dump.encode("utf-8")).hexdigest()
+
+
+def arc_sagitta(point1: Point, point2: Point, radius: float, large: bool, sweep: bool):
     chord_midpoint = ((point1 + point2) / 2).to_vector()
     chord = point2 - point1
     unit_chord = chord.normalize()

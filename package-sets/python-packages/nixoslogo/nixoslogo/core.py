@@ -1,9 +1,11 @@
 import os
 import string
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from enum import Enum, auto
 from functools import partial
 from pathlib import Path
+from typing import NotRequired, TypeAlias, TypedDict, cast
 
 import svg
 import tomllib
@@ -12,21 +14,43 @@ from lxml import etree
 from nixoslogo.colors import Color
 from nixoslogo.layout import Canvas
 
+# === Types ===
+
+
+class PaletteColor(TypedDict):
+    name: str
+    value: list[float]
+    tints: NotRequired[dict[str, list[float]]]
+
+
+SvgElements: TypeAlias = "svg.Element | Sequence[SvgElements]"
+
+
 # === Functions ===
 
 
-def get_path_from_envvar(envvar) -> Path:
+def flatten_svg_elements(*elements: SvgElements) -> list[svg.Element]:
+    flat: list[svg.Element] = []
+    for element in elements:
+        if isinstance(element, Sequence):
+            flat.extend(flatten_svg_elements(*element))
+        else:
+            flat.append(element)
+    return flat
+
+
+def get_path_from_envvar(envvar: str) -> Path:
     path = os.getenv(envvar)
     if not path:
-        raise EnvironmentError(
+        raise OSError(
             f"{envvar} is not set. "
-            "Please provide a font path explicitly or set the environment variable."
+            + "Please provide a font path explicitly or set the environment variable."
         )
     return Path(path)
 
 
-def get_color_by_name(palette, name):
-    return list(filter(lambda color: color["name"] == name, palette))[0]
+def get_color_by_name(palette: list[PaletteColor], name: str) -> PaletteColor:
+    return next(color for color in palette if color["name"] == name)
 
 
 get_nixos_logotype_font_file = partial(
@@ -87,12 +111,22 @@ DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING = (200,) + DEFAULT_LOGOTYPE_SPACINGS[1:]
 with open(get_nixos_color_palette_file(), "rb") as f:
     NIXOS_COLOR_PALETTE = tomllib.load(f)
 
-PALETTE_DEFAULT_COLORS = NIXOS_COLOR_PALETTE["logos"]["default"]
-PALETTE_RAINBOW_COLORS = NIXOS_COLOR_PALETTE["logos"]["rainbow"]
-PALETTE_TRANS_COLORS = NIXOS_COLOR_PALETTE["logos"]["trans"]
-PALETTE_PRIMARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["primary"]
-PALETTE_SECONDARY_COLORS = NIXOS_COLOR_PALETTE["palette"]["secondary"]
-PALETTE_ACCENT_COLORS = NIXOS_COLOR_PALETTE["palette"]["accent"]
+PALETTE_DEFAULT_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["default"]
+)
+PALETTE_RAINBOW_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["rainbow"]
+)
+PALETTE_TRANS_COLORS = cast(list[PaletteColor], NIXOS_COLOR_PALETTE["logos"]["trans"])
+PALETTE_PRIMARY_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["primary"]
+)
+PALETTE_SECONDARY_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["secondary"]
+)
+PALETTE_ACCENT_COLORS = cast(
+    list[PaletteColor], NIXOS_COLOR_PALETTE["palette"]["accent"]
+)
 
 NIXOS_DARK_BLUE = Color(
     "oklch",
@@ -103,17 +137,9 @@ NIXOS_LIGHT_BLUE = Color(
     get_color_by_name(PALETTE_DEFAULT_COLORS, "NixOS Light Blue")["value"],
 )
 RAINBOW_COLORS = tuple(
-    map(
-        lambda color: Color("oklch", color["value"]),
-        PALETTE_RAINBOW_COLORS,
-    )
+    Color("oklch", color["value"]) for color in PALETTE_RAINBOW_COLORS
 )
-TRANS_COLORS = tuple(
-    map(
-        lambda color: Color("oklch", color["value"]),
-        PALETTE_TRANS_COLORS,
-    )
-)
+TRANS_COLORS = tuple(Color("oklch", color["value"]) for color in PALETTE_TRANS_COLORS)
 
 NIXOS_BLACK = Color(
     "oklch",
@@ -166,11 +192,10 @@ class BaseRenderable(ABC):
         self,
         canvas: Canvas | None = None,
         background_color: str | None = None,
-        **kwargs,
+        **kwargs: object,
     ):
-        self.canvas = canvas
-        self.background_color = background_color
-        self._init_canvas()
+        self.background_color: str | None = background_color
+        self.canvas: Canvas = canvas if canvas is not None else self._make_canvas()
 
     @property
     @abstractmethod
@@ -180,27 +205,26 @@ class BaseRenderable(ABC):
     def _get_clearspace(self) -> float: ...
 
     @abstractmethod
-    def make_svg_elements(self): ...
+    def make_svg_elements(self) -> list[svg.Element]: ...
 
     @abstractmethod
-    def make_filename(self, extras: tuple[str]) -> str: ...
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str: ...
 
-    def _init_canvas(self):
-        if self.canvas is None:
-            min_x, min_y, max_x, max_y = self.elements_bounding_box
-            clear_space = self._get_clearspace()
+    def _make_canvas(self) -> Canvas:
+        min_x, min_y, max_x, max_y = self.elements_bounding_box
+        clear_space = self._get_clearspace()
 
-            min_x -= clear_space
-            min_y -= clear_space
-            max_x += clear_space
-            max_y += clear_space
+        min_x -= clear_space
+        min_y -= clear_space
+        max_x += clear_space
+        max_y += clear_space
 
-            self.canvas = Canvas(
-                min_x=min_x,
-                min_y=min_y,
-                width=max_x - min_x,
-                height=max_y - min_y,
-            )
+        return Canvas(
+            min_x=min_x,
+            min_y=min_y,
+            width=max_x - min_x,
+            height=max_y - min_y,
+        )
 
     @property
     def canvas_bounding_box(self):
@@ -211,11 +235,13 @@ class BaseRenderable(ABC):
             self.canvas.min_y + self.canvas.height,
         )
 
-    def make_svg_background(self):
+    def make_svg_background(self) -> list[svg.Element]:
         return (
-            ()
+            []
             if self.background_color is None
-            else self.canvas.make_svg_background(fill=self.background_color)
+            else flatten_svg_elements(
+                self.canvas.make_svg_background(fill=self.background_color)
+            )
         )
 
     def make_svg(self):
@@ -224,7 +250,7 @@ class BaseRenderable(ABC):
             elements=self.make_svg_background() + self.make_svg_elements(),
         )
 
-    def write_svg(self, filename=None):
+    def write_svg(self, filename: str | None = None):
         if filename is None:
             filename = self.make_filename()
         filename = filename.replace("/", "_")

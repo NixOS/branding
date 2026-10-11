@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logomark-dimensioned-linear";
-  outputHash = "sha256-bYyyE4c7UX2yQtbu1PBSfvPSo9CGMXMSgvCrbIVhAn0=";
+  outputHash = "sha256-UUPDC28b71PoXXmNpBVwDzP76Qna8DZoXoHFcm0zAV4=";
   script = ./script.py;
 }

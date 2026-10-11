@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-logomark-clearspace";
-  outputHash = "sha256-f2LSFFGeJlkrhFHNN/2drhQr7mzlQ9VMBaXPk89P3p8=";
+  outputHash = "sha256-E4LIpv5fNcSQfD4GXoy3xfaUAm126kM0yV3XxqZM/O4=";
   script = ./script.py;
 }

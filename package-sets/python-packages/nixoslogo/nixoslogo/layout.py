@@ -5,10 +5,10 @@ import svg
 
 @dataclass(kw_only=True)
 class Canvas:
-    min_x: int
-    min_y: int
-    width: int
-    height: int
+    min_x: float
+    min_y: float
+    width: float
+    height: float
 
     @property
     def max_y(self):
@@ -30,7 +30,7 @@ class Canvas:
             height=self.height,
         )
 
-    def make_svg_background(self, fill="#8888ee"):
+    def make_svg_background(self, fill: str = "#8888ee"):
         return (
             svg.Rect(
                 x=self.min_x,

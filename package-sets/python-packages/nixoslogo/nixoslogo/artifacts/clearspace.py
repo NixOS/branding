@@ -1,12 +1,13 @@
 import logging
+from typing import override
 
 import svg
 
 from nixoslogo.annotations import Annotations
-from nixoslogo.core import BaseRenderable, ClearSpace
+from nixoslogo.core import BaseRenderable, ClearSpace, flatten_svg_elements
 from nixoslogo.logging_config import setup_logging
-from nixoslogo.logo import Lambda, NixosLogo
-from nixoslogo.logomark import Logomark
+from nixoslogo.logo import NixosLogo
+from nixoslogo.logomark import Lambda, Logomark
 from nixoslogo.logotype import Glyph, Logotype
 
 logger = logging.getLogger(__name__)
@@ -15,29 +16,32 @@ logger = logging.getLogger(__name__)
 class LogoClearspace(BaseRenderable):
     def __init__(
         self,
-        logo: BaseRenderable,
+        logo: type[BaseRenderable],
         logo_name: str,
         space_object: BaseRenderable,
         annotations: Annotations,
         **kwargs,
     ):
-        self.logo = logo
-        self.logo_name = logo_name
-        self.space_object = space_object
-        self.annotations = annotations
+        self.logo: type[BaseRenderable] = logo
+        self.logo_name: str = logo_name
+        self.space_object: BaseRenderable = space_object
+        self.annotations: Annotations = annotations
 
-        self.recommended = self.logo(clear_space=ClearSpace.RECOMMENDED)
-        self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)
+        self.recommended: BaseRenderable = self.logo(clear_space=ClearSpace.RECOMMENDED)
+        self.minimal: BaseRenderable = self.logo(clear_space=ClearSpace.MINIMAL)
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return self.recommended.elements_bounding_box
 
+    @override
     def _get_clearspace(self) -> float:
         return self.recommended._get_clearspace()
 
-    def make_filename(self, extras: tuple[str] = ()) -> str:
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -47,8 +51,9 @@ class LogoClearspace(BaseRenderable):
             + list(extras)
         )
 
-    def make_svg_elements(self):
-        return (
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             self.make_greyscale_def(),
             self.make_grid_lines(),
             self.make_clearspace_lines(),
@@ -59,30 +64,30 @@ class LogoClearspace(BaseRenderable):
     def make_greyscale_def(self):
         return (
             svg.Defs(
-                elements=(
+                elements=[
                     svg.Filter(
                         id="greyscale-50",
-                        elements=(
+                        elements=[
                             svg.FeColorMatrix(
                                 type="matrix",
                                 values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0",
                             ),
-                        ),
+                        ],
                     ),
-                ),
+                ],
             ),
         )
 
     def make_space_object_elements(self):
-        transforms = [
-            (
+        transforms: list[list[svg.Transform]] = [
+            [
                 svg.Rotate(90 * index),
                 svg.Translate(
                     -self.space_object.elements_x_min,
                     -self.space_object.elements_y_max,
                 ),
-                translation,
-            )
+                *translation,
+            ]
             for index, translation in enumerate(
                 (
                     (
@@ -120,7 +125,9 @@ class LogoClearspace(BaseRenderable):
             for transform in transforms
         )
 
-    def make_space_object_element(self, space, transform=None):
+    def make_space_object_element(
+        self, space: BaseRenderable, transform: list[svg.Transform] | None = None
+    ):
         return svg.G(
             elements=(space.make_svg_elements()),
             filter="url(#greyscale-50)",
@@ -192,25 +199,25 @@ class LogoClearspace(BaseRenderable):
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
             svg.G(
-                transform=(
+                transform=[
                     svg.Translate(
                         self.recommended.canvas.min_x
                         + recommended_annotation.elements_height * 0.5,
                         self.recommended.canvas.min_y
                         + recommended_annotation.elements_height * 1.5,
                     ),
-                ),
+                ],
                 elements=recommended_annotation.make_svg_elements(),
             ),
             svg.G(
-                transform=(
+                transform=[
                     svg.Translate(
                         self.minimal.canvas.min_x
                         + minimal_annotation.elements_height * 0.5,
                         self.minimal.canvas.min_y
                         + minimal_annotation.elements_height * 1.5,
                     ),
-                ),
+                ],
                 elements=minimal_annotation.make_svg_elements(),
             ),
         )

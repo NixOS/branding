@@ -1,9 +1,10 @@
 import fractions
 import itertools
 import math
+from typing import TypedDict, override
 
 import svg
-from svg._types import Number
+from svg._types import Length
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
@@ -11,8 +12,16 @@ from nixoslogo.core import (
     ClearSpace,
     ColorStyle,
     LogomarkColors,
+    flatten_svg_elements,
 )
 from nixoslogo.geometry import Point, Points, Vector, cosd, sind
+
+
+class GradientEndPoints(TypedDict):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
 
 
 class Lambda(BaseRenderable):
@@ -25,14 +34,15 @@ class Lambda(BaseRenderable):
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
         **kwargs,
     ):
-        self.radius = radius
-        self.thickness = thickness
-        self.gap = gap
-        self.color = color
-        self.clear_space = clear_space
+        self.radius: int = radius
+        self.thickness: float = thickness
+        self.gap: float = gap
+        self.color: str = color
+        self.clear_space: ClearSpace = clear_space
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self):
         double_up = [
             (
@@ -50,6 +60,7 @@ class Lambda(BaseRenderable):
             )
         )
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -58,18 +69,17 @@ class Lambda(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
-            case _:
-                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
-    def make_svg_elements(self):
-        return (
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
+        return flatten_svg_elements(
             svg.Polygon(
                 points=self.make_lambda_points().to_list(),
                 fill=self.color,
             ),
         )
 
-    def make_hexagon_points(self, radius: Number) -> Points:
+    def make_hexagon_points(self, radius: float) -> Points:
         angles = [math.radians(angle) for angle in range(0, 360, 60)]
         return Points(
             [
@@ -85,9 +95,9 @@ class Lambda(BaseRenderable):
 
     def make_lambda_points(
         self,
-        radius: Number | None = None,
-        thickness: Number | None = None,
-        gap: Number | None = None,
+        radius: float | None = None,
+        thickness: float | None = None,
+        gap: float | None = None,
     ) -> Points:
         radius = radius if radius is not None else self.radius
         thickness = thickness if thickness is not None else self.thickness
@@ -122,9 +132,9 @@ class Lambda(BaseRenderable):
 
     def make_named_lambda_points(
         self,
-        radius: Number | None = None,
-        thickness: Number | None = None,
-        gap: Number | None = None,
+        radius: float | None = None,
+        thickness: float | None = None,
+        gap: float | None = None,
     ) -> dict[str, Point]:
         radius = radius if radius is not None else self.radius
         thickness = thickness if thickness is not None else self.thickness
@@ -149,7 +159,8 @@ class Lambda(BaseRenderable):
         )
         return {name: point for name, point in zip(names, points)}
 
-    def make_filename(self, colors="default", extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 "nixos",
@@ -169,22 +180,27 @@ class Logomark(BaseRenderable):
         ilambda: Lambda = Lambda(),
         color_style: ColorStyle = ColorStyle.GRADIENT,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
+        colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
         **kwargs,
     ):
         self.ilambda = ilambda
-        self.colors_name = getattr(colors, "name", "custom")
-        self.colors_value = getattr(colors, "value", colors)
-        self.color_style = color_style
-        self.clear_space = clear_space
+        self.colors_name: str = (
+            colors.name if isinstance(colors, LogomarkColors) else "custom"
+        )
+        self.colors_value: tuple[Color, ...] = (
+            colors.value if isinstance(colors, LogomarkColors) else colors
+        )
+        self.color_style: ColorStyle = color_style
+        self.clear_space: ClearSpace = clear_space
 
-        self._make_css_color_names()
+        self.css_color_names: tuple[str, ...] = self._make_css_color_names()
 
-        self._gradient_stop_offsets = [0, 25, 100]
+        self._gradient_stop_offsets: list[int] = [0, 25, 100]
 
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self):
         return (
             -self.circumradius,
@@ -208,6 +224,7 @@ class Logomark(BaseRenderable):
         """The ratio between the snowflake and lambda radius."""
         return self.circumradius / self.ilambda.radius
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -216,34 +233,27 @@ class Logomark(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
-            case _:
-                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
-    def _make_css_color_names(self):
+    def _make_css_color_names(self) -> tuple[str, ...]:
         match self.color_style:
             case ColorStyle.FLAT:
-                self.css_color_names = tuple(
+                return tuple(
                     color.convert("srgb").to_string(hex=True)
                     for color in self.colors_value
                 )
             case ColorStyle.GRADIENT:
-                self.css_color_names = tuple(
-                    color.gradient_color_name() for color in self.colors_value
-                )
-            case _:
-                raise Exception(f"Unknown ColorStyle: {self.color_style}")
+                return tuple(color.gradient_color_name() for color in self.colors_value)
 
-    def make_svg_elements(self):
+    @override
+    def make_svg_elements(self) -> list[svg.Element]:
         match self.color_style:
             case ColorStyle.FLAT:
-                return self.make_clean_flake_polygons_flat()
+                return flatten_svg_elements(self.make_clean_flake_polygons_flat())
             case ColorStyle.GRADIENT:
-                return (
+                return flatten_svg_elements(
                     self.make_flake_gradients_defs(),
                     self.make_clean_flake_polygons_gradient(),
                 )
-            case _:
-                raise Exception(f"Unknown ColorStyle: {self.color_style}")
 
     def make_flake_points(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
@@ -273,7 +283,7 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_gradient_end_points(self):
+    def make_gradient_end_points(self) -> GradientEndPoints:
         lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
         stop_point = lambda_points_no_gap[
             "joint_crotch"
@@ -288,7 +298,7 @@ class Logomark(BaseRenderable):
     def make_flake_gradients_defs(self):
         gradient_end_points = self.make_gradient_end_points()
 
-        linear_gradients = []
+        linear_gradients: list[svg.Element] = []
         for color, color_name in zip(self.colors_value, self.css_color_names):
             color_original = color.convert("srgb").to_string(hex=True)
             color_midpoint = color.darken(1).convert("srgb").to_string(hex=True)
@@ -301,15 +311,15 @@ class Logomark(BaseRenderable):
                     **gradient_end_points,
                     elements=[
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[0]}%",
+                            offset=Length(self._gradient_stop_offsets[0], "%"),
                             stop_color=color_dark,
                         ),
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[1]}%",
+                            offset=Length(self._gradient_stop_offsets[1], "%"),
                             stop_color=color_midpoint,
                         ),
                         svg.Stop(
-                            offset=f"{self._gradient_stop_offsets[2]}%",
+                            offset=Length(self._gradient_stop_offsets[2], "%"),
                             stop_color=color_original,
                         ),
                     ],
@@ -340,7 +350,8 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_filename(self, extras: tuple[str] = ()):
+    @override
+    def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
                 "nixos",
