@@ -42,7 +42,7 @@ def flatten_svg_elements(*elements: SvgElements) -> list[svg.Element]:
 def get_path_from_envvar(envvar: str) -> Path:
     path = os.getenv(envvar)
     if not path:
-        raise EnvironmentError(
+        raise OSError(
             f"{envvar} is not set. "
             + "Please provide a font path explicitly or set the environment variable."
         )
@@ -50,7 +50,7 @@ def get_path_from_envvar(envvar: str) -> Path:
 
 
 def get_color_by_name(palette: list[PaletteColor], name: str) -> PaletteColor:
-    return list(filter(lambda color: color["name"] == name, palette))[0]
+    return next(color for color in palette if color["name"] == name)
 
 
 get_nixos_logotype_font_file = partial(
@@ -137,17 +137,9 @@ NIXOS_LIGHT_BLUE = Color(
     get_color_by_name(PALETTE_DEFAULT_COLORS, "NixOS Light Blue")["value"],
 )
 RAINBOW_COLORS = tuple(
-    map(
-        lambda color: Color("oklch", color["value"]),
-        PALETTE_RAINBOW_COLORS,
-    )
+    Color("oklch", color["value"]) for color in PALETTE_RAINBOW_COLORS
 )
-TRANS_COLORS = tuple(
-    map(
-        lambda color: Color("oklch", color["value"]),
-        PALETTE_TRANS_COLORS,
-    )
-)
+TRANS_COLORS = tuple(Color("oklch", color["value"]) for color in PALETTE_TRANS_COLORS)
 
 NIXOS_BLACK = Color(
     "oklch",

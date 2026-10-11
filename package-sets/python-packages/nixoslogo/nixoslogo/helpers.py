@@ -9,7 +9,7 @@ from nixoslogo.geometry import Point
 
 def stable_hash(thing: object) -> str:
     dump = cast(str, jsonpickle.encode(thing))
-    return hashlib.md5(dump.encode("utf-8")).digest().hex()
+    return hashlib.md5(dump.encode("utf-8")).hexdigest()
 
 
 def arc_sagitta(point1: Point, point2: Point, radius: float, large: bool, sweep: bool):

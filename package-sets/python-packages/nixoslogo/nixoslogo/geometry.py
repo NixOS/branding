@@ -198,7 +198,7 @@ class Vector(Sequence[float]):
         return math.sqrt(self._modulus_squared())
 
     def dot(self, other: "Vector") -> float:
-        return sum((self * other))
+        return sum(self * other)
 
     def normalize(self) -> "Vector":
         return self / self.length()
