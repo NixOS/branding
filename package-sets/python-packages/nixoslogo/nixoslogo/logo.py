@@ -149,7 +149,7 @@ class NixosLogo(BaseRenderable):
             ),
         )
 
-    def make_filename(self, colors="default", extras: tuple[str, ...] = ()):
+    def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
                 self.logotype_characters.lower(),
