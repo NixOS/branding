@@ -3,7 +3,7 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NotRequired, TypedDict
+from typing import NotRequired, TypedDict, override
 
 import svg
 from svg._types import Number
@@ -58,6 +58,7 @@ class TextAnnotations(BaseRenderable):
         )
 
     @property
+    @override
     def elements_bounding_box(self):
         characters_box = tuple(
             f(elem)
@@ -95,12 +96,15 @@ class TextAnnotations(BaseRenderable):
         for glyph in self.glyphs:
             glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
 
+    @override
     def _get_clearspace(self):
         return 0
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(*(elem.make_svg_element() for elem in self.glyphs))
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [

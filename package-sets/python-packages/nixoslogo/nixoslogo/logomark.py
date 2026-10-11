@@ -4,7 +4,7 @@ import math
 
 import svg
 from svg._types import Length
-from typing import TypedDict
+from typing import TypedDict, override
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
@@ -42,6 +42,7 @@ class Lambda(BaseRenderable):
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self):
         double_up = [
             (
@@ -59,6 +60,7 @@ class Lambda(BaseRenderable):
             )
         )
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -70,6 +72,7 @@ class Lambda(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             svg.Polygon(
@@ -158,6 +161,7 @@ class Lambda(BaseRenderable):
         )
         return {name: point for name, point in zip(names, points)}
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -198,6 +202,7 @@ class Logomark(BaseRenderable):
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self):
         return (
             -self.circumradius,
@@ -221,6 +226,7 @@ class Logomark(BaseRenderable):
         """The ratio between the snowflake and lambda radius."""
         return self.circumradius / self.ilambda.radius
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -244,6 +250,7 @@ class Logomark(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ColorStyle: {self.color_style}")
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         match self.color_style:
             case ColorStyle.FLAT:
@@ -351,6 +358,7 @@ class Logomark(BaseRenderable):
             )
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [

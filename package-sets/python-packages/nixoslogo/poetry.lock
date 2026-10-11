@@ -204,5 +204,5 @@ dev = ["isort", "mypy", "pytest"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.11"
-content-hash = "037f3927469b35b609cb381684e8d4bcb62c6ccd3c0769afc013155676f1574a"
+python-versions = ">=3.12"
+content-hash = "78043a0b8e093c703246fe998d22fb7fa3974c82cafa985ca51bd0af4fbcb0e8"

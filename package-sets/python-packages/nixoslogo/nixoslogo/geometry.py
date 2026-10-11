@@ -1,6 +1,6 @@
 import math
 from collections.abc import Sequence
-from typing import overload
+from typing import overload, override
 
 from svg._types import Number
 
@@ -24,15 +24,19 @@ class Point(Sequence[float]):
     @overload
     def __getitem__(self, index: slice) -> Sequence[float]: ...
 
+    @override
     def __getitem__(self, index: int | slice) -> "float | Sequence[float]":
         return self.value[index]
 
+    @override
     def __len__(self):
         return len(self.value)
 
+    @override
     def __str__(self):
         return f"{self.x, self.y}"
 
+    @override
     def __repr__(self):
         return f"Point{self.value}"
 
@@ -114,15 +118,19 @@ class Points(Sequence[Point]):
     @overload
     def __getitem__(self, index: slice) -> Sequence[Point]: ...
 
+    @override
     def __getitem__(self, index: int | slice) -> "Point | Sequence[Point]":
         return self.value[index]
 
+    @override
     def __len__(self):
         return len(self.value)
 
+    @override
     def __repr__(self):
         return f"Points{self.value}"
 
+    @override
     def __str__(self):
         return "[" + ", ".join(str(elem) for elem in self.value) + "]"
 
@@ -143,15 +151,19 @@ class Vector(Sequence[float]):
     @overload
     def __getitem__(self, index: slice) -> Sequence[float]: ...
 
+    @override
     def __getitem__(self, index: int | slice) -> "float | Sequence[float]":
         return self.value[index]
 
+    @override
     def __len__(self):
         return len(self.value)
 
+    @override
     def __repr__(self):
         return f"Vector{self.value}"
 
+    @override
     def __str__(self):
         return f"{self.value}"
 
@@ -212,12 +224,15 @@ class Matrix(Sequence[Vector]):
     @overload
     def __getitem__(self, index: slice) -> Sequence[Vector]: ...
 
+    @override
     def __getitem__(self, index: int | slice) -> "Vector | Sequence[Vector]":
         return self.value[index]
 
+    @override
     def __len__(self):
         return len(self.value) * len(self.value[0])
 
+    @override
     def __str__(self):
         return "(" + ",\n ".join(str(elem) for elem in self.value) + ")"
 

@@ -1,3 +1,4 @@
+from typing import override
 import math
 
 import svg
@@ -112,6 +113,7 @@ class NixosLogo(BaseRenderable):
                 raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
 
     @property
+    @override
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         logomark_box = self.logomark.elements_bounding_box
         logotype_box = self.logotype.elements_bounding_box
@@ -130,6 +132,7 @@ class NixosLogo(BaseRenderable):
         )
         return (min_x, min_y, max_x, max_y)
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -141,6 +144,7 @@ class NixosLogo(BaseRenderable):
             case _:
                 raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.logomark.make_svg_elements(),
@@ -150,6 +154,7 @@ class NixosLogo(BaseRenderable):
             ),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [

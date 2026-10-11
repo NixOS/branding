@@ -1,3 +1,4 @@
+from typing import override
 import logging
 
 import svg
@@ -31,12 +32,15 @@ class LogoClearspace(BaseRenderable):
         super().__init__(**kwargs)
 
     @property
+    @override
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return self.recommended.elements_bounding_box
 
+    @override
     def _get_clearspace(self) -> float:
         return self.recommended._get_clearspace()
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -47,6 +51,7 @@ class LogoClearspace(BaseRenderable):
             + list(extras)
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.make_greyscale_def(),

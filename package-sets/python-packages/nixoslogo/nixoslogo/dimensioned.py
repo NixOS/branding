@@ -1,6 +1,6 @@
 import math
 from collections.abc import Callable
-from typing import TypedDict
+from typing import TypedDict, override
 
 import svg
 
@@ -38,6 +38,7 @@ class DimensionedLambda(Lambda):
         self.annotations: Annotations = annotations
         self.clear_space: ClearSpace = clear_space
 
+    @override
     def _make_canvas(self) -> Canvas:
         return Canvas(
             min_x=-2 * self.radius,
@@ -114,6 +115,7 @@ class DimensionedLambda(Lambda):
             ),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -198,6 +200,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
             for index, opts in enumerate(options)
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
@@ -209,6 +212,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
             self.make_lambda_linear_dimensions(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -246,6 +250,7 @@ class DimensionedLambdaAngular(DimensionedLambda):
             for index, opts in enumerate(options)
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
@@ -255,6 +260,7 @@ class DimensionedLambdaAngular(DimensionedLambda):
             self.make_lambda_angular_dimensions(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -354,6 +360,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
             for point, annotation, translation in named_annotations.values()
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
@@ -365,6 +372,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
             self.make_named_lambda_vertices(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -446,6 +454,7 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
 
         return radius + thickness + gap
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
@@ -457,6 +466,7 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
             self.make_parametric_annotations(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -480,6 +490,7 @@ class DimensionedLogomark(Logomark):
         super().__init__(ilambda=ilambda, **kwargs)
         self.annotations: Annotations = annotations
 
+    @override
     def _make_canvas(self) -> Canvas:
         return Canvas(
             min_x=-4 * self.ilambda.radius,
@@ -561,6 +572,7 @@ class DimensionedLogomark(Logomark):
             for lambda_points in flake_points
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.make_flake_polygons_for_dimensions(),
@@ -571,6 +583,7 @@ class DimensionedLogomark(Logomark):
             self.make_flake_linear_dimensions(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -595,6 +608,7 @@ class DimensionedLogomarkGradient(Logomark):
         super().__init__(ilambda=ilambda, **kwargs)
         self.annotations: Annotations = annotations
 
+    @override
     def _make_canvas(self) -> Canvas:
         return Canvas(
             min_x=-2 * self.ilambda.radius,
@@ -651,6 +665,7 @@ class DimensionedLogomarkGradient(Logomark):
             ]
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
@@ -660,6 +675,7 @@ class DimensionedLogomarkGradient(Logomark):
             self.make_dimensioned_gradient_lines(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -709,12 +725,14 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
             ),
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             super().make_svg_elements(),
             self.make_gradient_annotations(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -726,6 +744,7 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
 
 
 class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.make_flake_gradients_defs(),
@@ -733,6 +752,7 @@ class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
             super().make_svg_elements(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -826,6 +846,7 @@ class DimensionedLogotype(Logotype):
             for (point1, point2), offset, side in zip(points, offsets, sides)
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.svg_bounding_box(),
@@ -834,6 +855,7 @@ class DimensionedLogotype(Logotype):
             super().make_svg_elements(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [
@@ -894,6 +916,7 @@ class DimensionedLogo(NixosLogo):
             ),
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.dimension_cap_height(),
@@ -901,6 +924,7 @@ class DimensionedLogo(NixosLogo):
             super().make_svg_elements(),
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
             [

@@ -1,3 +1,4 @@
+from typing import override
 import atexit
 import logging
 import shutil
@@ -213,9 +214,11 @@ class Glyph(BaseRenderable):
         return path
 
     @property
+    @override
     def elements_bounding_box(self):
         return self.layer.boundingBox()
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -256,9 +259,11 @@ class Glyph(BaseRenderable):
             case _:
                 raise Exception("Unknown LogotypeStyle")
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(self.make_svg_element())
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
@@ -316,6 +321,7 @@ class Logotype(BaseRenderable):
             character.layer.transform((1, 0, 0, 1, x_offset, 0))
             x_offset += character.elements_width
 
+    @override
     def _get_clearspace(self):
         match self.clear_space:
             case ClearSpace.NONE:
@@ -328,6 +334,7 @@ class Logotype(BaseRenderable):
                 raise Exception("Unknown ClearSpace")
 
     @property
+    @override
     def elements_bounding_box(self):
         characters_box = tuple(
             f(elem)
@@ -339,9 +346,11 @@ class Logotype(BaseRenderable):
         with_lead_spacing = (characters_box[0] - self.spacings[0],) + characters_box[1:]
         return with_lead_spacing
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(*(elem.make_svg_element() for elem in self.glyphs))
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [

@@ -1,3 +1,4 @@
+from typing import override
 import logging
 
 import svg
@@ -23,6 +24,7 @@ class LogomarkRotate(Logomark):
             **kwargs,
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
@@ -35,6 +37,7 @@ class LogomarkRotate(Logomark):
         )
 
     @property
+    @override
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return (
             -self.inradius,
@@ -43,6 +46,7 @@ class LogomarkRotate(Logomark):
             self.circumradius,
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             svg.G(
@@ -64,6 +68,7 @@ class LogomarkMirror(Logomark):
             **kwargs,
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
@@ -75,6 +80,7 @@ class LogomarkMirror(Logomark):
             + list(extras)
         )
 
+    @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             svg.G(
@@ -96,6 +102,7 @@ class LogoCrop(NixosLogo):
             **kwargs,
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
@@ -107,6 +114,7 @@ class LogoCrop(NixosLogo):
             + list(extras)
         )
 
+    @override
     def _make_canvas(self) -> Canvas:
         min_x, min_y, max_x, max_y = self.elements_bounding_box
         clear_space = self._get_clearspace()
@@ -136,6 +144,7 @@ class LogoScale(NixosLogo):
             **kwargs,
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
@@ -147,6 +156,7 @@ class LogoScale(NixosLogo):
             + list(extras)
         )
 
+    @override
     def _default_cap_height(self) -> float:
         return self.lambda_radius
 
@@ -165,6 +175,7 @@ class LogoColorsWithLambdaPrime(NixosLogo):
             **kwargs,
         )
 
+    @override
     def make_filename(self, extras: tuple[str, ...] = ()):
         return "-".join(
             [
