@@ -109,8 +109,6 @@ class NixosLogo(BaseRenderable):
                     -self.logotype.elements_width / 2,
                     self.logomark.inradius + self.logotype_cap_height * 1.25,
                 )
-            case _:
-                raise Exception(f"Unknown LogoLayout: {self.logo_layout}")
 
     @property
     @override
@@ -141,8 +139,6 @@ class NixosLogo(BaseRenderable):
                 return self.logomark.elements_height / 2
             case ClearSpace.RECOMMENDED:
                 return self.logomark.elements_height
-            case _:
-                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:

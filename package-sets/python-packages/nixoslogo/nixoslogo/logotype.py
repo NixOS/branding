@@ -227,8 +227,6 @@ class Glyph(BaseRenderable):
                 return self.loader.capHeight / 2
             case ClearSpace.RECOMMENDED:
                 return self.loader.capHeight
-            case _:
-                raise Exception("Unknown ClearSpace")
 
     def make_svg_element(self):
         match self.style:
@@ -256,8 +254,6 @@ class Glyph(BaseRenderable):
                         d=self.get_path(self.layer),
                         fill=self.color,
                     )
-            case _:
-                raise Exception("Unknown LogotypeStyle")
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -330,8 +326,6 @@ class Logotype(BaseRenderable):
                 return self.cap_height / 2
             case ClearSpace.RECOMMENDED:
                 return self.cap_height
-            case _:
-                raise Exception("Unknown ClearSpace")
 
     @property
     @override

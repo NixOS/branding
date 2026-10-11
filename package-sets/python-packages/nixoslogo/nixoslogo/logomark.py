@@ -69,8 +69,6 @@ class Lambda(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
-            case _:
-                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -235,8 +233,6 @@ class Logomark(BaseRenderable):
                 return self.elements_y_max / 2
             case ClearSpace.RECOMMENDED:
                 return self.elements_y_max
-            case _:
-                raise Exception(f"Unknown ClearSpace: {self.clear_space}")
 
     def _make_css_color_names(self) -> tuple[str, ...]:
         match self.color_style:
@@ -247,8 +243,6 @@ class Logomark(BaseRenderable):
                 )
             case ColorStyle.GRADIENT:
                 return tuple(color.gradient_color_name() for color in self.colors_value)
-            case _:
-                raise Exception(f"Unknown ColorStyle: {self.color_style}")
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -260,8 +254,6 @@ class Logomark(BaseRenderable):
                     self.make_flake_gradients_defs(),
                     self.make_clean_flake_polygons_gradient(),
                 )
-            case _:
-                raise Exception(f"Unknown ColorStyle: {self.color_style}")
 
     def make_flake_points(self):
         lambda_points_gap = self.ilambda.make_lambda_points()
