@@ -2,17 +2,19 @@ import math
 from collections.abc import Sequence
 from typing import overload
 
+from svg._types import Number
 
-def cosd(angle) -> float:
+
+def cosd(angle: float) -> float:
     return math.cos(math.radians(angle))
 
 
-def sind(angle) -> float:
+def sind(angle: float) -> float:
     return math.sin(math.radians(angle))
 
 
 class Point(Sequence[float]):
-    def __init__(self, value):
+    def __init__(self, value: Sequence[float]):
         self.value = value
         super().__init__()
 
@@ -124,13 +126,14 @@ class Points(Sequence[Point]):
     def __str__(self):
         return "[" + ", ".join(str(elem) for elem in self.value) + "]"
 
-    def to_list(self):
+    def to_list(self) -> list[Number]:
         nested = [(elem.x, elem.y) for elem in self]
-        return [elem for point in nested for elem in point]
+        flat: list[Number] = [elem for point in nested for elem in point]
+        return flat
 
 
 class Vector(Sequence[float]):
-    def __init__(self, value):
+    def __init__(self, value: Sequence[float]):
         self.value = value
         super().__init__()
 

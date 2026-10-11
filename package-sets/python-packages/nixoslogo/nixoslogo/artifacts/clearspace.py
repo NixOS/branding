@@ -74,15 +74,15 @@ class LogoClearspace(BaseRenderable):
         )
 
     def make_space_object_elements(self):
-        transforms = [
-            (
+        transforms: list[list[svg.Transform]] = [
+            [
                 svg.Rotate(90 * index),
                 svg.Translate(
                     -self.space_object.elements_x_min,
                     -self.space_object.elements_y_max,
                 ),
-                translation,
-            )
+                *translation,
+            ]
             for index, translation in enumerate(
                 (
                     (
@@ -120,7 +120,9 @@ class LogoClearspace(BaseRenderable):
             for transform in transforms
         )
 
-    def make_space_object_element(self, space, transform=None):
+    def make_space_object_element(
+        self, space: BaseRenderable, transform: list[svg.Transform] | None = None
+    ):
         return svg.G(
             elements=(space.make_svg_elements()),
             filter="url(#greyscale-50)",

@@ -30,7 +30,7 @@ class Canvas:
             height=self.height,
         )
 
-    def make_svg_background(self, fill="#8888ee"):
+    def make_svg_background(self, fill: str = "#8888ee"):
         return (
             svg.Rect(
                 x=self.min_x,

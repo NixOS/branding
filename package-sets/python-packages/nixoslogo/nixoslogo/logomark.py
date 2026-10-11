@@ -4,6 +4,7 @@ import math
 
 import svg
 from svg._types import Length
+from typing import TypedDict
 
 from nixoslogo.colors import Color
 from nixoslogo.core import (
@@ -14,6 +15,13 @@ from nixoslogo.core import (
     flatten_svg_elements,
 )
 from nixoslogo.geometry import Point, Points, Vector, cosd, sind
+
+
+class GradientEndPoints(TypedDict):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
 
 
 class Lambda(BaseRenderable):
@@ -278,7 +286,7 @@ class Logomark(BaseRenderable):
             )
         )
 
-    def make_gradient_end_points(self):
+    def make_gradient_end_points(self) -> GradientEndPoints:
         lambda_points_no_gap = self.ilambda.make_named_lambda_points(gap=0)
         stop_point = lambda_points_no_gap[
             "joint_crotch"

@@ -83,7 +83,7 @@ class FontLoader:
         self.font.em = round(self.font.em * scale)
         return capHeight, scale
 
-    def _scale_glyph(self, character, transforms):
+    def _scale_glyph(self, character: str, transforms: dict[str, int]):
         """Scale a glyph; primarily used for vertically flipping."""
         self.font[character].transform(
             (
@@ -96,7 +96,7 @@ class FontLoader:
             )
         )
 
-    def _offset_glyph(self, character, transforms):
+    def _offset_glyph(self, character: str, transforms: dict[str, int]):
         """Offset a glyph; primarily used to remove the left side bearing."""
         self.font[character].transform(
             (
