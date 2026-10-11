@@ -43,7 +43,13 @@ class Point(Sequence[float]):
     def __neg__(self):
         return Point(tuple(-elem for elem in self))
 
-    def __add__(self, other: "Point | Vector") -> "Point":
+    @overload
+    def __add__(self, other: "Point") -> "Point": ...
+
+    @overload
+    def __add__(self, other: "Vector") -> "Point": ...
+
+    def __add__(self, other: object) -> "Point":
         if isinstance(other, Point):
             return Point((self.x + other.x, self.y + other.y))
         if isinstance(other, Vector):
@@ -56,7 +62,7 @@ class Point(Sequence[float]):
     @overload
     def __sub__(self, other: "Vector") -> "Point": ...
 
-    def __sub__(self, other: "Point | Vector") -> "Point | Vector":
+    def __sub__(self, other: object) -> "Point | Vector":
         if isinstance(other, Point):
             return Vector((self.x - other.x, self.y - other.y))
         if isinstance(other, Vector):
@@ -180,7 +186,13 @@ class Vector(Sequence[float]):
     def __rmul__(self, other: float) -> "Vector":
         return Vector(tuple(other * elem for elem in self))
 
-    def __matmul__(self, other: "Point | Vector") -> list[float]:
+    @overload
+    def __matmul__(self, other: "Point") -> list[float]: ...
+
+    @overload
+    def __matmul__(self, other: "Vector") -> list[float]: ...
+
+    def __matmul__(self, other: object) -> list[float]:
         if not isinstance(other, Point | Vector):
             return NotImplemented
         return [s * o for s, o in zip(self, other)]
@@ -236,7 +248,13 @@ class Matrix(Sequence[Vector]):
     def transpose(self) -> "Matrix":
         return Matrix(tuple(Vector(row) for row in zip(*self)))
 
-    def __matmul__(self, other: Point | Vector) -> list[float]:
+    @overload
+    def __matmul__(self, other: Point) -> list[float]: ...
+
+    @overload
+    def __matmul__(self, other: Vector) -> list[float]: ...
+
+    def __matmul__(self, other: object) -> list[float]:
         if not isinstance(other, Point | Vector):
             return NotImplemented
         return [sum(row @ other) for row in self]
