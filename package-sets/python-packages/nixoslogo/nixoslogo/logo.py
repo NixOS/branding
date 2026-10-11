@@ -28,7 +28,7 @@ class NixosLogo(BaseRenderable):
         lambda_gap: float = 1 / 32,
         loader: FontLoader | None = None,
         logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
-        logomark_colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
+        logomark_colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
         logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
         logotype_cap_height: float | None = None,
         logotype_color: str = "black",

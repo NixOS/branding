@@ -170,12 +170,16 @@ class Logomark(BaseRenderable):
         ilambda: Lambda = Lambda(),
         color_style: ColorStyle = ColorStyle.GRADIENT,
         clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        colors: LogomarkColors | tuple[Color] = LogomarkColors.DEFAULT,
+        colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
         **kwargs,
     ):
         self.ilambda = ilambda
-        self.colors_name = getattr(colors, "name", "custom")
-        self.colors_value = getattr(colors, "value", colors)
+        self.colors_name = (
+            colors.name if isinstance(colors, LogomarkColors) else "custom"
+        )
+        self.colors_value: tuple[Color, ...] = (
+            colors.value if isinstance(colors, LogomarkColors) else colors
+        )
         self.color_style = color_style
         self.clear_space = clear_space
 
