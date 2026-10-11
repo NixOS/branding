@@ -11,12 +11,18 @@ def sind(angle) -> float:
     return math.sin(math.radians(angle))
 
 
-class Point(Sequence):
+class Point(Sequence[float]):
     def __init__(self, value):
         self.value = value
         super().__init__()
 
-    def __getitem__(self, index):
+    @overload
+    def __getitem__(self, index: int) -> float: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[float]: ...
+
+    def __getitem__(self, index: int | slice) -> "float | Sequence[float]":
         return self.value[index]
 
     def __len__(self):
@@ -95,12 +101,18 @@ class Point(Sequence):
         return Vector(self.value)
 
 
-class Points(Sequence):
+class Points(Sequence[Point]):
     def __init__(self, value: list[Point]):
         self.value = value
         super().__init__()
 
-    def __getitem__(self, index):
+    @overload
+    def __getitem__(self, index: int) -> Point: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[Point]: ...
+
+    def __getitem__(self, index: int | slice) -> "Point | Sequence[Point]":
         return self.value[index]
 
     def __len__(self):
@@ -117,12 +129,18 @@ class Points(Sequence):
         return [elem for point in nested for elem in point]
 
 
-class Vector(Sequence):
+class Vector(Sequence[float]):
     def __init__(self, value):
         self.value = value
         super().__init__()
 
-    def __getitem__(self, index):
+    @overload
+    def __getitem__(self, index: int) -> float: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[float]: ...
+
+    def __getitem__(self, index: int | slice) -> "float | Sequence[float]":
         return self.value[index]
 
     def __len__(self):
@@ -180,12 +198,18 @@ class Vector(Sequence):
         return Point(self.value)
 
 
-class Matrix(Sequence):
+class Matrix(Sequence[Vector]):
     def __init__(self, value: Sequence[Vector]):
         self.value = value
         super().__init__()
 
-    def __getitem__(self, index):
+    @overload
+    def __getitem__(self, index: int) -> Vector: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[Vector]: ...
+
+    def __getitem__(self, index: int | slice) -> "Vector | Sequence[Vector]":
         return self.value[index]
 
     def __len__(self):
