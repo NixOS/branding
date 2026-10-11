@@ -1,9 +1,10 @@
 import math
+from collections.abc import Callable
 from typing import TypedDict
 
 import svg
 
-from nixoslogo.annotations import Annotations
+from nixoslogo.annotations import Annotations, TextAnnotations
 from nixoslogo.core import ClearSpace, flatten_svg_elements
 from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
@@ -278,7 +279,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
 
     def make_named_lambda_vertices(self):
         named_points = self.make_named_lambda_points()
-        translations = [
+        translations: list[Callable[[TextAnnotations], list[svg.Transform]]] = [
             lambda elem: [
                 svg.Translate(
                     -elem.elements_width - elem.elements_height / 2,
