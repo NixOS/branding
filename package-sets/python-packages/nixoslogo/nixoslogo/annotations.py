@@ -3,6 +3,7 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NotRequired, TypedDict
 
 import svg
 from svg._types import Number
@@ -110,6 +111,21 @@ class TextAnnotations(BaseRenderable):
         )
 
 
+class LineConfig(TypedDict):
+    name: str
+    stroke: str
+    stroke_width: int
+    stroke_dasharray: list[Number]
+    fill: NotRequired[str]
+
+
+class FontConfig(TypedDict):
+    scale: float | None
+    cap_height: float
+    color: str
+    stroke_dasharray: list[Number]
+
+
 @dataclass
 class LineGroup:
     name: str
@@ -133,7 +149,7 @@ class DimensionLines(LineGroup):
     def __init__(
         self,
         font_loader: FontLoader,
-        font_config: dict,
+        font_config: FontConfig,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -498,12 +514,12 @@ class DimensionLines(LineGroup):
 class Annotations:
     def __init__(
         self,
-        object_lines_config: dict,
-        construction_lines_config: dict,
-        dimension_lines_config: dict,
-        font_config: dict,
+        object_lines_config: LineConfig,
+        construction_lines_config: LineConfig,
+        dimension_lines_config: LineConfig,
+        font_config: FontConfig,
         get_font_file: Callable[[], Path] = get_nixos_annotation_font_file,
-        transforms_map: dict = DEFAULT_JURA_TRANSFORMS,
+        transforms_map: dict[str, dict[str, int]] = DEFAULT_JURA_TRANSFORMS,
     ):
         self.font_loader = FontLoader(
             get_font_file=get_font_file,
