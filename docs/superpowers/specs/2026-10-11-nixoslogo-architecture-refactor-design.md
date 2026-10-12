@@ -1,7 +1,8 @@
 # nixoslogo architecture refactor
 
 Status: design approved in discussion on 2026-10-11; written spec revised
-after a four-reviewer pass against the code; awaiting owner review.
+after two review passes against the code, the second adversarial with
+implementation attempts on scratch copies; awaiting owner review.
 Scope: `package-sets/python-packages/nixoslogo/` and the 96 artifact scripts
 under `package-sets/top-level/nixos-branding/artifacts/`.
 
@@ -29,14 +30,23 @@ Decisions already made:
 - Bounding boxes and left side bearings are the tight ink extents of the
   outline. Today's bearings already are (fontforge recomputes them from the
   splines); today's boxes are control-point boxes. Control points overhang
-  the ink on 60 Route159 and 516 Jura glyphs, none of them in the NixOS
-  wordmark, so the logo artifacts are unaffected and annotation label boxes
-  move by sub-unit amounts in the step that changes annotation bytes anyway.
+  the ink on 60 Route159 and 516 Jura glyphs. One of them is the wordmark's
+  "i": its dot's closing curve has control points at y=723 against a tight
+  extremum of 721.5. No artifact reads the i's vertical extent (the logotype
+  union is set by O and S at 754, and spacing consumes widths only), so the
+  logo artifacts are unaffected; annotation label boxes move by sub-unit
+  amounts in the step that changes annotation bytes anyway.
 - `Annotations` and its line groups become frozen dataclasses: fields cannot
   be rebound after construction, and presets take a typed override
   dictionary instead. (`stroke_dasharray` stays a `list` because svg-py's
   annotation requires one.)
 - `NixosLogo` is composed from a `Logomark` and a `Logotype` instance.
+- uharfbuzz ships no type information, and basedpyright reports every use
+  of its names as an error, not as Unknown. The package ships a local stub,
+  `typings/uharfbuzz/__init__.pyi`, declaring the seven names used, and
+  `pyproject.toml` gains `[tool.basedpyright] stubPath = "typings"`. The
+  gate runs basedpyright with `-p package-sets/python-packages/nixoslogo`.
+  Verified: 7 errors without the stub, 0 with it.
 - A pytest suite is added, run in the devshell and in the package's check
   phase.
 
@@ -104,7 +114,9 @@ adds the document behaviour. A frozen dataclass can subclass `Shape`; it
 cannot subclass `BaseRenderable` (frozen cannot inherit from non-frozen).
 
 The `canvas=` constructor parameter is removed. No code in the package or the
-96 scripts passes it. Fixes P1: nothing is computed during construction.
+96 scripts passes it. The four `_make_canvas` overrides (`dimensioned.py:41, 494, 612`, `misuse.py:378`) become `make_canvas(self, clear_space)` overrides
+that accept and ignore the parameter, so the signature matches the base.
+Fixes P1: nothing is computed during construction.
 
 ```python
 class ClearSpace(Enum):
@@ -115,7 +127,7 @@ class ClearSpace(Enum):
     def distance(self, unit: float) -> float:
         match self:
             case ClearSpace.NONE:
-                return 0            # int, so int-valued canvases stay int
+                return 0            # unchanged from today's match blocks
             case ClearSpace.MINIMAL:
                 return unit / 2
             case ClearSpace.RECOMMENDED:
@@ -125,33 +137,63 @@ class ClearSpace(Enum):
 Fixes P14. `clearspace_unit` per class, each the value its match block uses
 today: `Logotype` its cap height, `Lambda` and `Logomark` their
 `elements_y_max`, `NixosLogo` its logomark's `elements_height`,
-`LogoClearspace` delegates to its logo. Until step 9, `Glyph.clearspace_unit`
-is `self.loader.capHeight` and `TextAnnotations.clearspace_unit` is `0`
-(today's stub); after step 9 neither is a `BaseRenderable`.
+`LogoClearspace` delegates to its logo. `Glyph.clearspace_unit` is
+`self.loader.capHeight` until step 9 and `TextAnnotations.clearspace_unit`
+is `0` (today's stub) until step 8; after those steps neither is a
+`BaseRenderable`.
 
 ### 3.2 Dataclasses
 
 Every `BaseRenderable` subclass becomes `@dataclass(kw_only=True)`. Fields are
 the constructor parameters. Derived state is `field(init=False)` assigned in
-`__post_init__`. A subclass `__post_init__` calls `super().__post_init__()`
-when the parent has one. Mutable defaults use `default_factory`. Class-level
-constants are `ClassVar`.
+`__post_init__`. Mutable defaults use `default_factory`. Class-level
+constants are `ClassVar`. Overriding methods and properties carry
+`@override` as they do today.
 
 Fixes P2 (an unknown keyword raises `TypeError`) and P3
 (`ilambda: Lambda = field(default_factory=Lambda)`).
 
-A subclass that wants a different default redeclares the field:
-`DimensionedLambda` declares `clear_space: ClearSpace = ClearSpace.NONE`, the
-three remaining misuse classes declare `ClearSpace.MINIMAL`. The dead
-pre-`super()` assignments in `misuse.py` are deleted.
+**Parameters that are both input and derived state.** Today several
+constructors take an optional parameter and store a resolved value under
+the same name. A dataclass field typed `X | None` is read as `X | None`
+everywhere outside `__post_init__`, which is a basedpyright error at every
+later read. The resolution per class:
+
+- `Glyph.loader` and `Logotype.loader`: `loader: FontLoader = field(default_factory=FontLoader)`
+  (until step 9 removes the loader).
+- `NixosLogo.loader`: the parameter is removed now (no script or package
+  caller passes it); `loader: FontLoader = field(init=False)` is built in
+  `__post_init__`.
+- `NixosLogo.logotype_cap_height: float | None = None` stays an input.
+  `__post_init__` resolves it locally, passes it to the loader, and every
+  later read uses `self.logotype.cap_height`, which carries the same value.
+- `NixosLogo.logotype_transform: svg.Translate | None = None` stays an
+  input, read through a `transform` property that returns it or today's
+  `_default_transform` arithmetic.
+
+**Classes with `__post_init__`** after the dataclass step: `Logomark`
+(colour names), `NixosLogo` (children and loader), `Glyph` (fontforge
+objects), `Logotype` and `TextAnnotations` (glyph runs). A subclass
+`__post_init__` calls `super().__post_init__()` only when the parent has
+one. After step 10 `NixosLogo` has no derived state and no `__post_init__`.
+
+A subclass that wants a different default redeclares the field, with its
+annotation: `DimensionedLambda` declares
+`clear_space: ClearSpace = ClearSpace.NONE`; at the dataclass step all five
+misuse classes declare `ClearSpace.MINIMAL`, and `LogoColorsWithLambdaPrime`
+also redeclares `logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME`
+(both until step 5 deletes it). An unannotated class attribute is not a
+field: the parent default silently wins, basedpyright only warns, and only
+the artifact hash would catch it. The dead pre-`super()` assignments in
+`misuse.py` are deleted.
 
 Pitfalls to honour in implementation: every subclass needs its own
 `@dataclass(kw_only=True)` decorator or its annotations stop being fields;
 `eq=True` (the default) makes instances unhashable, and nothing in the
 package hashes a renderable; `Logomark._gradient_stop_offsets` becomes
-`GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)`, and
-its two readers in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines`
-(`dimensioned.py:626`, `:631`) follow the rename.
+`GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)` and
+all five readers follow (`logomark.py:314, 318, 322`, `dimensioned.py:626, 631`); `Glyph`'s derived fontforge attributes (`font`, `glyph`, `layer`) are
+annotated with the `fontforge` classes until step 9 removes them.
 
 ### 3.3 Composition changes
 
@@ -167,9 +209,13 @@ its two readers in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines`
 
 `make_hexagon_points` never reads `self` and becomes `hexagon_points(radius)`
 in `logomark.py`. `DimensionedLogomark` and `DimensionedLogomarkGradient`
-gain `ilambda: Lambda = field(default_factory=Lambda)` (today the field is
-required and typed `DimensionedLambda`) and read line styles from their own
-`annotations`. Fixes P11. Bodies move verbatim; element order is unchanged.
+read line styles from their own `annotations`, and their class-level
+`ilambda: DimensionedLambda` annotation is deleted, so they accept any
+`Lambda`. This must land before the dataclass step: once `Logomark.ilambda`
+is a dataclass field, redeclaring it with a narrower type is a basedpyright
+error (mutable fields are invariant) and not redeclaring it leaves the
+subclass method calls unresolved. Fixes P11. Bodies move verbatim; element
+order is unchanged.
 
 **`DimensionedLogotype.dimension_spacings`** derives its gap list from
 `itertools.pairwise(self.glyphs)` and its sides from
@@ -229,9 +275,11 @@ bounding box and name to the flattened form. Fixes P10 structurally: there is
 no second cap height. `close()` is deleted; no script calls it.
 
 `DimensionedLogo` reads `self.logotype.cap_height`, and its bearing dimension
-ends at `Point((self.logomark.circumradius + self.logotype.glyphs[0].elements_x_min, 0))`,
-where the first glyph's minimum x equals today's `scale * spacings[0]`.
-`LogoCrop` keeps its `make_canvas` override.
+ends at `Point((self.logomark.circumradius + self.logotype.glyphs[0].elements_x_min, 0))`.
+After step 9 the first glyph's minimum x is exactly `spacings[0] * scale`;
+today's value differs from that product by 5e-6 because of float32 layer
+storage, which is why step 10's byte identity is measured against step 9's
+output. `LogoCrop` keeps its `make_canvas` override.
 
 ### 3.4 Annotations
 
@@ -246,7 +294,7 @@ class LineGroup:
 
 @dataclass(frozen=True, kw_only=True)
 class DimensionLines(LineGroup):
-    font: Font
+    font: Font = field(repr=False)
     cap_height: float
     color: str
 
@@ -315,11 +363,16 @@ class Annotations:
 `[4]`, `[8]`, `[16]`; cap heights 24, 48, 96). The multiplier is an `int` so
 the products stay ints. Overrides are absolute values applied after sizing.
 A different Jura weight is `{"dimension_lines": {"font": load_font(path)}}`.
+
 basedpyright checks an override literal against the TypedDicts wherever it
 runs (the package gate and the editor): a misspelled key or wrong value type
-is a `reportArgumentType` error at the call site. The presets must carry the
-annotation shown; an unannotated `overrides` parameter would turn that check
-into warnings only.
+is a `reportArgumentType` error at the call site. Two limits: the literal
+must be written inline or in a variable annotated `AnnotationsOverrides`
+(an unannotated variable is inferred as `dict[str, ...]` and rejected), and
+`dataclasses.replace` itself is unchecked, so the TypedDict field lists are
+edited in lockstep with the dataclasses and a drift is caught only by the
+runtime `TypeError`. The presets must carry the annotation shown; an
+unannotated `overrides` parameter would turn the check into warnings only.
 
 `LineConfig`, `FontConfig`, `ObjectLines` and `ConstructionLines` are deleted
 (`FontConfig.scale` was `None` in every preset; `stroke_dasharray` was never
@@ -354,7 +407,7 @@ class FontGlyph:
     name: str
     outline: Outline                   # font units, y up
     advance: float                     # hmtx advance width
-    left_side_bearing: float           # tight ink minimum x; None-safe: 0.0 for an empty glyph
+    left_side_bearing: float           # tight ink minimum x; 0.0 for an empty glyph
     bounds: Box | None                 # tight ink bounds; None for an empty glyph
 
 @dataclass(frozen=True)
@@ -370,8 +423,8 @@ class Font:
     name: str                          # the file stem
     em: int
     cap_height: float
-    glyphs: Mapping[str, FontGlyph]    # every glyph in the font, by glyph name
-    cmap: Mapping[int, str]            # code point to glyph name
+    glyphs: Mapping[str, FontGlyph] = field(repr=False)   # every glyph, by glyph name
+    cmap: Mapping[int, str] = field(repr=False)           # code point to glyph name
     hb_face: hb.Face = field(repr=False, compare=False)
     hb_font: hb.Font = field(repr=False, compare=False)
 
@@ -390,36 +443,45 @@ def path_data(outline: Outline) -> list[svg.PathData]: ...
 ```
 
 `Font` equality compares path, metrics, glyphs and cmap; the HarfBuzz objects
-have identity equality and are excluded.
+have identity equality and are excluded. `repr=False` on the glyph table
+and on every `font` field that holds a `Font` keeps reprs and assertion
+messages from printing the whole outline table. Frozen dataclasses with
+mapping or list fields are not hashable; nothing hashes them.
 
 `load_font` opens the file with `fontTools.ttLib.TTFont`, iterates
-`getGlyphOrder()`, and draws every glyph through a `BasePen` subclass built
-with the glyph set, so composite glyphs decompose. When the font has a
-`CFF ` table the pen is wrapped in
-`ReverseContourPen(outputImpliedClosingLine=False)`. This reproduces the
-command stream the current pipeline emits for every Route159 glyph tested,
-because fontforge reverses CFF contour direction on import; TrueType outlines
-already match without it. Bounds come from `BoundsPen` (tight ink extents),
-and `left_side_bearing` is that box's minimum x, which is what fontforge's
-`left_side_bearing` reports today. Advance comes from `hmtx`. Every number
-is cast to `float` on load, including bounds, advance and bearing, so that
-viewBoxes print as `0.0` and not `0`. `em` is `head.unitsPerEm`. `cap_height`
-is the top of the bounds of `glyphs[cmap[ord("H")]]`, which is what fontforge
-reported (Route159 740, Jura 1289; the OS/2 table says 1266 for Jura and
-must not be used). The font file is read once and nothing is kept open
-except the HarfBuzz objects. Measured: 346 glyphs in 57 ms for Route159,
-1108 in 166 ms for Jura.
+`getGlyphOrder()`, and draws every glyph into a `DecomposingRecordingPen`
+built with the glyph set, so composite glyphs are flattened first. The
+recording is then replayed into the outline pen, wrapped in
+`ReverseContourPen(outputImpliedClosingLine=False)` when the font has a
+`CFF ` table. Decomposing before reversing matters because the reverse pen
+forwards components to the inner pen unreversed (fontTools'
+`_PassThruComponentsMixin`); Route159 has no components, so no shipped glyph
+depends on it. The reversal reproduces the command stream the current
+pipeline emits for every Route159 glyph (346 of 346 compared), because
+fontforge reverses CFF contour direction on import; TrueType outlines
+already match without it (all 771 non-composite Jura glyphs compared).
+Bounds come from `BoundsPen` (tight ink extents), and `left_side_bearing` is
+that box's minimum x, which is what fontforge's `left_side_bearing` reports
+today. Advance comes from `hmtx`. Every number is cast to `float` on load,
+including bounds, advance and bearing, so that viewBoxes print as `0.0` and
+not `0`. `em` is `head.unitsPerEm`. `cap_height` is the top of the bounds of
+`glyphs[cmap[ord("H")]]`, which is what fontforge reported (Route159 740,
+Jura 1289; the OS/2 table says 1266 for Jura and must not be used). The
+font file is read once and nothing is kept open except the HarfBuzz
+objects. Measured: 346 glyphs in 57 ms for Route159, 1108 in 166 ms for
+Jura.
 
 `shape` is the only HarfBuzz call site. It fills a buffer with the text,
-sets direction, script and language explicitly (left to right, Latin, and
-a fixed language tag; never guessed from the process locale, because Jura
-carries Turkish and other locale substitutions for "i"), shapes with the
-given features, and returns one `ShapedGlyph` per output glyph with the
-glyph name from the font's glyph order. Units are font units. An unencoded
-character shapes to `.notdef`, whose outline is rendered; no error is
-raised. Verified with both fonts: "Nixflake" yields the `fl` ligature unless
-`liga` is off; "e" plus combining acute yields `eacute`; Route159's `cpsp`
-returns x offsets; Jura's `zero` and `smcp` select alternate glyphs.
+sets `direction="ltr"`, `script="Latn"` and `language="dflt"` explicitly
+(the OpenType default language system; never guessed from the process
+locale, because Jura carries Turkish and other locale substitutions for
+"i"), shapes with the given features, and returns one `ShapedGlyph` per
+output glyph with the glyph name from the font's glyph order. Units are
+font units. An unencoded character shapes to `.notdef`, whose outline is
+rendered; no error is raised. Verified with both fonts: "Nixflake" yields
+the `fl` ligature unless `liga` is off; "e" plus combining acute yields
+`eacute`; Route159's `cpsp` returns x offsets; Jura's `zero` and `smcp`
+select alternate glyphs.
 
 `transform` maps every point of every segment to `(sx * x + dx, sy * y + dy)`
 and adds `+ 0.0` to each coordinate so a flipped zero is `0.0`, not `-0.0`.
@@ -437,7 +499,7 @@ closes implicitly.
 class Glyph(Shape):
     name: str                          # glyph name
     outline: Outline                   # final SVG-space geometry, y down, placed
-    bounds: Box                        # final; an empty glyph is the degenerate box at its pen origin
+    bounds: Box                        # final
     color: str
     style: LogotypeStyle
 
@@ -450,17 +512,22 @@ class Glyph(Shape):
 ```
 
 An empty glyph (a space) has bounds `(x, 0, x, 0)` at its placed origin x on
-the baseline; for every shipped label that point lies inside the label's ink
-box, so unions are unchanged.
+the baseline. Today an empty fontforge layer reports `(0, 0, 0, 0)`
+regardless of placement. Both points lie on the ink box boundary of every
+shipped label (x=0 is the first glyph's stripped left edge and y=0 the
+baseline), so unions are unchanged.
 
 `make_svg_element` is today's: one `svg.Path` for `REGULAR`; for
 `LAMBDAPRIME` and glyph name `x`, two paths from contour 0 split by
-`LAMBDAPRIME_X_LOWER = slice(2, 10)` in `core.py`, upper filled
-`NIXOS_LIGHT_BLUE`, lower `NIXOS_DARK_BLUE`. Because the first segment of a
-sub-contour is emitted as `MoveTo`, slicing segments gives the same paths as
-slicing points did. The slice is Route159 contour data; it holds for all 12
-Route159 faces (one contour of 12 segments, one `M` and eleven `L`, in the
-same order) and is meaningless for any other family.
+`LAMBDAPRIME_X_LOWER = slice(2, 10)` in `core.py`: the lower path is
+`contour[LAMBDAPRIME_X_LOWER]`, the upper path is
+`contour[:LAMBDAPRIME_X_LOWER.start] + contour[LAMBDAPRIME_X_LOWER.stop:]`
+in that order (the other order renders identically but moves bytes), upper
+filled `NIXOS_LIGHT_BLUE`, lower `NIXOS_DARK_BLUE`. Because the first
+segment of a sub-contour is emitted as `MoveTo`, slicing segments gives the
+same paths as slicing points did. The slice is Route159 contour data; it
+holds for all 12 Route159 faces (one contour of 12 segments, one `M` and
+eleven `L`, in the same order) and is meaningless for any other family.
 
 A `Glyph` is built once at its final position and never mutated. Fixes P6.
 
@@ -470,7 +537,7 @@ A `Glyph` is built once at its final position and never mutated. Fixes P6.
 @dataclass(kw_only=True)
 class Logotype(BaseRenderable):
     characters: str
-    font: Font = field(default_factory=logotype_font)
+    font: Font = field(default_factory=logotype_font, repr=False)
     cap_height: float
     color: str = "black"
     style: LogotypeStyle = LogotypeStyle.REGULAR
@@ -539,7 +606,7 @@ and scripts pass them explicitly.
 @dataclass(kw_only=True)
 class TextAnnotations(Shape):
     characters: str
-    font: Font
+    font: Font = field(repr=False)
     cap_height: float
     color: str = "black"
     glyphs: tuple[Glyph, ...] = field(init=False)
@@ -572,8 +639,9 @@ The `__main__` preview blocks in `logotype.py`, `logomark.py`, `logo.py`,
 `annotations.py`, `dimensioned.py`, `artifacts/clearspace.py` and
 `artifacts/misuse.py` are not artifacts, but they are inside the basedpyright
 and ruff gates. Each migration step rewrites the blocks that reference what
-it changes; `annotations.py`'s block, which only exercised `FontLoader`, is
-deleted in step 8.
+it changes. `annotations.py`'s block, which exercised `FontLoader` and wrote
+one `TextAnnotations` preview, is deleted in step 8; that preview is dropped
+deliberately.
 
 ### 4.6 Data flow
 
@@ -598,7 +666,7 @@ character is a `KeyError` from the cmap. In `Logotype`, HarfBuzz substitutes
 font file: fontTools' own error. A font without an "H" glyph: `KeyError`
 from `load_font`.
 
-### 4.8 Dependencies
+### 4.8 Dependencies and typing
 
 `pyproject.toml` adds `fonttools` (step 8) and `uharfbuzz` (step 9), and
 `poetry.lock` is regenerated in the same commits. `package.nix` drops
@@ -606,12 +674,17 @@ from `load_font`.
 already commented out, adds the two packages. The `nixos-logo-dev` shell
 drops `ps.fontforge`. `types-lxml` stays.
 
-Neither library ships `py.typed`. fontTools' `TTFont.__getitem__`,
-`getGlyphSet`, `getBestCmap` and `BoundsPen.bounds` and all of uharfbuzz are
-partially or wholly Unknown under basedpyright; `font.py` casts at those
-calls and nothing outside it sees either library. Expected effect on the
-current 288 warnings: the ~171 from `**kwargs` and the ~75 from fontforge
-go; a handful remain inside `font.py`.
+fontTools ships no `py.typed`; `TTFont.__getitem__`, `getGlyphSet`,
+`getBestCmap` and `BoundsPen.bounds` are partially Unknown under
+basedpyright, and `font.py` casts at those calls. uharfbuzz has no type
+information at all: every one of its names is an attribute-access error.
+Step 9 adds `typings/uharfbuzz/__init__.pyi` under the package directory,
+declaring `Blob`, `Face`, `Font`, `Buffer`, `GlyphInfo`, `GlyphPosition` and
+`shape` with the signatures `font.py` uses, and
+`[tool.basedpyright] stubPath = "typings"` in `pyproject.toml`, which the
+editor picks up as well. Nothing outside `font.py` sees either library.
+Expected effect on the current 288 warnings: the ~171 from `**kwargs` and
+the ~75 from fontforge go; a handful remain inside `font.py`.
 
 ## 5. Migration
 
@@ -626,61 +699,75 @@ reference what it changes (section 4.5).
    `clearspace_unit` on every class including `Glyph` (`loader.capHeight`)
    and `TextAnnotations` (`0`); `make_canvas(clear_space)` and the `canvas`
    property; `canvas=` parameter removed; the four `_make_canvas` overrides
-   renamed. Because the `canvas` property reads `self.clear_space`, this
-   step also gives `BaseRenderable.__init__` a
-   `clear_space: ClearSpace = ClearSpace.RECOMMENDED` parameter stored on
-   the base, since `LogoClearspace` and `TextAnnotations` never set one
-   today. No script changes.
-1. **Dataclasses.** Every `BaseRenderable` subclass converted, fields equal
-   to today's parameters (`loader` included for now), derived state in
-   `__post_init__`, defaults redeclared in subclasses, dead pre-`super()`
+   renamed and given the parameter. Because the `canvas` property reads
+   `self.clear_space`, `BaseRenderable.__init__` gains
+   `clear_space: ClearSpace = ClearSpace.RECOMMENDED` and stores it, and
+   every subclass that takes `clear_space` today passes it through as
+   `super().__init__(clear_space=clear_space, **kwargs)` and stops assigning
+   it itself. Read literally without that forwarding, the base default
+   overwrites every subclass value and all 52 minimal and no-clear-space
+   artifacts come out as recommended. `NixosLogo` keeps its early
+   `self.clear_space` assignment as well, because `_init_snowflake` reads it
+   before `super().__init__`. `DimensionedLambda`'s post-`super()`
+   assignment keeps working only because the canvas is now lazy. No script
+   changes.
+1. **Dimensioned.** Section 3.3: overlay functions, `diagonal_line`,
+   `hexagon_points`, plain-`Lambda` logomark diagrams, glyph-count-derived
+   spacing dimensions. The three logomark diagram scripts drop their
+   `DimensionedLambda` construction. Before the dataclass step for the
+   reason given in 3.3.
+1. **Dataclasses.** Every `BaseRenderable` subclass converted per section
+   3.2, `loader` kept on `Glyph` and `Logotype`, dead pre-`super()`
    assignments removed. `stroke_dasharray` is removed from `FontConfig` and
-   from the three preset literals in this step, not step 3: every
+   from the three preset literals in this step, not step 4: every
    `TextAnnotations(**font_config)` call forwards it today and it only
    survives through the `**kwargs` hole this step closes; left in place,
    all 12 annotation artifacts would fail to build. No script changes.
 1. **Annotations.** Section 3.4, with `DimensionLines` holding
    `font_loader: FontLoader` until step 8. Six scripts (eight assignments)
    switch from attribute assignment to `overrides`.
-1. **Dimensioned.** Overlay functions, `diagonal_line`, `hexagon_points`,
-   plain-`Lambda` logomark diagrams, glyph-count-derived spacing dimensions.
-   The three logomark diagram scripts drop their `DimensionedLambda`
-   construction.
 1. **Misuse presets deleted.** Two scripts call `NixosLogo` directly with
    the arguments shown in section 3.3.
 1. **`LogoClearspace` takes an instance.** Three scripts pass instances;
    `nixos-logotype-clearspace` passes `logo=Logotype()` with today's
    defaults.
-1. **Verification tooling.** `compare-artifacts` gains a numeric comparison
-   mode (parse both trees with `parse_node`, mask numbers, report per file
-   whether the masked lines are equal and the maximum absolute delta) and a
-   raster mode (render both trees with `resvg` at 1024 px wide, report
-   per-file pixel differences), with `resvg` as a runtime input and both
-   results written into the summary JSON. No package changes; needed before
-   step 8 can be judged.
+1. **Verification tooling.** `compare-artifacts` gains a numeric mode and a
+   raster mode, with `resvg` as a runtime input and both results written
+   into the summary JSON. The numeric mode parses both trees with
+   `parse_node`, masks numbers, aligns the masked elements of each file with
+   `difflib`, reports unmatched elements on either side, and reports the
+   maximum absolute delta over the numbers of matched elements only. The
+   pairing rule matters: positional pairing over a file with one extra
+   element reports a meaningless delta in the thousands. The raster mode
+   renders both trees with `resvg` at 1024 px wide and reports per-file
+   pixel differences. No package changes; needed before step 8 can be
+   judged.
 
 ### Phase 2: pipeline, two hash bumps
 
 8. **`font.py` and annotations.** `font.py` without `shape` and without the
-   HarfBuzz fields; `TextAnnotations` on outlines; `DimensionLines.font: Font`; presets load `annotations_font()`; `annotations.py`'s `__main__`
-   deleted; `fonttools` added and `poetry.lock` regenerated. `Logotype`
-   still uses `FontLoader`. Expected: 12 artifacts change, the 9 dimensioned
-   and 3 clearspace ones, structure identical, numbers only: Jura glyph
-   digits move from float32 to float64 (under 0.001 units), and label boxes
-   change from control-point to tight extents, which moves label
-   translations by sub-unit amounts (measured on the reviewer's probe: 0.32
-   units for a label starting with "1" at cap height 24, 0.56 units for the
-   "RECOMMENDED" label's placement). The exact maximum is measured by the
-   step-7 tooling and recorded in the commit message. No script changes.
+   HarfBuzz fields; `TextAnnotations` becomes the `Shape` of 4.4 on
+   outlines; `DimensionLines.font: Font`; presets load `annotations_font()`;
+   `annotations.py`'s `__main__` deleted; `fonttools` added and `poetry.lock`
+   regenerated. `Logotype` still uses `FontLoader`. Expected: 12 artifacts
+   change, the 9 dimensioned and 3 clearspace ones, every element matched,
+   numbers only: Jura glyph digits move from float32 to float64 (under
+   0.001 units), and label boxes change from control-point to tight
+   extents, which moves label translations by sub-unit amounts (measured on
+   a reviewer's probe: 0.32 units for a label starting with "1" at cap
+   height 24, 0.56 units for the "RECOMMENDED" label's placement). The
+   exact maximum is measured by the step-7 tooling and recorded in the
+   commit message. No script changes.
 
 1. **Shaping, `Logotype`, `Glyph`, fontforge removed.** `Font.shape`, the
-   HarfBuzz fields and `uharfbuzz` (`poetry.lock` regenerated); `Glyph` and
-   `Logotype` per sections 4.2 and 4.3; `LAMBDAPRIME_X_LOWER` and
-   `DEFAULT_LOGOTYPE_MIRRORED` in `core.py`; `NixosLogo` (still flattened)
-   builds `Logotype(characters=self.logotype_characters, font=logotype_font(), cap_height=self.logotype_cap_height, color=..., style=..., spacings=self.logotype_spacings, mirrored=DEFAULT_LOGOTYPE_MIRRORED)` and
-   drops `loader` and `close`; everything in 4.5 deleted; `fontforge`
-   removed from Nix and the devshell; the pytest suite of section 7 added
-   with the check phase. Scripts, 14 in total:
+   HarfBuzz fields, `uharfbuzz`, the stub and `stubPath` of 4.8
+   (`poetry.lock` regenerated); `Glyph` and `Logotype` per sections 4.2 and
+   4.3; `LAMBDAPRIME_X_LOWER` and `DEFAULT_LOGOTYPE_MIRRORED` in `core.py`;
+   `NixosLogo` (still flattened) builds
+   `Logotype(characters=self.logotype_characters, font=logotype_font(), cap_height=<resolved cap height>, color=..., style=..., spacings=self.logotype_spacings, mirrored=DEFAULT_LOGOTYPE_MIRRORED)`;
+   everything in 4.5 deleted; `fontforge` removed from Nix and the
+   devshell; the pytest suite of section 7 added with the check phase.
+   Scripts, 14 in total:
 
    - the 12 standalone logotype scripts become
      `font = logotype_font()` then `Logotype(characters="NixOS", font=font, cap_height=font.cap_height, color=..., style=..., spacings=DEFAULT_LOGOTYPE_SPACINGS, mirrored=DEFAULT_LOGOTYPE_MIRRORED, clear_space=...)`;
@@ -693,20 +780,28 @@ reference what it changes (section 4.5).
    `nixos-logo-dimensioned`, `nixos-logo-clearspace` and
    `nixos-logotype-dimensioned`. Against `main`: 57 (three of the 48 were
    already in step 8's 12). Numeric only, max 1.41 units at default cap
-   height, 2.19 for the cap-512 misuse-scale logo, and the same order for
-   the cap-512 `nixos-logotype-dimensioned`; the logotype's cap height
-   becomes exact (N spans plus and minus 665.1075 instead of -665.89 to
-   +665.11). One visible change: the labels on `nixos-logotype-dimensioned`
-   go from 3.36 to 3.357 and 1.039 to 1.038, because today's labels measure
-   the rounded glyphs. The 12 native-size logotype artifacts and all 27
-   lambda and logomark artifacts must be byte-identical; they are the
-   acceptance test for the port.
+   height, 2.19 for the cap-512 misuse-scale logo and for the cap-512
+   `nixos-logotype-dimensioned` glyphs; the logotype's cap height becomes
+   exact (N spans plus and minus 665.1075 instead of -665.89 to +665.11).
+   One artifact changes structure: on `nixos-logotype-dimensioned` the
+   labels 3.36 and 1.039 become 3.357 and 1.038, because today's labels
+   measure the rounded glyphs. The longer label adds one glyph path, and
+   because labels are centred on their own width, the two label groups'
+   translations move by about 9.5 units (half the added digit's advance at
+   cap height 24). The numeric mode reports those label paths and groups as
+   unmatched or changed elements; they are excluded from the delta bound.
+   The 12 native-size logotype artifacts and all 27 lambda and logomark
+   artifacts must be byte-identical; they are the acceptance test for the
+   port.
 
-These expectations were measured on a prototype that used the same float64
-arithmetic and operation order over fontforge-extracted outlines. The
-fontTools port must reproduce them; a different count, a structural
-difference beyond the two labels, or a delta above the stated bounds stops
-the step.
+These expectations were first measured on a prototype that used the same
+float64 arithmetic and operation order over fontforge-extracted outlines,
+then reproduced by a fontTools and HarfBuzz implementation of section 4
+written during the adversarial review: 12 of 12 native-size logotype
+artifacts byte-identical, `nixos-logotype-clearspace` byte-identical, the
+default logo at a maximum delta of 1.4078, misuse-scale at 2.1947, and the
+two label changes as predicted. A different count, a structural difference
+beyond those labels, or a delta above the stated bounds stops the step.
 
 ### Phase 3: byte-identical composition
 
@@ -714,7 +809,8 @@ the step.
     in `logo.py`. Scripts: the 42 logo scripts, misuse crop, scale and
     lambdaprime, `nixos-logo-dimensioned` and `nixos-logo-clearspace` build
     the two children explicitly. Placed after the pipeline so the 42 scripts
-    are rewritten once, in their final form. All 96 artifacts unchanged.
+    are rewritten once, in their final form. All 96 artifacts unchanged
+    against step 9.
 
 A media-kit script after step 10:
 
@@ -738,6 +834,17 @@ NixosLogo(
 ).write_svg()
 ```
 
+### Evidence from the review
+
+Steps 1 and 3 (then numbered 1 and 2) were implemented on a scratch copy by
+a reviewer and all 96 scripts run against it: 96 of 96 byte-identical after
+each step, ruff clean. The same attempt found the two gaps now fixed above:
+the `clear_space` forwarding in step 1, and the dataclass field conflicts
+that moved the dimensioned step ahead of the dataclass step and added the
+input-versus-derived rule in 3.2. With those, basedpyright on the step-3
+copy is expected at 0 errors; the attempt measured 16 errors, all from the
+two gaps.
+
 ### Optional follow-ups, not part of this plan
 
 - **Dead `<path>` in `make_dimension_line`.** Delete the unstyled path and
@@ -752,10 +859,13 @@ NixosLogo(
 ## 6. Verification
 
 For every step: `nix build .#hydraJobs.nixos-branding.x86_64-linux.all-artifacts`
-green, basedpyright at 0 errors on the package, `nix run nixpkgs#ruff -- check`
-clean, `nix fmt -- --fail-on-change` clean (the flag goes to treefmt after
-the separator; `nix fmt --fail-on-change` is rejected by nix). Compare
-against `main`, never against `HEAD` on a clean tree.
+green; basedpyright at 0 errors on the package, run as
+`basedpyright -p package-sets/python-packages/nixoslogo --pythonpath "$PY"`
+from the devshell so the project's `pyproject.toml` (and from step 9 its
+`stubPath`) applies; `nix run nixpkgs#ruff -- check` clean;
+`nix fmt -- --fail-on-change` clean (the flag goes to treefmt after the
+separator; `nix fmt --fail-on-change` is rejected by nix). Compare against
+`main`, never against `HEAD` on a clean tree.
 
 The comparison tool builds two committed refs in separate worktrees:
 
@@ -766,8 +876,8 @@ nix run .#nixos-branding.verification.compare-artifacts -- main <commit> --summa
 Both refs must be commits; the working tree is not consulted.
 
 Byte-identical steps (1 to 7, 10): the build succeeds without touching any
-`outputHash`, which is the proof; the comparison against `main` reports
-96 unchanged.
+`outputHash`, which is the proof; the comparison against `main` (step 10:
+against step 9) reports 96 unchanged.
 
 Hash-bump steps (8, 9):
 
@@ -776,9 +886,9 @@ Hash-bump steps (8, 9):
    and delete its `error.log`.
 1. The comparison against `main` reports exactly the expected modified count
    (12 after step 8, 57 after step 9).
-1. The step-7 numeric mode reports masked-equal for every artifact except
-   the two labels in `nixos-logotype-dimensioned`, and maximum deltas within
-   the bounds in section 5.
+1. The step-7 numeric mode reports every element matched for every artifact
+   except the label paths and label groups in `nixos-logotype-dimensioned`
+   after step 9, and maximum deltas within the bounds in section 5.
 1. The step-7 raster mode reports per-file pixel differences for the
    owner's review. resvg renders the gradient, filter and marker artifacts
    correctly (checked on four representative files).
@@ -809,7 +919,8 @@ The package has none. The suite lands with step 9 under
   contours.
 - `path_data` on a flipped integer outline contains no `-0.0`.
 - `Logotype` at `cap_height=font.cap_height` has `scale == 1.0` and
-  integer-valued coordinates.
+  integer-valued outline coordinates (bounds may be fractional: the "i"
+  dot's tight top is 721.5).
 - `Logotype` with five spacings and "Nixpkgs" raises `ValueError`; with
   seven it lays out seven glyphs left to right.
 - Shaped "Nixflake" yields seven glyphs including `fl`; with
