@@ -14,7 +14,8 @@
 
 - Branch: `djacu/architecture-refactor`. Never commit on `main`.
 - Every task must leave all 96 artifacts byte-identical: the harness reports `identical=96`, and `nix build .#hydraJobs.nixos-branding.x86_64-linux.all-artifacts` succeeds without any `outputHash` change.
-- Every task must pass: basedpyright at 0 errors on `package-sets/python-packages/nixoslogo/nixoslogo`; `nix run nixpkgs#ruff -- check package-sets/python-packages/nixoslogo` clean; `nix fmt -- --fail-on-change` clean (run `nix fmt` first to format; the flag must come after the `--` separator).
+- Every task must pass: basedpyright at 0 errors on `package-sets/python-packages/nixoslogo/nixoslogo`; `nix run --inputs-from . nixpkgs#ruff -- check package-sets/python-packages/nixoslogo` clean; `nix fmt -- --fail-on-change` clean (run `nix fmt` first to format; the flag must come after the `--` separator). The `--inputs-from .` pins ruff to the flake's nixpkgs (0.14.7, the version treefmt runs); the registry's newer ruff adds rules such as B008 that the pinned one does not have, and the gate is defined by the pinned one.
+- Some code blocks in this plan run past 88 columns. `nix fmt` wraps them, and the wrapped form is what gets committed; the pre-commit hook will reject the first commit attempt whenever that happens, which is why every commit step says to re-add and retry.
 - Every commit: plain engineer voice, no thank-you lines, no bolded lead-ins, no em dashes, and the trailer `Assisted-by: Claude Code (claude-fable-5-1)` as the last line. The repo's pre-commit hook runs treefmt; if it reformats a file the commit aborts, so `git add` the file again and repeat the same `git commit`.
 - `requires-python = ">=3.12"`; `typing.override` on every overriding method and property, as today.
 - Fonts and the colour palette arrive through `NIXOS_LOGOTYPE_FONT_FILE`, `NIXOS_ANNOTATIONS_FONT_FILE` and `NIXOS_COLOR_PALETTE_FILE`, which the devshell sets. Run every Python command through `nix develop .#nixos-logo-dev --command ...` from the repo root.
@@ -27,7 +28,7 @@
 1. Two `Logomark()` instances must not share one `Lambda`, and a misspelled keyword must raise `TypeError` instead of being swallowed. Pinned in Task 3.
 1. `Annotations.sized(3)` must give integer widths 12/6/3 and dash `[12]`, and a misspelled override key must raise `TypeError` at construction. Pinned in Task 4.
 1. `LogoClearspace` must draw the recommended and minimal rectangles from the given logo regardless of that instance's own `clear_space`. Pinned in Task 6.
-1. The numeric comparison must report an inserted element as unmatched and compute the maximum delta over matched elements only, and the raster comparison must report a size mismatch rather than crash. Pinned in Task 7.
+1. The numeric comparison must report an inserted element as unmatched and compute the maximum delta over matched elements only, ignoring the parser's own depth tags and index labels that an insertion renumbers, and the raster comparison must report a size mismatch rather than crash. Pinned in Task 7.
 
 ______________________________________________________________________
 
@@ -96,11 +97,21 @@ for script in "$repo"/package-sets/top-level/nixos-branding/artifacts/*/*/script
     report+=("CRASH $category/$name (see $dir/log)")
     continue
   fi
-  if cmp -s "$dir/$name.svg" "$baseline/$category/$name.svg"; then
+  # Seven scripts write a file named by make_filename rather than by their
+  # directory (the coloredx logotypes write ...-lambdaprime-..., the lambda
+  # background writes nixos-lambda-R512-T1_4-G0-none), so compare whatever
+  # the script produced under that same basename in the baseline.
+  produced=("$dir"/*.svg)
+  if [ "${#produced[@]}" -ne 1 ] || [ ! -e "${produced[0]}" ]; then
+    different=$((different + 1))
+    report+=("NOSVG $category/$name")
+    continue
+  fi
+  if cmp -s "${produced[0]}" "$baseline/$category/$(basename "${produced[0]}")"; then
     identical=$((identical + 1))
   else
     different=$((different + 1))
-    report+=("DIFF  $category/$name")
+    report+=("DIFF  $category/$(basename "${produced[0]}")")
   fi
 done
 echo "identical=$identical different=$different baseline=$baseline"
@@ -449,7 +460,7 @@ Expected: `identical=96 different=0`. A DIFF on any `-none` or `-minimal` artifa
 Run: `nix develop .#nixos-logo-dev --command bash -c 'PY=$(which python); nix run nixpkgs#basedpyright -- --pythonpath "$PY" package-sets/python-packages/nixoslogo/nixoslogo | tail -1'`
 Expected: `0 errors, ...`.
 
-Run: `nix run nixpkgs#ruff -- check package-sets/python-packages/nixoslogo && nix fmt && nix fmt -- --fail-on-change`
+Run: `nix run --inputs-from . nixpkgs#ruff -- check package-sets/python-packages/nixoslogo && nix fmt && nix fmt -- --fail-on-change`
 Expected: ruff `All checks passed!`, treefmt clean.
 
 Run: `nix build .#hydraJobs.nixos-branding.x86_64-linux.all-artifacts --no-link`
@@ -677,13 +688,13 @@ Everywhere in `DimensionedLambdaLinear`, `DimensionedLambdaAngular`, `Dimensione
 
 | Old | New |
 |---|---|
-| `self.make_hexagon_points(radius=self.radius)` | `hexagon_points(radius=self.radius)` |
+| `hexagon_points = self.make_hexagon_points(radius=self.radius)` (in `make_lambda_linear_dimensions` and `make_parametric_annotations`) | `hexagon = hexagon_points(radius=self.radius)`, and the reads `hexagon_points[1]`, `hexagon_points[4]`, `hexagon_points[5]` that follow become `hexagon[1]`, `hexagon[4]`, `hexagon[5]` |
 | `self.make_lambda_construction_lines()` | `make_lambda_construction_lines(self, self.annotations.construction_lines)` |
 | `self.make_lambda_main_diagonal()` | `make_lambda_main_diagonal(self, self.annotations.construction_lines)` |
 | `self.make_lambda_off_diagonal()` | `make_lambda_off_diagonal(self, self.annotations.construction_lines)` |
 | `self.make_lambda_polygons()` | `make_lambda_polygons(self, self.annotations.object_lines)` |
 
-Keep the order of the arguments to `flatten_svg_elements` exactly as it is in each `make_svg_elements`.
+Keep the order of the arguments to `flatten_svg_elements` exactly as it is in each `make_svg_elements`. The local must be renamed where the result is assigned: `hexagon_points = hexagon_points(...)` makes the name local to the whole method and raises `UnboundLocalError` on the call.
 
 - [ ] **Step 6: `DimensionedLogomark` and `DimensionedLogomarkGradient` take any `Lambda`**
 
@@ -703,9 +714,9 @@ In `DimensionedLogomark`:
 
 | Old | New |
 |---|---|
-| `self.ilambda.make_hexagon_points(radius=self.ilambda.radius * 2.25)` | `hexagon_points(radius=self.ilambda.radius * 2.25)` |
-| `self.ilambda.make_diagonal_line(radius=self.ilambda.radius * 2.25)` | `diagonal_line(radius=self.ilambda.radius * 2.25)` |
-| `self.ilambda.make_hexagon_points(radius=self.ilambda.radius)` | `hexagon_points(radius=self.ilambda.radius)` |
+| `self.ilambda.make_hexagon_points(radius=self.ilambda.radius * 2.25)` (formatted over three lines in the source) | `hexagon_points(radius=self.ilambda.radius * 2.25)` |
+| `self.ilambda.make_diagonal_line(radius=self.ilambda.radius * 2.25)` (three lines in the source) | `diagonal_line(radius=self.ilambda.radius * 2.25)` |
+| `hexagon_points = self.ilambda.make_hexagon_points(radius=self.ilambda.radius)` (in `make_flake_linear_dimensions`) | `hexagon = hexagon_points(radius=self.ilambda.radius)`, and the reads `hexagon_points[1]`, `hexagon_points[4]` become `hexagon[1]`, `hexagon[4]` |
 | `self.ilambda.annotations.object_lines.stroke` (and `.stroke_width`, `.fill`) | `self.annotations.object_lines.stroke` (etc.) |
 | `self.ilambda.make_lambda_construction_lines()` | `make_lambda_construction_lines(self.ilambda, self.annotations.construction_lines)` |
 
@@ -810,7 +821,7 @@ Expected: 7 passed.
 
 - [ ] **Step 10: Harness and gates**
 
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. ruff may report an unused `DimensionedLambda` import in `dimensioned.py` only if something else was deleted by mistake; the class itself still exists.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. A crash on `nixos-lambda-dimensioned-linear`, `nixos-lambda-dimensioned-annotated-parameters` or `nixos-logomark-dimensioned-linear` means one of the three `hexagon` renames in Steps 5 and 6 was missed.
 
 - [ ] **Step 11: Commit**
 
@@ -948,7 +959,7 @@ class Logomark(BaseRenderable):
         self.css_color_names = self._make_css_color_names()
 ```
 
-Replace the three reads of `self._gradient_stop_offsets[...]` in `make_flake_gradients_defs` with `self.GRADIENT_STOP_OFFSETS[...]`, and the two reads in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines` (`dimensioned.py`) the same way.
+Replace the three reads of `self._gradient_stop_offsets[...]` in `make_flake_gradients_defs` with `self.GRADIENT_STOP_OFFSETS[...]`, and the two reads in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines` (`dimensioned.py`) the same way. Remove `ClearSpace` from the `nixoslogo.core` import in `logomark.py`: the deleted `__init__` signatures were its last uses, and ruff reports the import as unused otherwise.
 
 - [ ] **Step 5: `Glyph` and `Logotype` in `logotype.py`**
 
@@ -991,7 +1002,7 @@ class Logotype(BaseRenderable):
         self._set_spacings()
 ```
 
-In `_load_glyphs`, remove the `self.glyphs: tuple[Glyph, ...] =` annotation (the field is declared on the class now): `self.glyphs = tuple(...)`.
+In `_load_glyphs`, remove the `self.glyphs: tuple[Glyph, ...] =` annotation (the field is declared on the class now): `self.glyphs = tuple(...)`. Remove `ClearSpace` from the `nixoslogo.core` import in `logotype.py`; nothing in the module names it any more.
 
 - [ ] **Step 6: `TextAnnotations` and `FontConfig` in `annotations.py`**
 
@@ -1075,7 +1086,7 @@ class NixosLogo(BaseRenderable):
 
 The `loader` constructor parameter is gone: no script or package caller passes it, and it was the mispositioning hook. In `_init_snowflake` and `_init_logotype`, drop the `self.ilambda: Lambda =`, `self.logomark: Logomark =` and `self.logotype: Logotype =` annotations (fields are declared on the class). In `_default_transform`, replace both reads of `self.logotype_cap_height` with `self.logotype.cap_height`. In `elements_bounding_box`, replace `self.logotype_transform.x` and `self.logotype_transform.y` with `self.transform.x` and `self.transform.y`. In `make_svg_elements`, replace `transform=[self.logotype_transform]` with `transform=[self.transform]`.
 
-`self.logotype.cap_height` is the loader's `capHeight`, which `_ref_size` returns as the requested value unchanged, so positions are byte-identical.
+`self.logotype.cap_height` is the loader's `capHeight`, which `_ref_size` returns as the requested value unchanged, so positions are byte-identical. Remove `ClearSpace` from the `nixoslogo.core` import in `logo.py`; the deleted signature and the deleted `self.clear_space` assignment were its last uses.
 
 - [ ] **Step 8: `dimensioned.py`**
 
@@ -1271,7 +1282,7 @@ The first test compares the line groups field by field rather than whole `Annota
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_annotations.py -q`
-Expected: `test_presets_are_the_sized_multipliers` fails with `AttributeError: type object 'Annotations' has no attribute 'sized'`; the others fail similarly or with `TypeError: unexpected keyword argument 'overrides'`.
+Expected: 4 failed, 1 passed. `test_presets_are_the_sized_multipliers` fails with `AttributeError: type object 'Annotations' has no attribute 'sized'` and three others with `TypeError: ... unexpected keyword argument 'overrides'`. `test_misspelled_override_key_raises` already passes, because that same unexpected-keyword `TypeError` satisfies its `pytest.raises`; it only becomes meaningful after Step 4.
 
 - [ ] **Step 3: Replace the line-group section of `annotations.py`**
 
@@ -1700,6 +1711,7 @@ and delete `__post_init__`. Add `Shape` to the `nixoslogo.core` import; drop `fi
 | `self.recommended.elements_x_min` (and `_x_max`, `_y_min`, `_y_max`, in `make_space_object_elements` and `make_grid_lines`) | `self.logo.elements_x_min` (etc.) |
 | `self.recommended.canvas.min_x` (and `.min_y`, `.width`, `.height`, in `make_clearspace_lines`) | `recommended.min_x` (etc.) |
 | `self.minimal.canvas.min_x` (and `.min_y`, `.width`, `.height`) | `minimal.min_x` (etc.) |
+| `def make_space_object_element(self, space: BaseRenderable, ...)` | `def make_space_object_element(self, space: Shape, ...)` (it is called with `self.space_object`, now a `Shape`, and only calls `space.make_svg_elements()`) |
 
 At the top of `make_clearspace_lines`, before the two annotations, add:
 
@@ -1824,7 +1836,23 @@ from compare_artifacts.numeric import NumericResult, compare_numeric, mask, numb
 def test_mask_and_numbers():
     line = "    [0001] M 10.5 -20 1e3"
     assert mask(line) == "    [#] M # # #"
-    assert numbers(line) == [1.0, 10.5, -20.0, 1000.0]
+    assert numbers(line) == [10.5, -20.0, 1000.0]
+    assert numbers("<path @0/12>") == []
+
+
+def test_shifted_depth_tags_are_not_deltas():
+    before = ["<g @0>", "  <rect @0/0>", "    @x: 5", "</g @0>"]
+    after = [
+        "<g @0>",
+        "  <circle @0/0>",
+        "    @r: 1",
+        "  <rect @0/1>",
+        "    @x: 5",
+        "</g @0>",
+    ]
+    result = compare_numeric(before, after)
+    assert result.unmatched_after == 2
+    assert result.max_delta == 0.0
 
 
 def test_identical_lines_have_zero_delta():
@@ -1868,6 +1896,11 @@ are aligned with difflib, and deltas are measured only between lines that
 align. Lines that do not align are counted, not measured: positional
 pairing over a file with one inserted element would otherwise report a
 meaningless delta.
+
+Alignment is by masked text, so an inserted element whose masked lines
+equal an existing element's is paired with it and its numbers are
+measured. This is a drift detector for numerically changed files, not a
+structural diff; a large delta is a prompt to look at the HTML report.
 """
 
 import difflib
@@ -1875,6 +1908,10 @@ import re
 from dataclasses import dataclass
 
 NUMBER = re.compile(r"-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?")
+# parse_node's own tokens: the depth tag "@0/1/3>" on open and close lines and
+# the index label "[0001]". They are masked so shifted siblings still align,
+# but they are not measured: an inserted sibling renumbers every later one.
+STRUCTURE = re.compile(r"@\d+(?:/\d+)*>|\[\d+\]")
 
 
 def mask(line: str) -> str:
@@ -1882,7 +1919,7 @@ def mask(line: str) -> str:
 
 
 def numbers(line: str) -> list[float]:
-    return [float(match) for match in NUMBER.findall(line)]
+    return [float(match) for match in NUMBER.findall(STRUCTURE.sub("", line))]
 
 
 @dataclass(frozen=True)
@@ -1917,7 +1954,7 @@ def compare_numeric(before: list[str], after: list[str]) -> NumericResult:
 
 - [ ] **Step 4: Run the numeric tests**
 
-Run the same command as Step 2. Expected: 4 passed.
+Run the same command as Step 2. Expected: 5 passed.
 
 - [ ] **Step 5: Write the failing raster tests**
 
@@ -1935,7 +1972,9 @@ SQUARE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="0
 SQUARE_SHIFTED = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="1" y="0" width="5" height="10" fill="black"/></svg>'
 TALL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 20"><rect x="0" y="0" width="5" height="20" fill="black"/></svg>'
 
-needs_resvg = pytest.mark.skipif(shutil.which("resvg") is None, reason="resvg not on PATH")
+needs_resvg = pytest.mark.skipif(
+    shutil.which("resvg") is None, reason="resvg not on PATH"
+)
 
 
 def write(path: Path, content: str) -> Path:
@@ -2156,13 +2195,17 @@ python3Packages.buildPythonApplication {
 }
 ```
 
-`README.md`: add to the usage line `[--numeric] [--raster]` and a paragraph under `--summary output`:
+`README.md`: add to the usage line `[--numeric] [--raster]`, change the sentence "The JSON contains exactly four integer count keys:" under `--summary output` to "By default the JSON contains exactly four integer count keys:", and add a paragraph after the JSON example:
 
 ```
 With `--numeric` the JSON gains a `numeric` object keyed by relative
 path, for modified files only: `matched`, `unmatched_before`,
 `unmatched_after` (line counts after aligning number-masked lines) and
-`max_delta` over the matched lines. With `--raster` it gains a `raster`
+`max_delta` over the matched lines. Alignment is by number-masked text,
+so a numerically different file with the same structure is measured
+exactly, while an inserted element that masks identically to an existing
+one is paired with it; treat a surprising `max_delta` as a prompt to read
+the HTML diff. With `--raster` it gains a `raster`
 object with `size_before`, `size_after`, `differing_pixels` and
 `max_channel_delta` from resvg renders at 1024 px wide; the two pixel
 fields are null when the sizes differ.
@@ -2185,8 +2228,9 @@ compare-artifacts: add numeric and raster comparison modes
 
 --numeric aligns the number-masked lines of each modified artifact and
 reports the maximum delta over aligned lines and the count of lines
-that did not align, so an inserted element is counted rather than
-turned into a meaningless positional delta. --raster renders both
+that did not align. The parser's own depth tags and index labels are
+masked for alignment but excluded from measurement, so an inserted
+sibling renumbering later ones is counted, not measured. --raster renders both
 versions with resvg and reports differing pixels. Both are written
 into the summary JSON only when requested; the four count keys are
 unchanged otherwise.
