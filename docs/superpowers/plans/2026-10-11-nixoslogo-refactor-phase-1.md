@@ -4,7 +4,7 @@
 
 **Goal:** Restructure the `nixoslogo` package (lazy canvas, one clear-space rule, keyword-only dataclasses, composition where inheritance was wrong, immutable annotation presets) and extend `compare-artifacts` with numeric and raster modes, with every one of the 96 shipped SVG artifacts byte-identical after every task.
 
-**Architecture:** Seven commits on `djacu/architecture-refactor`, each independently mergeable. The oracle is the artifact build: the 96 fixed-output derivations pin the SVG bytes, so a byte change fails the build. A local harness runs the 96 scripts in seconds for fast feedback before the build. A small pytest suite pins the behaviours the artifacts cannot observe.
+**Architecture:** Seven commits on `djacu/architecture-refactor`, each independently mergeable. The oracle is the artifact build: the 96 fixed-output derivations pin the SVG bytes, so a byte change fails the build. A local harness runs the 96 scripts in seconds for fast feedback before the build. One package test and the comparison tool's own tests cover the two behaviours the artifacts cannot observe.
 
 **Tech Stack:** Python 3.12+ dataclasses and TypedDict, svg-py, fontforge (still, in this phase), basedpyright, ruff, treefmt via `nix fmt`, Nix flake builds; Pillow and resvg for the comparison tool.
 
@@ -24,11 +24,13 @@
 
 ## Review Focus
 
-1. A caller passes `clear_space=ClearSpace.NONE` to any renderable and later reads `.clear_space`: it must still be `NONE`. The first implementation attempt of Task 1 silently reset 52 artifacts to recommended clear space because subclasses did not forward the value. Pinned by `test_subclasses_forward_clear_space_to_the_base` in Task 1.
-1. Two `Logomark()` instances must not share one `Lambda`, and a misspelled keyword must raise `TypeError` instead of being swallowed. Pinned in Task 3.
-1. `Annotations.sized(3)` must give integer widths 12/6/3 and dash `[12]`, and a misspelled override key must raise `TypeError` at construction. Pinned in Task 4.
-1. `LogoClearspace` must draw the recommended and minimal rectangles from the given logo regardless of that instance's own `clear_space`. Pinned in Task 6.
-1. The numeric comparison must report an inserted element as unmatched and compute the maximum delta over matched elements only, ignoring the parser's own depth tags and index labels that an insertion renumbers, and the raster comparison must report a size mismatch rather than crash. Pinned in Task 7.
+The 96 artifacts are the test suite for this phase: every clear-space value, every preset, every override a script uses, the cap-height-512 logo and all three clearspace diagrams are among them, and a byte change fails the build. The five failure modes most likely to bite, and what catches each:
+
+1. A subclass stops forwarding `clear_space` to the base, so every `NONE` and `MINIMAL` renderable comes out `RECOMMENDED`. The first implementation attempt of Task 1 did exactly this. Caught by the harness: 52 artifacts change filename and canvas.
+1. An unannotated default redeclaration (`clear_space = ClearSpace.MINIMAL` without the type) is not a dataclass field, so the base default silently wins. Caught by the five misuse artifacts' canvases.
+1. An override applied to the wrong group, or clobbering a sibling field, changes a stroke colour or width. Caught by the twelve annotation artifacts.
+1. `dimension_spacings` generalised wrongly for a length other than five. Not observable in any artifact; pinned by the one package test in Task 2.
+1. The numeric comparison treats an inserted element as a huge positional delta, or measures the parser's own depth tags. Not observable in any artifact; pinned by the comparison-tool tests in Task 7.
 
 ______________________________________________________________________
 
@@ -150,48 +152,12 @@ ______________________________________________________________________
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/dimensioned.py:29-47, 492-499, 610-617`
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/clearspace.py:39-41`
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/misuse.py:117-132`
-- Test: `package-sets/python-packages/nixoslogo/tests/test_core.py`
 
 **Interfaces:**
 
 - Produces: `core.Box`, `core.Shape` (abstract `elements_bounding_box: Box`, `make_svg_elements()`, the six `elements_*` properties), `ClearSpace.distance(unit: float) -> float`, `BaseRenderable.__init__(clear_space=..., background_color=..., **kwargs)`, `BaseRenderable.clearspace_unit` (abstract property), `BaseRenderable.make_canvas(clear_space: ClearSpace) -> Canvas`, `BaseRenderable.canvas` (property). `_get_clearspace`, `_make_canvas` and the `canvas=` parameter no longer exist.
 
-- [ ] **Step 1: Write the failing tests**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_core.py`:
-
-```python
-from nixoslogo.core import BaseRenderable, ClearSpace, Shape
-from nixoslogo.logomark import Lambda, Logomark
-
-
-def test_distance_matches_the_old_match_blocks():
-    assert ClearSpace.NONE.distance(740.0) == 0
-    assert ClearSpace.MINIMAL.distance(740.0) == 370.0
-    assert ClearSpace.RECOMMENDED.distance(740.0) == 740.0
-
-
-def test_subclasses_forward_clear_space_to_the_base():
-    assert Lambda(clear_space=ClearSpace.NONE).clear_space is ClearSpace.NONE
-    assert Logomark(clear_space=ClearSpace.MINIMAL).clear_space is ClearSpace.MINIMAL
-
-
-def test_canvas_is_lazy_and_follows_clear_space():
-    lam = Lambda(gap=0, clear_space=ClearSpace.NONE)
-    tight = lam.canvas
-    lam.clear_space = ClearSpace.RECOMMENDED
-    assert lam.canvas == Lambda(gap=0).canvas
-    assert lam.canvas != tight
-    assert isinstance(lam, Shape)
-    assert isinstance(lam, BaseRenderable)
-```
-
-- [ ] **Step 2: Run the tests to verify they fail**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_core.py -q`
-Expected: FAIL at import with `ImportError: cannot import name 'Shape'`.
-
-- [ ] **Step 3: Add `Box` and `ClearSpace.distance` in `core.py`**
+- [ ] **Step 1: Add `Box` and `ClearSpace.distance` in `core.py`**
 
 Under `# === Types ===`, after the `PaletteColor` class and before `SvgElements`, add:
 
@@ -217,7 +183,7 @@ class ClearSpace(Enum):
                 return unit
 ```
 
-- [ ] **Step 4: Split `Shape` out of `BaseRenderable` in `core.py`**
+- [ ] **Step 2: Split `Shape` out of `BaseRenderable` in `core.py`**
 
 Replace everything from `# === Base Classes ===` to the end of the file with:
 
@@ -329,7 +295,7 @@ class BaseRenderable(Shape, ABC):
 
 `make_svg_background`, `make_svg` and `write_svg` are byte-for-byte today's bodies; only their position moved.
 
-- [ ] **Step 5: Forward `clear_space` and replace the clear-space blocks in `logotype.py`**
+- [ ] **Step 3: Forward `clear_space` and replace the clear-space blocks in `logotype.py`**
 
 In `Glyph.__init__`, delete the line `self.clear_space: ClearSpace = clear_space` and change the `super().__init__(**kwargs)` call to:
 
@@ -355,7 +321,7 @@ In `Logotype.__init__`, delete `self.clear_space: ClearSpace = clear_space` and 
         return self.cap_height
 ```
 
-- [ ] **Step 6: The same in `logomark.py`**
+- [ ] **Step 4: The same in `logomark.py`**
 
 In `Lambda.__init__`, delete `self.clear_space: ClearSpace = clear_space` and forward: `super().__init__(clear_space=clear_space, **kwargs)`. Replace `Lambda._get_clearspace` with:
 
@@ -368,7 +334,7 @@ In `Lambda.__init__`, delete `self.clear_space: ClearSpace = clear_space` and fo
 
 In `Logomark.__init__`, delete `self.clear_space: ClearSpace = clear_space` and forward the same way. Replace `Logomark._get_clearspace` with the identical `clearspace_unit` property returning `self.elements_y_max`.
 
-- [ ] **Step 7: `logo.py`: forward but keep the early assignment**
+- [ ] **Step 5: `logo.py`: forward but keep the early assignment**
 
 `NixosLogo.__init__` reads `self.clear_space` inside `_init_snowflake()` before calling `super().__init__`, so keep the line `self.clear_space: ClearSpace = clear_space` where it is and change the final call to:
 
@@ -385,7 +351,7 @@ Replace `NixosLogo._get_clearspace` with:
         return self.logomark.elements_height
 ```
 
-- [ ] **Step 8: `annotations.py`, `dimensioned.py`, `clearspace.py`, `misuse.py`**
+- [ ] **Step 6: `annotations.py`, `dimensioned.py`, `clearspace.py`, `misuse.py`**
 
 In `annotations.py`, replace `TextAnnotations._get_clearspace` (which returns 0) with:
 
@@ -448,12 +414,7 @@ In `artifacts/misuse.py`, `LogoCrop._make_canvas` becomes:
         )
 ```
 
-- [ ] **Step 9: Run the tests**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_core.py -q`
-Expected: 3 passed.
-
-- [ ] **Step 10: Harness and gates**
+- [ ] **Step 7: Harness and gates**
 
 Run: `nix develop .#nixos-logo-dev --command bash /tmp/nixoslogo-harness/run-artifacts.sh`
 Expected: `identical=96 different=0`. A DIFF on any `-none` or `-minimal` artifact means a subclass is not forwarding `clear_space`.
@@ -467,7 +428,7 @@ Expected: ruff `All checks passed!`, treefmt clean.
 Run: `nix build .#hydraJobs.nixos-branding.x86_64-linux.all-artifacts --no-link`
 Expected: success with no hash mismatch errors.
 
-- [ ] **Step 11: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo
@@ -513,43 +474,7 @@ Create `package-sets/python-packages/nixoslogo/tests/test_dimensioned.py`:
 
 ```python
 from nixoslogo.annotations import Annotations
-from nixoslogo.dimensioned import (
-    DimensionedLogomark,
-    DimensionedLogotype,
-    diagonal_line,
-    make_lambda_construction_lines,
-    make_lambda_polygons,
-)
-from nixoslogo.logomark import Lambda, hexagon_points
-
-
-def test_hexagon_points_starts_on_the_positive_x_axis():
-    points = hexagon_points(512)
-    assert len(points) == 6
-    assert points[0].x == 512
-    assert abs(points[0].y) < 1e-9
-
-
-def test_diagonal_line_joins_the_second_and_fifth_vertices():
-    points = hexagon_points(512)
-    line = diagonal_line(512)
-    assert (line[0].x, line[0].y) == (points[1].x, points[1].y)
-    assert (line[1].x, line[1].y) == (points[4].x, points[4].y)
-
-
-def test_overlay_functions_read_the_given_line_group():
-    lines = Annotations.small().construction_lines
-    circle, hexagon = make_lambda_construction_lines(Lambda(), lines)
-    assert circle.stroke == lines.stroke
-    assert hexagon.stroke_width == lines.stroke_width
-    no_gap, gap = make_lambda_polygons(Lambda(), Annotations.small().object_lines)
-    assert no_gap.stroke_dasharray == [4]
-    assert gap.stroke_dasharray is None
-
-
-def test_dimensioned_logomark_accepts_a_plain_lambda():
-    logomark = DimensionedLogomark(ilambda=Lambda(), annotations=Annotations.small())
-    assert len(logomark.make_svg_elements()) > 0
+from nixoslogo.dimensioned import DimensionedLogotype
 
 
 def test_spacing_dimensions_follow_the_glyph_count():
@@ -559,12 +484,12 @@ def test_spacing_dimensions_follow_the_glyph_count():
     assert len(diagram.dimension_spacings()) == 2
 ```
 
-The last test is the only check of `dimension_spacings` for a length other than five; the artifact build covers five glyphs, which the old hard-coded loop also produced.
+This is the only test in the package for this phase. Every other behaviour the phase changes is pinned by the 96 artifacts; this one is not, because the artifacts only ever run the five-glyph case and the point of the change is other lengths.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_dimensioned.py -q`
-Expected: FAIL at import with `ImportError: cannot import name 'diagonal_line'`.
+Expected: FAIL with `IndexError: tuple index out of range`, because today's `dimension_spacings` indexes `self.glyphs[index + 1]` for `index` in `range(4)` and the logotype has three glyphs.
 
 - [ ] **Step 3: `hexagon_points` in `logomark.py`**
 
@@ -828,11 +753,11 @@ The dropped `DimensionedLambda(annotations=annotations)` had default radius, thi
 - [ ] **Step 9: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 8 passed.
+Expected: 1 passed.
 
 - [ ] **Step 10: Harness and gates**
 
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. A crash on `nixos-lambda-dimensioned-linear`, `nixos-lambda-dimensioned-annotated-parameters` or `nixos-logomark-dimensioned-linear` means one of the three `hexagon` renames in Steps 5 and 6 was missed.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. A crash on `nixos-lambda-dimensioned-linear`, `nixos-lambda-dimensioned-annotated-parameters` or `nixos-logomark-dimensioned-linear` means one of the three `hexagon` renames in Steps 5 and 6 was missed.
 
 - [ ] **Step 11: Commit**
 
@@ -869,7 +794,6 @@ ______________________________________________________________________
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/dimensioned.py` (all eleven classes)
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/misuse.py` (five classes)
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/clearspace.py` (`LogoClearspace`)
-- Test: `package-sets/python-packages/nixoslogo/tests/test_dataclasses.py`
 
 **Interfaces:**
 
@@ -877,46 +801,7 @@ ______________________________________________________________________
 
 - Produces: every renderable constructed by keyword only; `Logomark.GRADIENT_STOP_OFFSETS` (class constant, replaces `_gradient_stop_offsets`); `NixosLogo.transform` (property, replaces reads of `logotype_transform`); `NixosLogo` no longer accepts `loader`; `NixosLogo.logotype.cap_height` replaces reads of `logotype_cap_height` outside `__post_init__`.
 
-- [ ] **Step 1: Write the failing tests**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_dataclasses.py`:
-
-```python
-import pytest
-
-from nixoslogo.core import ClearSpace
-from nixoslogo.dimensioned import DimensionedLambda
-from nixoslogo.annotations import Annotations
-from nixoslogo.logo import NixosLogo
-from nixoslogo.logomark import Lambda, Logomark
-
-
-def test_unknown_keyword_raises():
-    with pytest.raises(TypeError):
-        Lambda(bogus=1)  # pyright: ignore[reportCallIssue]
-
-
-def test_each_logomark_gets_its_own_lambda():
-    assert Logomark().ilambda is not Logomark().ilambda
-
-
-def test_subclass_default_overrides_the_base_default():
-    assert DimensionedLambda(annotations=Annotations.small()).clear_space is ClearSpace.NONE
-    assert Lambda().clear_space is ClearSpace.RECOMMENDED
-
-
-def test_logo_positions_with_the_logotype_cap_height():
-    logo = NixosLogo(logotype_cap_height=500)
-    assert logo.logotype.cap_height == 500
-    assert logo.transform.y == 250.0
-```
-
-- [ ] **Step 2: Run the tests to verify they fail**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_dataclasses.py -q`
-Expected: `test_unknown_keyword_raises` fails (no exception: the keyword is swallowed), `test_each_logomark_gets_its_own_lambda` fails (shared instance), `test_logo_positions_with_the_logotype_cap_height` fails with `AttributeError: 'NixosLogo' object has no attribute 'transform'`.
-
-- [ ] **Step 3: `BaseRenderable` in `core.py`**
+- [ ] **Step 1: `BaseRenderable` in `core.py`**
 
 Add `from dataclasses import dataclass` to the imports. Replace the `BaseRenderable.__init__` with fields:
 
@@ -933,7 +818,7 @@ class BaseRenderable(Shape, ABC):
 
 The rest of the class is unchanged.
 
-- [ ] **Step 4: `Lambda` and `Logomark` in `logomark.py`**
+- [ ] **Step 2: `Lambda` and `Logomark` in `logomark.py`**
 
 Add `from dataclasses import dataclass, field` and `ClassVar` to the typing import. Replace `Lambda.__init__` with fields:
 
@@ -972,7 +857,7 @@ class Logomark(BaseRenderable):
 
 Replace the three reads of `self._gradient_stop_offsets[...]` in `make_flake_gradients_defs` with `self.GRADIENT_STOP_OFFSETS[...]`, and the two reads in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines` (`dimensioned.py`) the same way. Remove `ClearSpace` from the `nixoslogo.core` import in `logomark.py`: the deleted `__init__` signatures were its last uses, and ruff reports the import as unused otherwise.
 
-- [ ] **Step 5: `Glyph` and `Logotype` in `logotype.py`**
+- [ ] **Step 3: `Glyph` and `Logotype` in `logotype.py`**
 
 Add `from dataclasses import dataclass, field`. Replace `Glyph.__init__` with:
 
@@ -1015,7 +900,7 @@ class Logotype(BaseRenderable):
 
 In `_load_glyphs`, remove the `self.glyphs: tuple[Glyph, ...] =` annotation (the field is declared on the class now): `self.glyphs = tuple(...)`. Remove `ClearSpace` from the `nixoslogo.core` import in `logotype.py`; nothing in the module names it any more.
 
-- [ ] **Step 6: `TextAnnotations` and `FontConfig` in `annotations.py`**
+- [ ] **Step 4: `TextAnnotations` and `FontConfig` in `annotations.py`**
 
 Add `from dataclasses import dataclass, field` (the module already imports `dataclass`). Replace `TextAnnotations.__init__` with:
 
@@ -1050,7 +935,7 @@ class FontConfig(TypedDict):
 
 and delete the `"stroke_dasharray": [...]` line from the `font_config` literal of each of `small`, `medium` and `large`. Those entries were forwarded into `TextAnnotations(**self.font_config)` and swallowed by `**kwargs`; with the dataclass they would raise `TypeError` at every dimension label.
 
-- [ ] **Step 7: `NixosLogo` in `logo.py`**
+- [ ] **Step 5: `NixosLogo` in `logo.py`**
 
 Add `from dataclasses import dataclass, field`. Replace `NixosLogo.__init__` with:
 
@@ -1097,7 +982,7 @@ The `loader` constructor parameter is gone: no script or package caller passes i
 
 `self.logotype.cap_height` is the loader's `capHeight`, which `_ref_size` returns as the requested value unchanged, so positions are byte-identical. Remove `ClearSpace` from the `nixoslogo.core` import in `logo.py`; the deleted signature and the deleted `self.clear_space` assignment were its last uses.
 
-- [ ] **Step 8: `dimensioned.py`**
+- [ ] **Step 6: `dimensioned.py`**
 
 Every class gets `@dataclass(kw_only=True)`. The ones with constructors become:
 
@@ -1134,7 +1019,7 @@ class DimensionedLogo(NixosLogo):
 
 Delete their `__init__` methods. `DimensionedLambdaLinear`, `DimensionedLambdaAngular`, `DimensionedLambdaAnnotatedVertices`, `DimensionedLambdaAnnotatedParameters`, `DimensionedLogomarkGradientAnnotated` and `DimensionedLogomarkGradientBackground` get the decorator with no fields. In `DimensionedLogo`, replace every `self.logotype_cap_height` with `self.logotype.cap_height` (five reads in `dimension_cap_height` and `dimension_bearing`). Add `from dataclasses import dataclass` to the imports.
 
-- [ ] **Step 9: `misuse.py` and `clearspace.py`**
+- [ ] **Step 7: `misuse.py` and `clearspace.py`**
 
 In `artifacts/misuse.py`, add `from dataclasses import dataclass` and replace each `__init__` with field redeclarations:
 
@@ -1188,16 +1073,11 @@ class LogoClearspace(BaseRenderable):
         self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)
 ```
 
-- [ ] **Step 10: Run the tests**
+- [ ] **Step 8: Harness and gates**
 
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 12 passed.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. basedpyright errors here almost always mean a field typed `X | None` is read outside `__post_init__`; resolve by reading the derived value (`self.logotype.cap_height`, `self.transform`), never by `assert`.
 
-- [ ] **Step 11: Harness and gates**
-
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. basedpyright errors here almost always mean a field typed `X | None` is read outside `__post_init__`; resolve by reading the derived value (`self.logotype.cap_height`, `self.transform`), never by `assert`.
-
-- [ ] **Step 12: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo
@@ -1228,8 +1108,7 @@ ______________________________________________________________________
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/annotations.py` (`LineConfig`, `FontConfig`, `LineGroup`, `ObjectLines`, `ConstructionLines`, `DimensionLines`, `Annotations`)
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/dimensioned.py` (`__main__` block)
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/clearspace.py` (`__main__` block)
-- Modify: six scripts under `package-sets/top-level/nixos-branding/artifacts/` listed in Step 7
-- Test: `package-sets/python-packages/nixoslogo/tests/test_annotations.py`
+- Modify: six scripts under `package-sets/top-level/nixos-branding/artifacts/` listed in Step 4
 
 **Interfaces:**
 
@@ -1237,63 +1116,7 @@ ______________________________________________________________________
 
 - Produces: frozen `LineGroup(name=, stroke=, stroke_width=, stroke_dasharray=, fill=)`; frozen `DimensionLines(LineGroup)` with `font_loader: FontLoader`, `cap_height: float`, `color: str`, `make_annotation(text) -> TextAnnotations`; `LineGroupOverrides`, `DimensionLinesOverrides`, `AnnotationsOverrides` TypedDicts; frozen `Annotations(object_lines=, construction_lines=, dimension_lines=)` with `sized(multiplier: int, overrides=None)`, `small/medium/large(overrides=None)`, `make_annotation(text)`. `LineConfig`, `FontConfig`, `ObjectLines`, `ConstructionLines` and `Annotations.__init__`'s config dicts no longer exist.
 
-- [ ] **Step 1: Write the failing tests**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_annotations.py`:
-
-```python
-import dataclasses
-
-import pytest
-
-from nixoslogo.annotations import Annotations
-
-
-def test_presets_are_the_sized_multipliers():
-    for preset, multiplier in ((Annotations.small, 1), (Annotations.medium, 2), (Annotations.large, 4)):
-        built, sized = preset(), Annotations.sized(multiplier)
-        assert built.object_lines == sized.object_lines
-        assert built.construction_lines == sized.construction_lines
-        assert built.dimension_lines.stroke_width == sized.dimension_lines.stroke_width
-        assert built.dimension_lines.stroke_dasharray == sized.dimension_lines.stroke_dasharray
-        assert built.dimension_lines.cap_height == sized.dimension_lines.cap_height
-
-
-def test_sized_three_keeps_integer_widths():
-    annotations = Annotations.sized(3)
-    assert annotations.object_lines.stroke_width == 12
-    assert annotations.construction_lines.stroke_width == 6
-    assert annotations.dimension_lines.stroke_width == 3
-    assert annotations.construction_lines.stroke_dasharray == [12]
-    assert annotations.dimension_lines.cap_height == 72
-
-
-def test_override_replaces_only_the_named_field():
-    annotations = Annotations.large(overrides={"construction_lines": {"stroke": "grey"}})
-    assert annotations.construction_lines.stroke == "grey"
-    assert annotations.construction_lines.stroke_width == 8
-    assert annotations.object_lines == Annotations.large().object_lines
-
-
-def test_misspelled_override_key_raises():
-    with pytest.raises(TypeError):
-        Annotations.large(overrides={"construction_lines": {"strok": "grey"}})  # pyright: ignore[reportArgumentType]
-
-
-def test_annotations_are_frozen():
-    annotations = Annotations.small()
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        annotations.construction_lines.stroke = "grey"  # pyright: ignore[reportAttributeAccessIssue]
-```
-
-The first test compares the line groups field by field rather than whole `Annotations` values, because `DimensionLines.font_loader` is a `FontLoader` with identity equality in this phase.
-
-- [ ] **Step 2: Run the tests to verify they fail**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_annotations.py -q`
-Expected: 4 failed, 1 passed. `test_presets_are_the_sized_multipliers` fails with `AttributeError: type object 'Annotations' has no attribute 'sized'` and three others with `TypeError: ... unexpected keyword argument 'overrides'`. `test_misspelled_override_key_raises` already passes, because that same unexpected-keyword `TypeError` satisfies its `pytest.raises`; it only becomes meaningful after Step 4.
-
-- [ ] **Step 3: Replace the line-group section of `annotations.py`**
+- [ ] **Step 1: Replace the line-group section of `annotations.py`**
 
 Replace everything from `class LineConfig(TypedDict):` through the end of `class DimensionLines(LineGroup):`'s `__init__` (keep its four `make_dimension_*` methods) with:
 
@@ -1366,7 +1189,7 @@ with `text_annotation = self.make_annotation(str(label))` (and `str(text)` in `m
 
 Nothing outside the class read `TextAnnotations.scale` (the `.scale` reads in `dimensioned.py` are on `Logotype`), and every preset sets `cap_height`, so the executed path is the same.
 
-- [ ] **Step 4: Replace `Annotations`**
+- [ ] **Step 2: Replace `Annotations`**
 
 Replace the `Annotations` class (its `__init__`, `make_annotation`, `small`, `medium`, `large`) with:
 
@@ -1441,7 +1264,7 @@ Imports: add `replace` to the `dataclasses` import; remove `Callable`, `Path` an
 
 The old literals were stroke widths 4/2/1, 8/4/2, 16/8/4, dash arrays `[4]`, `[8]`, `[16]` and cap heights 24, 48, 96; `4 * m`, `2 * m`, `1 * m`, `[4 * m]`, `24 * m` with `m` in 1, 2, 4 reproduce them as the same ints.
 
-- [ ] **Step 5: `__main__` blocks**
+- [ ] **Step 3: `__main__` blocks**
 
 In `dimensioned.py`'s `__main__`, replace
 
@@ -1470,12 +1293,7 @@ with `annotations = Annotations.large(overrides={"construction_lines": {"stroke"
 
 In `artifacts/clearspace.py`'s `__main__`, replace each `annotations = Annotations.medium()` followed by `annotations.construction_lines.stroke = "grey"` with `annotations = Annotations.medium(overrides={"construction_lines": {"stroke": "grey"}})`, and the `large()` pair the same way.
 
-- [ ] **Step 6: Run the tests**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 17 passed.
-
-- [ ] **Step 7: The six scripts**
+- [ ] **Step 4: The six scripts**
 
 `clearspace/nixos-logo-clearspace/script.py`: replace the two lines `annotations = Annotations.large()` and `annotations.construction_lines.stroke = "grey"` with
 
@@ -1547,11 +1365,11 @@ logomark.write_svg()
 
 The `# TODO @djacu see if this can be better` comments go; the override is the better way.
 
-- [ ] **Step 8: Harness and gates**
+- [ ] **Step 5: Harness and gates**
 
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo package-sets/top-level/nixos-branding/artifacts
@@ -1580,7 +1398,6 @@ ______________________________________________________________________
 - Modify: `package-sets/python-packages/nixoslogo/nixoslogo/artifacts/misuse.py` (`LogoScale`, `LogoColorsWithLambdaPrime`, `__main__`)
 - Modify: `package-sets/top-level/nixos-branding/artifacts/misuse/nixos-logo-misuse-scale/script.py`
 - Modify: `package-sets/top-level/nixos-branding/artifacts/misuse/nixos-logo-misuse-lambdaprime/script.py`
-- Test: `package-sets/python-packages/nixoslogo/tests/test_misuse.py`
 
 **Interfaces:**
 
@@ -1588,30 +1405,11 @@ ______________________________________________________________________
 
 - Produces: nothing new; `LogoScale` and `LogoColorsWithLambdaPrime` no longer exist.
 
-- [ ] **Step 1: Write the failing test**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_misuse.py`:
-
-```python
-import nixoslogo.artifacts.misuse as misuse
-
-
-def test_preset_classes_are_gone():
-    assert not hasattr(misuse, "LogoScale")
-    assert not hasattr(misuse, "LogoColorsWithLambdaPrime")
-    assert hasattr(misuse, "LogoCrop")
-```
-
-- [ ] **Step 2: Run the test to verify it fails**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_misuse.py -q`
-Expected: FAIL on the first assertion.
-
-- [ ] **Step 3: Delete the classes and their preview entries**
+- [ ] **Step 1: Delete the classes and their preview entries**
 
 In `artifacts/misuse.py`, delete `class LogoScale(NixosLogo)` and `class LogoColorsWithLambdaPrime(NixosLogo)` entirely, and in the `__main__` block delete the four lines that construct and write `LogoScale(...)` and `LogoColorsWithLambdaPrime(...)`. If ruff then reports `LogotypeStyle` as unused, remove it from the `nixoslogo.core` import.
 
-- [ ] **Step 4: The two scripts**
+- [ ] **Step 2: The two scripts**
 
 `misuse/nixos-logo-misuse-scale/script.py`:
 
@@ -1635,16 +1433,11 @@ logo.write_svg("nixos-logo-misuse-lambdaprime")
 
 `LogoScale` overrode `_default_cap_height` to return the lambda radius, 512; `logotype_cap_height=512` is the same int. The explicit filenames keep the output names the fixed-output derivations expect.
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 3: Harness and gates**
 
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 18 passed.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
 
-- [ ] **Step 6: Harness and gates**
-
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
-
-- [ ] **Step 7: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo package-sets/top-level/nixos-branding/artifacts/misuse
@@ -1671,7 +1464,6 @@ ______________________________________________________________________
 - Modify: `package-sets/top-level/nixos-branding/artifacts/clearspace/nixos-logo-clearspace/script.py`
 - Modify: `package-sets/top-level/nixos-branding/artifacts/clearspace/nixos-logomark-clearspace/script.py`
 - Modify: `package-sets/top-level/nixos-branding/artifacts/clearspace/nixos-logotype-clearspace/script.py`
-- Test: `package-sets/python-packages/nixoslogo/tests/test_clearspace.py`
 
 **Interfaces:**
 
@@ -1679,36 +1471,7 @@ ______________________________________________________________________
 
 - Produces: `LogoClearspace(logo: BaseRenderable, logo_name: str, space_object: Shape, annotations: Annotations)`. The `recommended` and `minimal` attributes no longer exist.
 
-- [ ] **Step 1: Write the failing test**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_clearspace.py`:
-
-```python
-from nixoslogo.annotations import Annotations
-from nixoslogo.artifacts.clearspace import LogoClearspace
-from nixoslogo.core import ClearSpace
-from nixoslogo.logomark import Lambda, Logomark
-
-
-def test_rectangles_come_from_the_given_logo_not_its_clear_space():
-    diagram = LogoClearspace(
-        logo=Logomark(clear_space=ClearSpace.NONE),
-        logo_name="logomark",
-        space_object=Lambda(gap=0),
-        annotations=Annotations.medium(),
-    )
-    recommended, minimal = diagram.make_clearspace_lines()[:2]
-    assert recommended.width == Logomark().make_canvas(ClearSpace.RECOMMENDED).width
-    assert minimal.width == Logomark().make_canvas(ClearSpace.MINIMAL).width
-    assert diagram.canvas == Logomark().canvas
-```
-
-- [ ] **Step 2: Run the test to verify it fails**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_clearspace.py -q`
-Expected: FAIL with `TypeError: 'Logomark' object is not callable` (the class still instantiates `logo`).
-
-- [ ] **Step 3: Rewrite the class head**
+- [ ] **Step 1: Rewrite the class head**
 
 Replace the dataclass head of `LogoClearspace` with:
 
@@ -1723,7 +1486,7 @@ class LogoClearspace(BaseRenderable):
 
 and delete `__post_init__`. Add `Shape` to the `nixoslogo.core` import; drop `field` from the dataclasses import if unused.
 
-- [ ] **Step 4: Replace the reads**
+- [ ] **Step 2: Replace the reads**
 
 | Old | New |
 |---|---|
@@ -1744,7 +1507,7 @@ At the top of `make_clearspace_lines`, before the two annotations, add:
 
 The elements of a renderable never depended on its clear space, only its canvas did, so one instance produces the same drawing.
 
-- [ ] **Step 5: The three scripts and the preview block**
+- [ ] **Step 3: The three scripts and the preview block**
 
 `clearspace/nixos-logo-clearspace/script.py`:
 
@@ -1800,16 +1563,11 @@ ilc.write_svg()
 
 In the `__main__` block of `clearspace.py`, change the three `logo=Logomark,`, `logo=Logotype,` and `logo=NixosLogo,` arguments to `logo=Logomark(),`, `logo=Logotype(),` and `logo=NixosLogo(),`.
 
-- [ ] **Step 6: Run the tests**
+- [ ] **Step 4: Harness and gates**
 
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 19 passed.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
 
-- [ ] **Step 7: Harness and gates**
-
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 10. Expected: `identical=96`, 0 errors, clean, clean, build succeeds.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo package-sets/top-level/nixos-branding/artifacts/clearspace
@@ -1852,14 +1610,7 @@ ______________________________________________________________________
 Create `tests/test_numeric.py` under the compare-artifacts directory:
 
 ```python
-from compare_artifacts.numeric import NumericResult, compare_numeric, mask, numbers
-
-
-def test_mask_and_numbers():
-    line = "    [0001] M 10.5 -20 1e3"
-    assert mask(line) == "    [#] M # # #"
-    assert numbers(line) == [10.5, -20.0, 1000.0]
-    assert numbers("<path @0/12>") == []
+from compare_artifacts.numeric import NumericResult, compare_numeric
 
 
 def test_shifted_depth_tags_are_not_deltas():
@@ -1875,11 +1626,6 @@ def test_shifted_depth_tags_are_not_deltas():
     result = compare_numeric(before, after)
     assert result.unmatched_after == 2
     assert result.max_delta == 0.0
-
-
-def test_identical_lines_have_zero_delta():
-    lines = ["<svg @0>", "  @viewBox:", "    [0000] 0.0", "</svg @0>"]
-    assert compare_numeric(lines, lines) == NumericResult(4, 0, 0, 0.0)
 
 
 def test_numeric_drift_is_measured_on_matched_lines():
@@ -1976,7 +1722,7 @@ def compare_numeric(before: list[str], after: list[str]) -> NumericResult:
 
 - [ ] **Step 4: Run the numeric tests**
 
-Run the same command as Step 2. Expected: 5 passed.
+Run the same command as Step 2. Expected: 3 passed.
 
 - [ ] **Step 5: Write the failing raster tests**
 
@@ -2276,4 +2022,4 @@ ______________________________________________________________________
 
 **Type consistency.** `clearspace_unit` is a property returning `float` everywhere; `make_canvas(self, clear_space: ClearSpace) -> Canvas` on the base and all four overrides; `LineGroup` fields are `name, stroke, stroke_width, stroke_dasharray, fill` in Task 2's tests, Task 4's class and the overrides TypedDict; `NixosLogo.transform` is used by `logo.py` and nothing else in this phase; `Annotations.sized` returns `"Annotations"` and the presets delegate to it.
 
-**Review Focus.** Each of the five lines has its test in the owning task: 1 in Task 1, 2 in Task 3, 3 in Task 4, 4 in Task 6, 5 in Task 7.
+**Review Focus.** Items 1 to 3 are pinned by named artifacts through the harness and build every task runs; item 4 by Task 2's test; item 5 by Task 7's tests. No test duplicates what the build already fails on.
