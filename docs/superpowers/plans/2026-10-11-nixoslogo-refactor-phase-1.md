@@ -177,12 +177,13 @@ def test_subclasses_forward_clear_space_to_the_base():
 
 
 def test_canvas_is_lazy_and_follows_clear_space():
-    none = Lambda(gap=0, clear_space=ClearSpace.NONE)
-    recommended = Lambda(gap=0)
-    assert none.canvas == none.make_canvas(ClearSpace.NONE)
-    assert none.make_canvas(ClearSpace.RECOMMENDED) == recommended.canvas
-    assert isinstance(none, Shape)
-    assert isinstance(none, BaseRenderable)
+    lam = Lambda(gap=0, clear_space=ClearSpace.NONE)
+    tight = lam.canvas
+    lam.clear_space = ClearSpace.RECOMMENDED
+    assert lam.canvas == Lambda(gap=0).canvas
+    assert lam.canvas != tight
+    assert isinstance(lam, Shape)
+    assert isinstance(lam, BaseRenderable)
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -514,6 +515,7 @@ Create `package-sets/python-packages/nixoslogo/tests/test_dimensioned.py`:
 from nixoslogo.annotations import Annotations
 from nixoslogo.dimensioned import (
     DimensionedLogomark,
+    DimensionedLogotype,
     diagonal_line,
     make_lambda_construction_lines,
     make_lambda_polygons,
@@ -548,7 +550,16 @@ def test_overlay_functions_read_the_given_line_group():
 def test_dimensioned_logomark_accepts_a_plain_lambda():
     logomark = DimensionedLogomark(ilambda=Lambda(), annotations=Annotations.small())
     assert len(logomark.make_svg_elements()) > 0
+
+
+def test_spacing_dimensions_follow_the_glyph_count():
+    diagram = DimensionedLogotype(
+        characters="Nix", spacings=(0, 90, 70), annotations=Annotations.small()
+    )
+    assert len(diagram.dimension_spacings()) == 2
 ```
+
+The last test is the only check of `dimension_spacings` for a length other than five; the artifact build covers five glyphs, which the old hard-coded loop also produced.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
@@ -817,7 +828,7 @@ The dropped `DimensionedLambda(annotations=annotations)` had default radius, thi
 - [ ] **Step 9: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 7 passed.
+Expected: 8 passed.
 
 - [ ] **Step 10: Harness and gates**
 
@@ -1018,17 +1029,15 @@ class TextAnnotations(BaseRenderable):
     cap_height: float | None = None
     glyphs: tuple[Glyph, ...] = field(init=False)
     original_cap_height: float = field(init=False)
-    original_scale: float = field(init=False)
 
     def __post_init__(self) -> None:
         self._load_glyphs()
         self.original_cap_height = self.loader.capHeight
-        self.original_scale = self.loader.scale
         self._set_spacings()
         self._scale_glyphs()
 ```
 
-In `_load_glyphs`, drop the `self.glyphs: tuple[Glyph, ...] =` annotation.
+`original_scale` is gone: today it is assigned and never read. In `_load_glyphs`, drop the `self.glyphs: tuple[Glyph, ...] =` annotation.
 
 Remove `stroke_dasharray` from `FontConfig`:
 
@@ -1182,7 +1191,7 @@ class LogoClearspace(BaseRenderable):
 - [ ] **Step 10: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 11 passed.
+Expected: 12 passed.
 
 - [ ] **Step 11: Harness and gates**
 
@@ -1344,6 +1353,19 @@ Inside `make_dimension_line`, `make_dimension_line_outer` and `make_dimension_an
 
 with `text_annotation = self.make_annotation(str(label))` (and `str(text)` in `make_dimension_angle`). The presets always passed `scale=None`, which is `TextAnnotations`'s default, so the layout is unchanged.
 
+`make_annotation` is now the only caller that reaches `TextAnnotations` with a size, and it passes `cap_height`, so the `scale` input is unreachable. Delete the `scale: float | None = None` field from `TextAnnotations` and reduce `_scale_glyphs` to its surviving branch:
+
+```python
+    def _scale_glyphs(self):
+        if self.cap_height is None:
+            return
+        scale = self.original_cap_height / self.cap_height
+        for glyph in self.glyphs:
+            glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
+```
+
+Nothing outside the class read `TextAnnotations.scale` (the `.scale` reads in `dimensioned.py` are on `Logotype`), and every preset sets `cap_height`, so the executed path is the same.
+
 - [ ] **Step 4: Replace `Annotations`**
 
 Replace the `Annotations` class (its `__init__`, `make_annotation`, `small`, `medium`, `large`) with:
@@ -1451,7 +1473,7 @@ In `artifacts/clearspace.py`'s `__main__`, replace each `annotations = Annotatio
 - [ ] **Step 6: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 16 passed.
+Expected: 17 passed.
 
 - [ ] **Step 7: The six scripts**
 
@@ -1616,7 +1638,7 @@ logo.write_svg("nixos-logo-misuse-lambdaprime")
 - [ ] **Step 5: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 17 passed.
+Expected: 18 passed.
 
 - [ ] **Step 6: Harness and gates**
 
@@ -1781,7 +1803,7 @@ In the `__main__` block of `clearspace.py`, change the three `logo=Logomark,`, `
 - [ ] **Step 6: Run the tests**
 
 Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 18 passed.
+Expected: 19 passed.
 
 - [ ] **Step 7: Harness and gates**
 
