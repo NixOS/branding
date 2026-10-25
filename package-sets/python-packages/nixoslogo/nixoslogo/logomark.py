@@ -1,7 +1,8 @@
 import fractions
 import itertools
 import math
-from typing import TypedDict, override
+from dataclasses import dataclass, field
+from typing import ClassVar, TypedDict, override
 
 import svg
 from svg._types import Length
@@ -9,7 +10,6 @@ from svg._types import Length
 from nixoslogo.colors import Color
 from nixoslogo.core import (
     BaseRenderable,
-    ClearSpace,
     ColorStyle,
     LogomarkColors,
     flatten_svg_elements,
@@ -24,22 +24,27 @@ class GradientEndPoints(TypedDict):
     y2: float
 
 
+def hexagon_points(radius: float) -> Points:
+    angles = [math.radians(angle) for angle in range(0, 360, 60)]
+    return Points(
+        [
+            Point(
+                (
+                    radius * math.cos(angle),
+                    radius * math.sin(angle),
+                )
+            )
+            for angle in angles
+        ]
+    )
+
+
+@dataclass(kw_only=True)
 class Lambda(BaseRenderable):
-    def __init__(
-        self,
-        radius: int = 512,
-        thickness: float = 1 / 4,
-        gap: float = 1 / 32,
-        color: str = "black",
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        **kwargs,
-    ):
-        self.radius: int = radius
-        self.thickness: float = thickness
-        self.gap: float = gap
-        self.color: str = color
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(**kwargs)
+    radius: int = 512
+    thickness: float = 1 / 4
+    gap: float = 1 / 32
+    color: str = "black"
 
     @property
     @override
@@ -60,15 +65,10 @@ class Lambda(BaseRenderable):
             )
         )
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.elements_y_max / 2
-            case ClearSpace.RECOMMENDED:
-                return self.elements_y_max
+    def clearspace_unit(self) -> float:
+        return self.elements_y_max
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -77,20 +77,6 @@ class Lambda(BaseRenderable):
                 points=self.make_lambda_points().to_list(),
                 fill=self.color,
             ),
-        )
-
-    def make_hexagon_points(self, radius: float) -> Points:
-        angles = [math.radians(angle) for angle in range(0, 360, 60)]
-        return Points(
-            [
-                Point(
-                    (
-                        radius * math.cos(angle),
-                        radius * math.sin(angle),
-                    )
-                )
-                for angle in angles
-            ]
         )
 
     def make_lambda_points(
@@ -103,10 +89,10 @@ class Lambda(BaseRenderable):
         thickness = thickness if thickness is not None else self.thickness
         gap = gap if gap is not None else self.gap
 
-        hexagon_points = self.make_hexagon_points(radius)
-        hex_top_left = hexagon_points[2]
-        hex_bottom_left = hexagon_points[4]
-        hex_bottom_right = hexagon_points[5]
+        hexagon = hexagon_points(radius)
+        hex_top_left = hexagon[2]
+        hex_bottom_left = hexagon[4]
+        hex_bottom_right = hexagon[5]
 
         vector_0 = radius * thickness * Vector((cosd(0), sind(0)))
         vector_60 = radius * thickness * Vector((cosd(60), sind(60)))
@@ -174,30 +160,29 @@ class Lambda(BaseRenderable):
         )
 
 
+@dataclass(kw_only=True)
 class Logomark(BaseRenderable):
-    def __init__(
-        self,
-        ilambda: Lambda = Lambda(),
-        color_style: ColorStyle = ColorStyle.GRADIENT,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
-        **kwargs,
-    ):
-        self.ilambda = ilambda
-        self.colors_name: str = (
-            colors.name if isinstance(colors, LogomarkColors) else "custom"
+    ilambda: Lambda = field(default_factory=Lambda)
+    color_style: ColorStyle = ColorStyle.GRADIENT
+    colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT
+
+    GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)
+
+    @property
+    def colors_name(self) -> str:
+        return self.colors.name if isinstance(self.colors, LogomarkColors) else "custom"
+
+    @property
+    def colors_value(self) -> tuple[Color, ...]:
+        return (
+            self.colors.value
+            if isinstance(self.colors, LogomarkColors)
+            else self.colors
         )
-        self.colors_value: tuple[Color, ...] = (
-            colors.value if isinstance(colors, LogomarkColors) else colors
-        )
-        self.color_style: ColorStyle = color_style
-        self.clear_space: ClearSpace = clear_space
 
-        self.css_color_names: tuple[str, ...] = self._make_css_color_names()
-
-        self._gradient_stop_offsets: list[int] = [0, 25, 100]
-
-        super().__init__(**kwargs)
+    @property
+    def css_color_names(self) -> tuple[str, ...]:
+        return self._make_css_color_names()
 
     @property
     @override
@@ -224,15 +209,10 @@ class Logomark(BaseRenderable):
         """The ratio between the snowflake and lambda radius."""
         return self.circumradius / self.ilambda.radius
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.elements_y_max / 2
-            case ClearSpace.RECOMMENDED:
-                return self.elements_y_max
+    def clearspace_unit(self) -> float:
+        return self.elements_y_max
 
     def _make_css_color_names(self) -> tuple[str, ...]:
         match self.color_style:
@@ -311,15 +291,15 @@ class Logomark(BaseRenderable):
                     **gradient_end_points,
                     elements=[
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[0], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[0], "%"),
                             stop_color=color_dark,
                         ),
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[1], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[1], "%"),
                             stop_color=color_midpoint,
                         ),
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[2], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[2], "%"),
                             stop_color=color_original,
                         ),
                     ],

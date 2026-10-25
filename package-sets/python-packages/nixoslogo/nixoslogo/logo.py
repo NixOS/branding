@@ -1,4 +1,5 @@
 import math
+from dataclasses import dataclass, field
 from typing import override
 
 import svg
@@ -7,7 +8,6 @@ from nixoslogo.colors import Color
 from nixoslogo.core import (
     DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
     BaseRenderable,
-    ClearSpace,
     ColorStyle,
     LogoLayout,
     LogomarkColors,
@@ -21,64 +21,50 @@ from nixoslogo.logotype import (
 )
 
 
+@dataclass(kw_only=True)
 class NixosLogo(BaseRenderable):
-    def __init__(
-        self,
-        lambda_radius: int = 512,
-        lambda_thickness: float = 1 / 4,
-        lambda_gap: float = 1 / 32,
-        loader: FontLoader | None = None,
-        logo_layout: LogoLayout = LogoLayout.HORIZONTAL,
-        logomark_colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
-        logomark_color_style: ColorStyle = ColorStyle.GRADIENT,
-        logotype_cap_height: float | None = None,
-        logotype_color: str = "black",
-        logotype_style: LogotypeStyle = LogotypeStyle.REGULAR,
-        logotype_spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING,
-        logotype_characters: str = "NixOS",
-        logotype_transform: svg.Translate | None = None,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        **kwargs,
-    ):
-        self.lambda_radius: int = lambda_radius
-        self.lambda_thickness: float = lambda_thickness
-        self.lambda_gap: float = lambda_gap
-        self.logo_layout: LogoLayout = logo_layout
-        self.logomark_colors: LogomarkColors | tuple[Color, ...] = logomark_colors
-        self.logomark_color_style: ColorStyle = logomark_color_style
-        self.logotype_color: str = logotype_color
-        self.logotype_style: LogotypeStyle = logotype_style
-        self.logotype_spacings: tuple[int, ...] = logotype_spacings
-        self.logotype_characters: str = logotype_characters
-        self.clear_space: ClearSpace = clear_space
+    lambda_radius: int = 512
+    lambda_thickness: float = 1 / 4
+    lambda_gap: float = 1 / 32
+    logo_layout: LogoLayout = LogoLayout.HORIZONTAL
+    logomark_colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT
+    logomark_color_style: ColorStyle = ColorStyle.GRADIENT
+    logotype_cap_height: float | None = None
+    logotype_color: str = "black"
+    logotype_style: LogotypeStyle = LogotypeStyle.REGULAR
+    logotype_spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS_WITH_BEARING
+    logotype_characters: str = "NixOS"
+    logotype_transform: svg.Translate | None = None
+    ilambda: Lambda = field(init=False)
+    logomark: Logomark = field(init=False)
+    loader: FontLoader = field(init=False)
+    logotype: Logotype = field(init=False)
 
+    def __post_init__(self) -> None:
         self._init_snowflake()
-        self.logotype_cap_height: float = (
-            logotype_cap_height
-            if logotype_cap_height is not None
+        cap_height = (
+            self.logotype_cap_height
+            if self.logotype_cap_height is not None
             else self._default_cap_height()
         )
-        self.loader: FontLoader = (
-            loader
-            if loader is not None
-            else FontLoader(capHeight=self.logotype_cap_height)
-        )
+        self.loader = FontLoader(capHeight=cap_height)
         self._init_logotype()
-        self.logotype_transform: svg.Translate = (
-            logotype_transform
-            if logotype_transform is not None
+
+    @property
+    def transform(self) -> svg.Translate:
+        return (
+            self.logotype_transform
+            if self.logotype_transform is not None
             else self._default_transform()
         )
 
-        super().__init__(**kwargs)
-
     def _init_snowflake(self):
-        self.ilambda: Lambda = Lambda(
+        self.ilambda = Lambda(
             radius=self.lambda_radius,
             thickness=self.lambda_thickness,
             gap=self.lambda_gap,
         )
-        self.logomark: Logomark = Logomark(
+        self.logomark = Logomark(
             ilambda=self.ilambda,
             colors=self.logomark_colors,
             color_style=self.logomark_color_style,
@@ -89,7 +75,7 @@ class NixosLogo(BaseRenderable):
         return self.lambda_radius * (1 + self.lambda_thickness * 2) * math.sqrt(3)
 
     def _init_logotype(self):
-        self.logotype: Logotype = Logotype(
+        self.logotype = Logotype(
             characters=self.logotype_characters,
             loader=self.loader,
             color=self.logotype_color,
@@ -102,12 +88,12 @@ class NixosLogo(BaseRenderable):
             case LogoLayout.HORIZONTAL:
                 return svg.Translate(
                     self.logomark.circumradius,
-                    self.logotype_cap_height / 2,
+                    self.logotype.cap_height / 2,
                 )
             case LogoLayout.VERTICAL:
                 return svg.Translate(
                     -self.logotype.elements_width / 2,
-                    self.logomark.inradius + self.logotype_cap_height * 1.25,
+                    self.logomark.inradius + self.logotype.cap_height * 1.25,
                 )
 
     @property
@@ -115,8 +101,8 @@ class NixosLogo(BaseRenderable):
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         logomark_box = self.logomark.elements_bounding_box
         logotype_box = self.logotype.elements_bounding_box
-        offset_x = float(self.logotype_transform.x)
-        offset_y = float(self.logotype_transform.y or 0)
+        offset_x = float(self.transform.x)
+        offset_y = float(self.transform.y or 0)
         logotype_box_translated = (
             logotype_box[0] + offset_x,
             logotype_box[1] + offset_y,
@@ -132,22 +118,17 @@ class NixosLogo(BaseRenderable):
         )
         return (min_x, min_y, max_x, max_y)
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.logomark.elements_height / 2
-            case ClearSpace.RECOMMENDED:
-                return self.logomark.elements_height
+    def clearspace_unit(self) -> float:
+        return self.logomark.elements_height
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.logomark.make_svg_elements(),
             svg.G(
-                transform=[self.logotype_transform],
+                transform=[self.transform],
                 elements=self.logotype.make_svg_elements(),
             ),
         )

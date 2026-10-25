@@ -1,9 +1,7 @@
 import fractions
 import math
-from collections.abc import Callable
-from dataclasses import dataclass
-from pathlib import Path
-from typing import NotRequired, TypedDict, override
+from dataclasses import dataclass, field, replace
+from typing import Self, TypedDict, override
 
 import svg
 from svg._types import Number
@@ -20,35 +18,26 @@ from nixoslogo.helpers import arc_sagitta
 from nixoslogo.logotype import FontLoader, Glyph
 
 
+@dataclass(kw_only=True)
 class TextAnnotations(BaseRenderable):
-    def __init__(
-        self,
-        characters: str,
-        loader: FontLoader,
-        color: str = "black",
-        scale: float | None = None,
-        cap_height: float | None = None,
-        **kwargs,
-    ):
-        self.characters: str = characters
-        self.loader: FontLoader = loader
-        self.color: str = color
-        self.scale: float | None = scale
-        self.cap_height: float | None = cap_height
+    characters: str
+    loader: FontLoader
+    color: str = "black"
+    cap_height: float | None = None
+    glyphs: tuple[Glyph, ...] = field(init=False)
+    original_cap_height: float = field(init=False)
 
+    def __post_init__(self) -> None:
         self._load_glyphs()
-        self.original_cap_height: float = self.loader.capHeight
-        self.original_scale: float = self.loader.scale
+        self.original_cap_height = self.loader.capHeight
         self._set_spacings()
         self._scale_glyphs()
-
-        super().__init__(**kwargs)
 
     def _map_characters(self, character: str) -> str:
         return CHARACTER_GLYPHNAME_MAP.get(character, character)
 
     def _load_glyphs(self):
-        self.glyphs: tuple[Glyph, ...] = tuple(
+        self.glyphs = tuple(
             Glyph(
                 loader=self.loader,
                 character=self._map_characters(character),
@@ -81,23 +70,15 @@ class TextAnnotations(BaseRenderable):
             x_offset += glyph.glyph.width
 
     def _scale_glyphs(self):
-        if self.scale is not None and self.cap_height is not None:
-            raise ValueError("Only one of scale or cap_height can be set.")
-
-        if self.cap_height is not None:
-            scale = self.original_cap_height / self.cap_height
-        elif self.scale is not None:
-            scale = self.scale
-            self.cap_height = self.original_cap_height / scale
-        else:
+        if self.cap_height is None:
             return
-
-        self.scale = scale
+        scale = self.original_cap_height / self.cap_height
         for glyph in self.glyphs:
             glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
 
+    @property
     @override
-    def _get_clearspace(self):
+    def clearspace_unit(self) -> float:
         return 0
 
     @override
@@ -116,22 +97,7 @@ class TextAnnotations(BaseRenderable):
         )
 
 
-class LineConfig(TypedDict):
-    name: str
-    stroke: str
-    stroke_width: int
-    stroke_dasharray: list[Number]
-    fill: NotRequired[str]
-
-
-class FontConfig(TypedDict):
-    scale: float | None
-    cap_height: float
-    color: str
-    stroke_dasharray: list[Number]
-
-
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class LineGroup:
     name: str
     stroke: str
@@ -140,26 +106,38 @@ class LineGroup:
     fill: str = "transparent"
 
 
-class ObjectLines(LineGroup):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class LineGroupOverrides(TypedDict, total=False):
+    stroke: str
+    stroke_width: int
+    stroke_dasharray: list[Number]
+    fill: str
 
 
-class ConstructionLines(LineGroup):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class DimensionLinesOverrides(LineGroupOverrides, total=False):
+    font_loader: FontLoader
+    cap_height: float
+    color: str
 
 
+class AnnotationsOverrides(TypedDict, total=False):
+    object_lines: LineGroupOverrides
+    construction_lines: LineGroupOverrides
+    dimension_lines: DimensionLinesOverrides
+
+
+@dataclass(frozen=True, kw_only=True)
 class DimensionLines(LineGroup):
-    def __init__(
-        self,
-        font_loader: FontLoader,
-        font_config: FontConfig,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.font_loader: FontLoader = font_loader
-        self.font_config: FontConfig = font_config
+    font_loader: FontLoader
+    cap_height: float
+    color: str
+
+    def make_annotation(self, text: str) -> TextAnnotations:
+        return TextAnnotations(
+            characters=text,
+            loader=self.font_loader,
+            cap_height=self.cap_height,
+            color=self.color,
+        )
 
     def make_dimension_line(
         self,
@@ -203,11 +181,7 @@ class DimensionLines(LineGroup):
             else:
                 label = text
 
-            text_annotation = TextAnnotations(
-                characters=str(label),
-                loader=self.font_loader,
-                **self.font_config,
-            )
+            text_annotation = self.make_annotation(str(label))
             annotation_center = Point(
                 (
                     text_annotation.elements_width / 2,
@@ -332,11 +306,7 @@ class DimensionLines(LineGroup):
             else:
                 label = text
 
-            text_annotation = TextAnnotations(
-                characters=str(label),
-                loader=self.font_loader,
-                **self.font_config,
-            )
+            text_annotation = self.make_annotation(str(label))
             annotation_center = Point(
                 (
                     text_annotation.elements_width / 2,
@@ -450,11 +420,7 @@ class DimensionLines(LineGroup):
             sweep,
         )
 
-        text_annotation = TextAnnotations(
-            characters=str(text),
-            loader=self.font_loader,
-            **self.font_config,
-        )
+        text_annotation = self.make_annotation(str(text))
         annotation_center = Point(
             (text_annotation.elements_width / 2, -text_annotation.elements_height / 2)
         )
@@ -519,125 +485,72 @@ class DimensionLines(LineGroup):
         )
 
 
+@dataclass(frozen=True, kw_only=True)
 class Annotations:
-    def __init__(
-        self,
-        object_lines_config: LineConfig,
-        construction_lines_config: LineConfig,
-        dimension_lines_config: LineConfig,
-        font_config: FontConfig,
-        get_font_file: Callable[[], Path] = get_nixos_annotation_font_file,
-        transforms_map: dict[str, dict[str, int]] = DEFAULT_JURA_TRANSFORMS,
-    ):
-        self.font_loader: FontLoader = FontLoader(
-            get_font_file=get_font_file,
-            transforms_map=transforms_map,
-            offset_glyph=False,
-        )
-        self.font_config: FontConfig = font_config
-        self.object_lines: ObjectLines = ObjectLines(**object_lines_config)
-        self.construction_lines: ConstructionLines = ConstructionLines(
-            **construction_lines_config
-        )
-        self.dimension_lines: DimensionLines = DimensionLines(
-            **dimension_lines_config,
-            font_loader=self.font_loader,
-            font_config=self.font_config,
-        )
+    object_lines: LineGroup
+    construction_lines: LineGroup
+    dimension_lines: DimensionLines
 
     def make_annotation(self, text: str) -> TextAnnotations:
-        return TextAnnotations(
-            characters=str(text),
-            loader=self.font_loader,
-            **self.font_config,
+        return self.dimension_lines.make_annotation(text)
+
+    @classmethod
+    def sized(
+        cls, multiplier: int, overrides: AnnotationsOverrides | None = None
+    ) -> Self:
+        base = cls(
+            object_lines=LineGroup(
+                name="object",
+                stroke="green",
+                stroke_width=4 * multiplier,
+                stroke_dasharray=[4 * multiplier],
+            ),
+            construction_lines=LineGroup(
+                name="construction",
+                stroke="blue",
+                stroke_width=2 * multiplier,
+                stroke_dasharray=[4 * multiplier],
+            ),
+            dimension_lines=DimensionLines(
+                name="dimension",
+                stroke="red",
+                stroke_width=1 * multiplier,
+                stroke_dasharray=[4 * multiplier],
+                font_loader=FontLoader(
+                    get_font_file=get_nixos_annotation_font_file,
+                    transforms_map=DEFAULT_JURA_TRANSFORMS,
+                    offset_glyph=False,
+                ),
+                cap_height=24 * multiplier,
+                color="black",
+            ),
+        )
+        if overrides is None:
+            return base
+        return replace(
+            base,
+            object_lines=replace(
+                base.object_lines, **overrides.get("object_lines", {})
+            ),
+            construction_lines=replace(
+                base.construction_lines, **overrides.get("construction_lines", {})
+            ),
+            dimension_lines=replace(
+                base.dimension_lines, **overrides.get("dimension_lines", {})
+            ),
         )
 
     @classmethod
-    def small(cls) -> "Annotations":
-        return cls(
-            object_lines_config={
-                "name": "object",
-                "stroke": "green",
-                "stroke_width": 4,
-                "stroke_dasharray": [4],
-            },
-            construction_lines_config={
-                "name": "construction",
-                "stroke": "blue",
-                "stroke_width": 2,
-                "stroke_dasharray": [4],
-            },
-            dimension_lines_config={
-                "name": "dimension",
-                "stroke": "red",
-                "stroke_width": 1,
-                "stroke_dasharray": [4],
-            },
-            font_config={
-                "scale": None,
-                "cap_height": 24,
-                "color": "black",
-                "stroke_dasharray": [4],
-            },
-        )
+    def small(cls, overrides: AnnotationsOverrides | None = None) -> Self:
+        return cls.sized(1, overrides)
 
     @classmethod
-    def medium(cls) -> "Annotations":
-        return cls(
-            object_lines_config={
-                "name": "object",
-                "stroke": "green",
-                "stroke_width": 8,
-                "stroke_dasharray": [8],
-            },
-            construction_lines_config={
-                "name": "construction",
-                "stroke": "blue",
-                "stroke_width": 4,
-                "stroke_dasharray": [8],
-            },
-            dimension_lines_config={
-                "name": "dimension",
-                "stroke": "red",
-                "stroke_width": 2,
-                "stroke_dasharray": [8],
-            },
-            font_config={
-                "scale": None,
-                "cap_height": 48,
-                "color": "black",
-                "stroke_dasharray": [8],
-            },
-        )
+    def medium(cls, overrides: AnnotationsOverrides | None = None) -> Self:
+        return cls.sized(2, overrides)
 
     @classmethod
-    def large(cls) -> "Annotations":
-        return cls(
-            object_lines_config={
-                "name": "object",
-                "stroke": "green",
-                "stroke_width": 16,
-                "stroke_dasharray": [16],
-            },
-            construction_lines_config={
-                "name": "construction",
-                "stroke": "blue",
-                "stroke_width": 8,
-                "stroke_dasharray": [16],
-            },
-            dimension_lines_config={
-                "name": "dimension",
-                "stroke": "red",
-                "stroke_width": 4,
-                "stroke_dasharray": [16],
-            },
-            font_config={
-                "scale": None,
-                "cap_height": 96,
-                "color": "black",
-                "stroke_dasharray": [16],
-            },
-        )
+    def large(cls, overrides: AnnotationsOverrides | None = None) -> Self:
+        return cls.sized(4, overrides)
 
 
 if __name__ == "__main__":

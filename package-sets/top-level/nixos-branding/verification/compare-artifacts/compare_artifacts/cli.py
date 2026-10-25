@@ -10,10 +10,14 @@ import json
 import signal
 import subprocess
 import sys
+import tempfile
+from dataclasses import asdict
 from pathlib import Path
 
 from compare_artifacts.build import build_pair
 from compare_artifacts.collect import collect_files, counts
+from compare_artifacts.numeric import compare_numeric
+from compare_artifacts.raster import compare_raster, render
 from compare_artifacts.report import render_report
 from compare_artifacts.worktree import Interrupted, Worktree
 
@@ -54,6 +58,20 @@ def _build_parser() -> argparse.ArgumentParser:
         help="If set, write a JSON file at this path with the counts "
         "(modified/added/deleted/unchanged). The HTML output is "
         "unchanged whether or not this flag is passed.",
+    )
+    parser.add_argument(
+        "--numeric",
+        action="store_true",
+        help="For each modified file, align number-masked lines and report "
+        "the maximum numeric delta over aligned lines plus the count of "
+        "unaligned lines. Written under 'numeric' in the summary JSON.",
+    )
+    parser.add_argument(
+        "--raster",
+        action="store_true",
+        help="For each modified file, render both versions with resvg at "
+        "1024 px wide and report differing pixels. Written under 'raster' "
+        "in the summary JSON.",
     )
     diff_mode = parser.add_mutually_exclusive_group()
     diff_mode.add_argument(
@@ -110,8 +128,38 @@ def main() -> int:
                 hide_unchanged=args.hide_unchanged,
             )
             args.output.write_text(html_out)
+            summary: dict[str, object] = dict(counts(specs))
+            modified = [spec for spec in specs if spec.state == "modified"]
+            if args.numeric:
+                numeric = {
+                    str(spec.path): asdict(compare_numeric(spec.before, spec.after))
+                    for spec in modified
+                }
+                summary["numeric"] = numeric
+                for path, result in numeric.items():
+                    print(
+                        f"numeric {path}: matched={result['matched']} "
+                        f"unmatched={result['unmatched_before']}/{result['unmatched_after']} "
+                        f"changed={result['changed']}/{result['compared']} "
+                        f"max_delta={result['max_delta']:.6g}"
+                    )
+            if args.raster:
+                raster: dict[str, dict[str, object]] = {}
+                with tempfile.TemporaryDirectory() as tmp:
+                    for index, spec in enumerate(modified):
+                        png_a = Path(tmp) / f"{index}-a.png"
+                        png_b = Path(tmp) / f"{index}-b.png"
+                        render(path_a / spec.path, png_a)
+                        render(path_b / spec.path, png_b)
+                        raster[str(spec.path)] = asdict(compare_raster(png_a, png_b))
+                summary["raster"] = raster
+                for path, result in raster.items():
+                    print(
+                        f"raster {path}: differing_pixels={result['differing_pixels']} "
+                        f"max_channel_delta={result['max_channel_delta']}"
+                    )
             if args.summary is not None:
-                args.summary.write_text(json.dumps(counts(specs)))
+                args.summary.write_text(json.dumps(summary))
     except subprocess.CalledProcessError as e:
         # Distinguish git-worktree-add failure from nix-build failure by
         # the command vector recorded on the exception.

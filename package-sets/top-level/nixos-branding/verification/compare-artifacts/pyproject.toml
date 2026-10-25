@@ -3,6 +3,7 @@ name = "compare-artifacts"
 version = "0.2.0"
 description = "Diff nixos-branding artifacts between two git refs"
 requires-python = ">=3.13"
+dependencies = ["pillow (>=12,<13)"]
 
 [project.scripts]
 compare-artifacts = "compare_artifacts.cli:main"

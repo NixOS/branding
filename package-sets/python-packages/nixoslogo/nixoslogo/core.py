@@ -2,6 +2,7 @@ import os
 import string
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import Enum, auto
 from functools import partial
 from pathlib import Path
@@ -22,6 +23,8 @@ class PaletteColor(TypedDict):
     value: list[float]
     tints: NotRequired[dict[str, list[float]]]
 
+
+Box = tuple[float, float, float, float]
 
 SvgElements: TypeAlias = "svg.Element | Sequence[SvgElements]"
 
@@ -160,6 +163,15 @@ class ClearSpace(Enum):
     MINIMAL = auto()
     RECOMMENDED = auto()
 
+    def distance(self, unit: float) -> float:
+        match self:
+            case ClearSpace.NONE:
+                return 0
+            case ClearSpace.MINIMAL:
+                return unit / 2
+            case ClearSpace.RECOMMENDED:
+                return unit
+
 
 class ColorStyle(Enum):
     FLAT = auto()
@@ -187,37 +199,59 @@ class LogotypeStyle(Enum):
 # === Base Classes ===
 
 
-class BaseRenderable(ABC):
-    def __init__(
-        self,
-        canvas: Canvas | None = None,
-        background_color: str | None = None,
-        **kwargs: object,
-    ):
-        self.background_color: str | None = background_color
-        self.canvas: Canvas = canvas if canvas is not None else self._make_canvas()
-
+class Shape(ABC):
     @property
     @abstractmethod
-    def elements_bounding_box(self) -> tuple[float, float, float, float]: ...
-
-    @abstractmethod
-    def _get_clearspace(self) -> float: ...
+    def elements_bounding_box(self) -> Box: ...
 
     @abstractmethod
     def make_svg_elements(self) -> list[svg.Element]: ...
 
+    @property
+    def elements_x_min(self):
+        return self.elements_bounding_box[0]
+
+    @property
+    def elements_y_min(self):
+        return self.elements_bounding_box[1]
+
+    @property
+    def elements_x_max(self):
+        return self.elements_bounding_box[2]
+
+    @property
+    def elements_y_max(self):
+        return self.elements_bounding_box[3]
+
+    @property
+    def elements_width(self):
+        return self.elements_x_max - self.elements_x_min
+
+    @property
+    def elements_height(self):
+        return self.elements_y_max - self.elements_y_min
+
+
+@dataclass(kw_only=True)
+class BaseRenderable(Shape, ABC):
+    clear_space: ClearSpace = ClearSpace.RECOMMENDED
+    background_color: str | None = None
+
+    @property
+    @abstractmethod
+    def clearspace_unit(self) -> float: ...
+
     @abstractmethod
     def make_filename(self, extras: tuple[str, ...] = ()) -> str: ...
 
-    def _make_canvas(self) -> Canvas:
+    def make_canvas(self, clear_space: ClearSpace) -> Canvas:
         min_x, min_y, max_x, max_y = self.elements_bounding_box
-        clear_space = self._get_clearspace()
+        distance = clear_space.distance(self.clearspace_unit)
 
-        min_x -= clear_space
-        min_y -= clear_space
-        max_x += clear_space
-        max_y += clear_space
+        min_x -= distance
+        min_y -= distance
+        max_x += distance
+        max_y += distance
 
         return Canvas(
             min_x=min_x,
@@ -225,6 +259,10 @@ class BaseRenderable(ABC):
             width=max_x - min_x,
             height=max_y - min_y,
         )
+
+    @property
+    def canvas(self) -> Canvas:
+        return self.make_canvas(self.clear_space)
 
     @property
     def canvas_bounding_box(self):
@@ -256,27 +294,3 @@ class BaseRenderable(ABC):
         filename = filename.replace("/", "_")
         with open(Path(filename + ".svg"), "w", encoding="utf-8") as file:
             etree.canonicalize(str(self.make_svg()), out=file)
-
-    @property
-    def elements_x_min(self):
-        return self.elements_bounding_box[0]
-
-    @property
-    def elements_y_min(self):
-        return self.elements_bounding_box[1]
-
-    @property
-    def elements_x_max(self):
-        return self.elements_bounding_box[2]
-
-    @property
-    def elements_y_max(self):
-        return self.elements_bounding_box[3]
-
-    @property
-    def elements_width(self):
-        return self.elements_x_max - self.elements_x_min
-
-    @property
-    def elements_height(self):
-        return self.elements_y_max - self.elements_y_min
