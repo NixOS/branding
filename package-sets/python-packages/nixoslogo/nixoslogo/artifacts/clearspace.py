@@ -223,8 +223,9 @@ class LogoClearspace(BaseRenderable):
 if __name__ == "__main__":
     setup_logging(level=logging.DEBUG)
 
-    annotations = Annotations.medium()
-    annotations.construction_lines.stroke = "grey"
+    annotations = Annotations.medium(
+        overrides={"construction_lines": {"stroke": "grey"}}
+    )
     space_object = Lambda(gap=0)
     ilc = LogoClearspace(
         logo=Logomark,
@@ -234,8 +235,9 @@ if __name__ == "__main__":
     )
     ilc.write_svg(filename=ilc.make_filename(extras=("test",)))
 
-    annotations = Annotations.medium()
-    annotations.construction_lines.stroke = "grey"
+    annotations = Annotations.medium(
+        overrides={"construction_lines": {"stroke": "grey"}}
+    )
     space_object = Glyph(character="N")
     ilc = LogoClearspace(
         logo=Logotype,
@@ -245,8 +247,9 @@ if __name__ == "__main__":
     )
     ilc.write_svg(filename=ilc.make_filename(extras=("test",)))
 
-    annotations = Annotations.large()
-    annotations.construction_lines.stroke = "grey"
+    annotations = Annotations.large(
+        overrides={"construction_lines": {"stroke": "grey"}}
+    )
     space_object = Logomark()
     ilc = LogoClearspace(
         logo=NixosLogo,

@@ -2,8 +2,7 @@ from nixoslogo.annotations import Annotations
 from nixoslogo.artifacts.clearspace import LogoClearspace
 from nixoslogo.logomark import Lambda, Logomark
 
-annotations = Annotations.medium()
-annotations.construction_lines.stroke = "grey"
+annotations = Annotations.medium(overrides={"construction_lines": {"stroke": "grey"}})
 space_object = Lambda(gap=0)
 ilc = LogoClearspace(
     logo=Logomark,

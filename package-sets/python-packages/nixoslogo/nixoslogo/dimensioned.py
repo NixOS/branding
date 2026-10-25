@@ -926,9 +926,9 @@ if __name__ == "__main__":
     from nixoslogo.core import DEFAULT_LOGOTYPE_SPACINGS
     from nixoslogo.logotype import FontLoader
 
-    annotations = Annotations.small()
-    annotations.construction_lines.stroke = "black"
-    annotations.construction_lines.stroke_dasharray = [16]
+    annotations = Annotations.small(
+        overrides={"construction_lines": {"stroke": "black", "stroke_dasharray": [16]}}
+    )
 
     loader = FontLoader(capHeight=512)
 
@@ -941,8 +941,9 @@ if __name__ == "__main__":
     )
     artifact.write_svg(filename=artifact.make_filename(extras=("test",)))
 
-    annotations = Annotations.large()
-    annotations.construction_lines.stroke = "black"
+    annotations = Annotations.large(
+        overrides={"construction_lines": {"stroke": "black"}}
+    )
     artifact = DimensionedLogo(
         clear_space=ClearSpace.MINIMAL,
         annotations=annotations,
