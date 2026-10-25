@@ -1140,7 +1140,7 @@ class Annotations:
     @classmethod
     def sized(
         cls, multiplier: int, overrides: AnnotationsOverrides | None = None
-    ) -> "Annotations":
+    ) -> Self:
         base = cls(
             object_lines=LineGroup(
                 name="object",
@@ -1182,19 +1182,19 @@ class Annotations:
         )
 
     @classmethod
-    def small(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def small(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(1, overrides)
 
     @classmethod
-    def medium(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def medium(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(2, overrides)
 
     @classmethod
-    def large(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def large(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(4, overrides)
 ```
 
-Imports: add `replace` to the `dataclasses` import; remove `Callable`, `Path` and `NotRequired` if ruff reports them unused.
+Imports: add `replace` to the `dataclasses` import and `Self` to the `typing` import; remove `Callable`, `Path` and `NotRequired` if ruff reports them unused.
 
 The old literals were stroke widths 4/2/1, 8/4/2, 16/8/4, dash arrays `[4]`, `[8]`, `[16]` and cap heights 24, 48, 96; `4 * m`, `2 * m`, `1 * m`, `[4 * m]`, `24 * m` with `m` in 1, 2, 4 reproduce them as the same ints.
 
@@ -1954,6 +1954,6 @@ ______________________________________________________________________
 
 **Placeholders.** None: every edit shows its code, every test its body, every command its expected output.
 
-**Type consistency.** `clearspace_unit` is a property returning `float` everywhere; `make_canvas(self, clear_space: ClearSpace) -> Canvas` on the base and all four overrides; `LineGroup` fields are `name, stroke, stroke_width, stroke_dasharray, fill` in Task 2's tests, Task 4's class and the overrides TypedDict; `NixosLogo.transform` is used by `logo.py` and nothing else in this phase; `Annotations.sized` returns `"Annotations"` and the presets delegate to it.
+**Type consistency.** `clearspace_unit` is a property returning `float` everywhere; `make_canvas(self, clear_space: ClearSpace) -> Canvas` on the base and all four overrides; `LineGroup` fields are `name, stroke, stroke_width, stroke_dasharray, fill` in Task 2's tests, Task 4's class and the overrides TypedDict; `NixosLogo.transform` is used by `logo.py` and nothing else in this phase; `Annotations.sized` and the three presets return `Self`, since they build through `cls`; `geometry.py` keeps concrete names because its operators return fixed classes.
 
 **Review Focus.** Items 1 to 4 are pinned by named artifacts through the harness and build every task runs; item 5 by Task 7's tests. No test duplicates what the build already fails on.
