@@ -33,12 +33,11 @@ class DimensionedLambda(Lambda):
         clear_space: ClearSpace = ClearSpace.NONE,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
         self.annotations: Annotations = annotations
-        self.clear_space: ClearSpace = clear_space
 
     @override
-    def _make_canvas(self) -> Canvas:
+    def make_canvas(self, clear_space: ClearSpace) -> Canvas:
         return Canvas(
             min_x=-2 * self.radius,
             min_y=-2 * self.radius,
@@ -490,7 +489,7 @@ class DimensionedLogomark(Logomark):
         self.annotations: Annotations = annotations
 
     @override
-    def _make_canvas(self) -> Canvas:
+    def make_canvas(self, clear_space: ClearSpace) -> Canvas:
         return Canvas(
             min_x=-4 * self.ilambda.radius,
             min_y=-4 * self.ilambda.radius,
@@ -608,7 +607,7 @@ class DimensionedLogomarkGradient(Logomark):
         self.annotations: Annotations = annotations
 
     @override
-    def _make_canvas(self) -> Canvas:
+    def make_canvas(self, clear_space: ClearSpace) -> Canvas:
         return Canvas(
             min_x=-2 * self.ilambda.radius,
             min_y=-2 * self.ilambda.radius,

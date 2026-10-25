@@ -36,9 +36,10 @@ class LogoClearspace(BaseRenderable):
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return self.recommended.elements_bounding_box
 
+    @property
     @override
-    def _get_clearspace(self) -> float:
-        return self.recommended._get_clearspace()
+    def clearspace_unit(self) -> float:
+        return self.recommended.clearspace_unit
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:

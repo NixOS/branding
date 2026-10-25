@@ -70,7 +70,7 @@ class NixosLogo(BaseRenderable):
             else self._default_transform()
         )
 
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
 
     def _init_snowflake(self):
         self.ilambda: Lambda = Lambda(
@@ -132,15 +132,10 @@ class NixosLogo(BaseRenderable):
         )
         return (min_x, min_y, max_x, max_y)
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.logomark.elements_height / 2
-            case ClearSpace.RECOMMENDED:
-                return self.logomark.elements_height
+    def clearspace_unit(self) -> float:
+        return self.logomark.elements_height
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:

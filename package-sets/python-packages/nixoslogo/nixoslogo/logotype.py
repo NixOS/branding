@@ -151,13 +151,12 @@ class Glyph(BaseRenderable):
         self.loader: FontLoader = loader if loader is not None else FontLoader()
         self.color: str = color
         self.style: LogotypeStyle = style
-        self.clear_space: ClearSpace = clear_space
 
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
 
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
 
     def get_path(self, layer):
         path = []
@@ -218,15 +217,10 @@ class Glyph(BaseRenderable):
     def elements_bounding_box(self) -> tuple[float, float, float, float]:
         return cast("tuple[float, float, float, float]", self.layer.boundingBox())
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.loader.capHeight / 2
-            case ClearSpace.RECOMMENDED:
-                return self.loader.capHeight
+    def clearspace_unit(self) -> float:
+        return self.loader.capHeight
 
     def make_svg_element(self):
         match self.style:
@@ -290,14 +284,13 @@ class Logotype(BaseRenderable):
         self.color: str = color
         self.style: LogotypeStyle = style
         self.spacings: tuple[int, ...] = spacings
-        self.clear_space: ClearSpace = clear_space
 
         self._load_glyphs()
         self.cap_height: float = self.glyphs[0].loader.capHeight
         self.scale: float = self.glyphs[0].loader.scale
         self._set_spacings()
 
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
 
     def _load_glyphs(self):
         self.glyphs: tuple[Glyph, ...] = tuple(
@@ -317,15 +310,10 @@ class Logotype(BaseRenderable):
             character.layer.transform((1, 0, 0, 1, x_offset, 0))
             x_offset += character.elements_width
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.cap_height / 2
-            case ClearSpace.RECOMMENDED:
-                return self.cap_height
+    def clearspace_unit(self) -> float:
+        return self.cap_height
 
     @property
     @override

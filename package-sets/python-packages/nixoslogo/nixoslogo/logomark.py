@@ -38,8 +38,7 @@ class Lambda(BaseRenderable):
         self.thickness: float = thickness
         self.gap: float = gap
         self.color: str = color
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
 
     @property
     @override
@@ -60,15 +59,10 @@ class Lambda(BaseRenderable):
             )
         )
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.elements_y_max / 2
-            case ClearSpace.RECOMMENDED:
-                return self.elements_y_max
+    def clearspace_unit(self) -> float:
+        return self.elements_y_max
 
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -191,13 +185,12 @@ class Logomark(BaseRenderable):
             colors.value if isinstance(colors, LogomarkColors) else colors
         )
         self.color_style: ColorStyle = color_style
-        self.clear_space: ClearSpace = clear_space
 
         self.css_color_names: tuple[str, ...] = self._make_css_color_names()
 
         self._gradient_stop_offsets: list[int] = [0, 25, 100]
 
-        super().__init__(**kwargs)
+        super().__init__(clear_space=clear_space, **kwargs)
 
     @property
     @override
@@ -224,15 +217,10 @@ class Logomark(BaseRenderable):
         """The ratio between the snowflake and lambda radius."""
         return self.circumradius / self.ilambda.radius
 
+    @property
     @override
-    def _get_clearspace(self):
-        match self.clear_space:
-            case ClearSpace.NONE:
-                return 0
-            case ClearSpace.MINIMAL:
-                return self.elements_y_max / 2
-            case ClearSpace.RECOMMENDED:
-                return self.elements_y_max
+    def clearspace_unit(self) -> float:
+        return self.elements_y_max
 
     def _make_css_color_names(self) -> tuple[str, ...]:
         match self.color_style:

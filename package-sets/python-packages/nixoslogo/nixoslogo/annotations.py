@@ -96,8 +96,9 @@ class TextAnnotations(BaseRenderable):
         for glyph in self.glyphs:
             glyph.layer.transform((1 / scale, 0, 0, 1 / scale, 0, 0))
 
+    @property
     @override
-    def _get_clearspace(self):
+    def clearspace_unit(self) -> float:
         return 0
 
     @override

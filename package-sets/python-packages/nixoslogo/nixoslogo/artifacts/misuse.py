@@ -115,14 +115,14 @@ class LogoCrop(NixosLogo):
         )
 
     @override
-    def _make_canvas(self) -> Canvas:
+    def make_canvas(self, clear_space: ClearSpace) -> Canvas:
         min_x, min_y, max_x, max_y = self.elements_bounding_box
-        clear_space = self._get_clearspace()
+        distance = clear_space.distance(self.clearspace_unit)
 
-        min_x += clear_space
-        min_y -= clear_space
-        max_x -= clear_space
-        max_y += clear_space
+        min_x += distance
+        min_y -= distance
+        max_x -= distance
+        max_y += distance
 
         return Canvas(
             min_x=min_x,
