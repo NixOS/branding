@@ -192,8 +192,10 @@ Pitfalls to honour in implementation: every subclass needs its own
 `eq=True` (the default) makes instances unhashable, and nothing in the
 package hashes a renderable; `Logomark._gradient_stop_offsets` becomes
 `GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)` and
-all five readers follow (`logomark.py:314, 318, 322`, `dimensioned.py:626, 631`); `Glyph`'s derived fontforge attributes (`font`, `glyph`, `layer`) are
-annotated with the `fontforge` classes until step 9 removes them.
+all five readers follow (`logomark.py:314, 318, 322`, `dimensioned.py:626, 631`); `Glyph`'s derived fontforge attributes (`font`, `glyph`, `layer`) stay
+plain attributes assigned in `__post_init__` until step 9 removes them;
+fontforge ships no stubs, so an annotation would add nothing basedpyright
+can check.
 
 ### 3.3 Composition changes
 
