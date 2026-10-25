@@ -4,7 +4,7 @@ from typing import override
 
 import svg
 
-from nixoslogo.core import ClearSpace, LogotypeStyle, flatten_svg_elements
+from nixoslogo.core import ClearSpace, flatten_svg_elements
 from nixoslogo.layout import Canvas
 from nixoslogo.logging_config import setup_logging
 from nixoslogo.logo import NixosLogo
@@ -109,45 +109,6 @@ class LogoCrop(NixosLogo):
         )
 
 
-@dataclass(kw_only=True)
-class LogoScale(NixosLogo):
-    clear_space: ClearSpace = ClearSpace.MINIMAL
-
-    @override
-    def make_filename(self, extras: tuple[str, ...] = ()):
-        return "-".join(
-            [
-                "nixos",
-                "logo",
-                "misuse",
-                "scale",
-            ]
-            + list(extras)
-        )
-
-    @override
-    def _default_cap_height(self) -> float:
-        return self.lambda_radius
-
-
-@dataclass(kw_only=True)
-class LogoColorsWithLambdaPrime(NixosLogo):
-    clear_space: ClearSpace = ClearSpace.MINIMAL
-    logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME
-
-    @override
-    def make_filename(self, extras: tuple[str, ...] = ()):
-        return "-".join(
-            [
-                "nixos",
-                "logo",
-                "misuse",
-                "lambdaprime",
-            ]
-            + list(extras)
-        )
-
-
 if __name__ == "__main__":
     setup_logging(level=logging.DEBUG)
 
@@ -158,10 +119,4 @@ if __name__ == "__main__":
     logo.write_svg(filename=logo.make_filename(extras=("test",)))
 
     logo = LogoCrop(background_color="#dddddd")
-    logo.write_svg(filename=logo.make_filename(extras=("test",)))
-
-    logo = LogoScale(background_color="#dddddd")
-    logo.write_svg(filename=logo.make_filename(extras=("test",)))
-
-    logo = LogoColorsWithLambdaPrime(background_color="#dddddd")
     logo.write_svg(filename=logo.make_filename(extras=("test",)))

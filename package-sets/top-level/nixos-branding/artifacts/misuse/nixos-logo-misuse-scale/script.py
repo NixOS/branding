@@ -1,4 +1,5 @@
-from nixoslogo.artifacts.misuse import LogoScale
+from nixoslogo.core import ClearSpace
+from nixoslogo.logo import NixosLogo
 
-logocrop = LogoScale()
-logocrop.write_svg()
+logo = NixosLogo(clear_space=ClearSpace.MINIMAL, logotype_cap_height=512)
+logo.write_svg("nixos-logo-misuse-scale")

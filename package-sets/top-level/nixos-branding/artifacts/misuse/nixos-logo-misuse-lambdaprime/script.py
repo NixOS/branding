@@ -1,4 +1,7 @@
-from nixoslogo.artifacts.misuse import LogoColorsWithLambdaPrime
+from nixoslogo.core import ClearSpace, LogotypeStyle
+from nixoslogo.logo import NixosLogo
 
-logocrop = LogoColorsWithLambdaPrime()
-logocrop.write_svg()
+logo = NixosLogo(
+    clear_space=ClearSpace.MINIMAL, logotype_style=LogotypeStyle.LAMBDAPRIME
+)
+logo.write_svg("nixos-logo-misuse-lambdaprime")
