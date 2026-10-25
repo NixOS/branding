@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass, field
 from typing import override
 
 import svg
@@ -13,23 +14,18 @@ from nixoslogo.logotype import Glyph, Logotype
 logger = logging.getLogger(__name__)
 
 
+@dataclass(kw_only=True)
 class LogoClearspace(BaseRenderable):
-    def __init__(
-        self,
-        logo: type[BaseRenderable],
-        logo_name: str,
-        space_object: BaseRenderable,
-        annotations: Annotations,
-        **kwargs,
-    ):
-        self.logo: type[BaseRenderable] = logo
-        self.logo_name: str = logo_name
-        self.space_object: BaseRenderable = space_object
-        self.annotations: Annotations = annotations
+    logo: type[BaseRenderable]
+    logo_name: str
+    space_object: BaseRenderable
+    annotations: Annotations
+    recommended: BaseRenderable = field(init=False)
+    minimal: BaseRenderable = field(init=False)
 
-        self.recommended: BaseRenderable = self.logo(clear_space=ClearSpace.RECOMMENDED)
-        self.minimal: BaseRenderable = self.logo(clear_space=ClearSpace.MINIMAL)
-        super().__init__(**kwargs)
+    def __post_init__(self) -> None:
+        self.recommended = self.logo(clear_space=ClearSpace.RECOMMENDED)
+        self.minimal = self.logo(clear_space=ClearSpace.MINIMAL)
 
     @property
     @override

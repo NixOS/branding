@@ -2,6 +2,7 @@ import os
 import string
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import Enum, auto
 from functools import partial
 from pathlib import Path
@@ -231,15 +232,10 @@ class Shape(ABC):
         return self.elements_y_max - self.elements_y_min
 
 
+@dataclass(kw_only=True)
 class BaseRenderable(Shape, ABC):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        background_color: str | None = None,
-        **kwargs: object,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        self.background_color: str | None = background_color
+    clear_space: ClearSpace = ClearSpace.RECOMMENDED
+    background_color: str | None = None
 
     @property
     @abstractmethod

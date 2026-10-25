@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from typing import override
 
 import svg
@@ -12,17 +13,9 @@ from nixoslogo.logomark import Logomark
 logger = logging.getLogger(__name__)
 
 
+@dataclass(kw_only=True)
 class LogomarkRotate(Logomark):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.MINIMAL,
-        **kwargs,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(
-            clear_space=clear_space,
-            **kwargs,
-        )
+    clear_space: ClearSpace = ClearSpace.MINIMAL
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()):
@@ -56,17 +49,9 @@ class LogomarkRotate(Logomark):
         )
 
 
+@dataclass(kw_only=True)
 class LogomarkMirror(Logomark):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.MINIMAL,
-        **kwargs,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(
-            clear_space=clear_space,
-            **kwargs,
-        )
+    clear_space: ClearSpace = ClearSpace.MINIMAL
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()):
@@ -90,17 +75,9 @@ class LogomarkMirror(Logomark):
         )
 
 
+@dataclass(kw_only=True)
 class LogoCrop(NixosLogo):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.MINIMAL,
-        **kwargs,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(
-            clear_space=clear_space,
-            **kwargs,
-        )
+    clear_space: ClearSpace = ClearSpace.MINIMAL
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()):
@@ -132,17 +109,9 @@ class LogoCrop(NixosLogo):
         )
 
 
+@dataclass(kw_only=True)
 class LogoScale(NixosLogo):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.MINIMAL,
-        **kwargs,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(
-            clear_space=clear_space,
-            **kwargs,
-        )
+    clear_space: ClearSpace = ClearSpace.MINIMAL
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()):
@@ -161,19 +130,10 @@ class LogoScale(NixosLogo):
         return self.lambda_radius
 
 
+@dataclass(kw_only=True)
 class LogoColorsWithLambdaPrime(NixosLogo):
-    def __init__(
-        self,
-        clear_space: ClearSpace = ClearSpace.MINIMAL,
-        logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME,
-        **kwargs,
-    ):
-        self.clear_space: ClearSpace = clear_space
-        super().__init__(
-            clear_space=clear_space,
-            logotype_style=logotype_style,
-            **kwargs,
-        )
+    clear_space: ClearSpace = ClearSpace.MINIMAL
+    logotype_style: LogotypeStyle = LogotypeStyle.LAMBDAPRIME
 
     @override
     def make_filename(self, extras: tuple[str, ...] = ()):

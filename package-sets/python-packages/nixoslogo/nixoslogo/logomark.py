@@ -1,7 +1,8 @@
 import fractions
 import itertools
 import math
-from typing import TypedDict, override
+from dataclasses import dataclass, field
+from typing import ClassVar, TypedDict, override
 
 import svg
 from svg._types import Length
@@ -9,7 +10,6 @@ from svg._types import Length
 from nixoslogo.colors import Color
 from nixoslogo.core import (
     BaseRenderable,
-    ClearSpace,
     ColorStyle,
     LogomarkColors,
     flatten_svg_elements,
@@ -39,21 +39,12 @@ def hexagon_points(radius: float) -> Points:
     )
 
 
+@dataclass(kw_only=True)
 class Lambda(BaseRenderable):
-    def __init__(
-        self,
-        radius: int = 512,
-        thickness: float = 1 / 4,
-        gap: float = 1 / 32,
-        color: str = "black",
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        **kwargs,
-    ):
-        self.radius: int = radius
-        self.thickness: float = thickness
-        self.gap: float = gap
-        self.color: str = color
-        super().__init__(clear_space=clear_space, **kwargs)
+    radius: int = 512
+    thickness: float = 1 / 4
+    gap: float = 1 / 32
+    color: str = "black"
 
     @property
     @override
@@ -169,29 +160,29 @@ class Lambda(BaseRenderable):
         )
 
 
+@dataclass(kw_only=True)
 class Logomark(BaseRenderable):
-    def __init__(
-        self,
-        ilambda: Lambda = Lambda(),
-        color_style: ColorStyle = ColorStyle.GRADIENT,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT,
-        **kwargs,
-    ):
-        self.ilambda = ilambda
-        self.colors_name: str = (
-            colors.name if isinstance(colors, LogomarkColors) else "custom"
+    ilambda: Lambda = field(default_factory=Lambda)
+    color_style: ColorStyle = ColorStyle.GRADIENT
+    colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT
+
+    GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)
+
+    @property
+    def colors_name(self) -> str:
+        return self.colors.name if isinstance(self.colors, LogomarkColors) else "custom"
+
+    @property
+    def colors_value(self) -> tuple[Color, ...]:
+        return (
+            self.colors.value
+            if isinstance(self.colors, LogomarkColors)
+            else self.colors
         )
-        self.colors_value: tuple[Color, ...] = (
-            colors.value if isinstance(colors, LogomarkColors) else colors
-        )
-        self.color_style: ColorStyle = color_style
 
-        self.css_color_names: tuple[str, ...] = self._make_css_color_names()
-
-        self._gradient_stop_offsets: list[int] = [0, 25, 100]
-
-        super().__init__(clear_space=clear_space, **kwargs)
+    @property
+    def css_color_names(self) -> tuple[str, ...]:
+        return self._make_css_color_names()
 
     @property
     @override
@@ -300,15 +291,15 @@ class Logomark(BaseRenderable):
                     **gradient_end_points,
                     elements=[
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[0], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[0], "%"),
                             stop_color=color_dark,
                         ),
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[1], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[1], "%"),
                             stop_color=color_midpoint,
                         ),
                         svg.Stop(
-                            offset=Length(self._gradient_stop_offsets[2], "%"),
+                            offset=Length(self.GRADIENT_STOP_OFFSETS[2], "%"),
                             stop_color=color_original,
                         ),
                     ],

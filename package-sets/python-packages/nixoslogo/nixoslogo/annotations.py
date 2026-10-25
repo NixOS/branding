@@ -1,7 +1,7 @@
 import fractions
 import math
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import NotRequired, TypedDict, override
 
@@ -20,35 +20,27 @@ from nixoslogo.helpers import arc_sagitta
 from nixoslogo.logotype import FontLoader, Glyph
 
 
+@dataclass(kw_only=True)
 class TextAnnotations(BaseRenderable):
-    def __init__(
-        self,
-        characters: str,
-        loader: FontLoader,
-        color: str = "black",
-        scale: float | None = None,
-        cap_height: float | None = None,
-        **kwargs,
-    ):
-        self.characters: str = characters
-        self.loader: FontLoader = loader
-        self.color: str = color
-        self.scale: float | None = scale
-        self.cap_height: float | None = cap_height
+    characters: str
+    loader: FontLoader
+    color: str = "black"
+    scale: float | None = None
+    cap_height: float | None = None
+    glyphs: tuple[Glyph, ...] = field(init=False)
+    original_cap_height: float = field(init=False)
 
+    def __post_init__(self) -> None:
         self._load_glyphs()
-        self.original_cap_height: float = self.loader.capHeight
-        self.original_scale: float = self.loader.scale
+        self.original_cap_height = self.loader.capHeight
         self._set_spacings()
         self._scale_glyphs()
-
-        super().__init__(**kwargs)
 
     def _map_characters(self, character: str) -> str:
         return CHARACTER_GLYPHNAME_MAP.get(character, character)
 
     def _load_glyphs(self):
-        self.glyphs: tuple[Glyph, ...] = tuple(
+        self.glyphs = tuple(
             Glyph(
                 loader=self.loader,
                 character=self._map_characters(character),
@@ -129,7 +121,6 @@ class FontConfig(TypedDict):
     scale: float | None
     cap_height: float
     color: str
-    stroke_dasharray: list[Number]
 
 
 @dataclass
@@ -578,7 +569,6 @@ class Annotations:
                 "scale": None,
                 "cap_height": 24,
                 "color": "black",
-                "stroke_dasharray": [4],
             },
         )
 
@@ -607,7 +597,6 @@ class Annotations:
                 "scale": None,
                 "cap_height": 48,
                 "color": "black",
-                "stroke_dasharray": [8],
             },
         )
 
@@ -636,7 +625,6 @@ class Annotations:
                 "scale": None,
                 "cap_height": 96,
                 "color": "black",
-                "stroke_dasharray": [16],
             },
         )
 

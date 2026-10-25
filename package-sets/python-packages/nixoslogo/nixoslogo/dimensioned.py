@@ -1,6 +1,7 @@
 import itertools
 import math
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TypedDict, override
 
 import svg
@@ -106,15 +107,10 @@ def make_lambda_polygons(ilambda: Lambda, lines: LineGroup) -> tuple[svg.Element
     )
 
 
+@dataclass(kw_only=True)
 class DimensionedLambda(Lambda):
-    def __init__(
-        self,
-        annotations: Annotations,
-        clear_space: ClearSpace = ClearSpace.NONE,
-        **kwargs,
-    ):
-        super().__init__(clear_space=clear_space, **kwargs)
-        self.annotations: Annotations = annotations
+    annotations: Annotations
+    clear_space: ClearSpace = ClearSpace.NONE
 
     @override
     def make_canvas(self, clear_space: ClearSpace) -> Canvas:
@@ -137,6 +133,7 @@ class DimensionedLambda(Lambda):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLambdaLinear(DimensionedLambda):
     def make_lambda_linear_dimensions(self):
         hexagon = hexagon_points(radius=self.radius)
@@ -233,6 +230,7 @@ class DimensionedLambdaLinear(DimensionedLambda):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLambdaAngular(DimensionedLambda):
     def make_lambda_angular_dimensions(self):
         lambda_points_no_gap = self.make_lambda_points()
@@ -281,6 +279,7 @@ class DimensionedLambdaAngular(DimensionedLambda):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
     def make_dotted_lambda_vertices(self):
         return tuple(
@@ -394,6 +393,7 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
     def make_parametric_annotations(self):
         hexagon = hexagon_points(radius=self.radius)
@@ -488,14 +488,9 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogomark(Logomark):
-    def __init__(
-        self,
-        annotations: Annotations,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.annotations: Annotations = annotations
+    annotations: Annotations
 
     @override
     def make_canvas(self, clear_space: ClearSpace) -> Canvas:
@@ -601,14 +596,9 @@ class DimensionedLogomark(Logomark):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogomarkGradient(Logomark):
-    def __init__(
-        self,
-        annotations: Annotations,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.annotations: Annotations = annotations
+    annotations: Annotations
 
     @override
     def make_canvas(self, clear_space: ClearSpace) -> Canvas:
@@ -626,12 +616,12 @@ class DimensionedLogomarkGradient(Logomark):
         point_vector = point_stop - point_start
         stop_points = [
             point_start + offset / 100 * point_vector
-            for offset in self._gradient_stop_offsets
+            for offset in self.GRADIENT_STOP_OFFSETS
         ]
 
         text_annotations = [
             self.annotations.make_annotation(text=f"{offset}%")
-            for offset in self._gradient_stop_offsets
+            for offset in self.GRADIENT_STOP_OFFSETS
         ]
 
         return tuple(
@@ -692,6 +682,7 @@ class DimensionedLogomarkGradient(Logomark):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
     def make_gradient_annotations(self):
         gradient_end_points = self.make_gradient_end_points()
@@ -747,6 +738,7 @@ class DimensionedLogomarkGradientAnnotated(DimensionedLogomarkGradient):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
     @override
     def make_svg_elements(self) -> list[svg.Element]:
@@ -767,14 +759,9 @@ class DimensionedLogomarkGradientBackground(DimensionedLogomarkGradient):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogotype(Logotype):
-    def __init__(
-        self,
-        annotations: Annotations,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.annotations: Annotations = annotations
+    annotations: Annotations
 
     def svg_bounding_box(self):
         bbox = self.elements_bounding_box
@@ -871,31 +858,26 @@ class DimensionedLogotype(Logotype):
         )
 
 
+@dataclass(kw_only=True)
 class DimensionedLogo(NixosLogo):
-    def __init__(
-        self,
-        annotations: Annotations,
-        **kwargs,
-    ):
-        super().__init__(**kwargs)
-        self.annotations: Annotations = annotations
+    annotations: Annotations
 
     def dimension_cap_height(self):
         return (
             svg.Line(
                 x1=self.canvas.min_x,
-                y1=-self.logotype_cap_height / 2,
+                y1=-self.logotype.cap_height / 2,
                 x2=self.canvas.max_x,
-                y2=-self.logotype_cap_height / 2,
+                y2=-self.logotype.cap_height / 2,
                 stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
             ),
             svg.Line(
                 x1=self.canvas.min_x,
-                y1=self.logotype_cap_height / 2,
+                y1=self.logotype.cap_height / 2,
                 x2=self.canvas.max_x,
-                y2=self.logotype_cap_height / 2,
+                y2=self.logotype.cap_height / 2,
                 stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
@@ -914,7 +896,7 @@ class DimensionedLogo(NixosLogo):
                     )
                 ),
                 offset=2.5,
-                reference=self.logotype_cap_height,
+                reference=self.logotype.cap_height,
                 text_offset=True,
                 fractional=False,
             ),

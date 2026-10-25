@@ -3,6 +3,7 @@ import logging
 import shutil
 import tempfile
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast, override
 
@@ -15,7 +16,6 @@ from nixoslogo.core import (
     NIXOS_DARK_BLUE,
     NIXOS_LIGHT_BLUE,
     BaseRenderable,
-    ClearSpace,
     LogotypeStyle,
     flatten_svg_elements,
     get_nixos_logotype_font_file,
@@ -137,26 +137,17 @@ class FontLoader:
         self._cleanup_once()
 
 
+@dataclass(kw_only=True)
 class Glyph(BaseRenderable):
-    def __init__(
-        self,
-        character: str,
-        loader: FontLoader | None = None,
-        color: str = "black",
-        style: LogotypeStyle = LogotypeStyle.REGULAR,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        **kwargs,
-    ):
-        self.character: str = character
-        self.loader: FontLoader = loader if loader is not None else FontLoader()
-        self.color: str = color
-        self.style: LogotypeStyle = style
+    character: str
+    loader: FontLoader = field(default_factory=FontLoader)
+    color: str = "black"
+    style: LogotypeStyle = LogotypeStyle.REGULAR
 
+    def __post_init__(self) -> None:
         self.font = self.loader.font
         self.glyph = self.font[self.character]
         self.layer = self.glyph.foreground.dup()
-
-        super().__init__(clear_space=clear_space, **kwargs)
 
     def get_path(self, layer):
         path = []
@@ -268,32 +259,29 @@ class Glyph(BaseRenderable):
         )
 
 
+@dataclass(kw_only=True)
 class Logotype(BaseRenderable):
-    def __init__(
-        self,
-        characters: str = "NixOS",
-        loader: FontLoader | None = None,
-        color: str = "black",
-        style: LogotypeStyle = LogotypeStyle.REGULAR,
-        spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS,
-        clear_space: ClearSpace = ClearSpace.RECOMMENDED,
-        **kwargs,
-    ):
-        self.characters: str = characters
-        self.loader: FontLoader = loader if loader is not None else FontLoader()
-        self.color: str = color
-        self.style: LogotypeStyle = style
-        self.spacings: tuple[int, ...] = spacings
+    characters: str = "NixOS"
+    loader: FontLoader = field(default_factory=FontLoader)
+    color: str = "black"
+    style: LogotypeStyle = LogotypeStyle.REGULAR
+    spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS
+    glyphs: tuple[Glyph, ...] = field(init=False)
 
+    @property
+    def cap_height(self) -> float:
+        return self.loader.capHeight
+
+    @property
+    def scale(self) -> float:
+        return self.loader.scale
+
+    def __post_init__(self) -> None:
         self._load_glyphs()
-        self.cap_height: float = self.glyphs[0].loader.capHeight
-        self.scale: float = self.glyphs[0].loader.scale
         self._set_spacings()
 
-        super().__init__(clear_space=clear_space, **kwargs)
-
     def _load_glyphs(self):
-        self.glyphs: tuple[Glyph, ...] = tuple(
+        self.glyphs = tuple(
             Glyph(
                 loader=self.loader,
                 character=character,
