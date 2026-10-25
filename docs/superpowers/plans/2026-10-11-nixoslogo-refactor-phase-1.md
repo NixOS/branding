@@ -1559,6 +1559,8 @@ def test_shifted_depth_tags_are_not_deltas():
     ]
     result = compare_numeric(before, after)
     assert result.unmatched_after == 2
+    assert result.compared == 1  # the rect's x; the renumbered depth tag is not a number
+    assert result.changed == 0
     assert result.max_delta == 0.0
 
 
@@ -1574,6 +1576,8 @@ def test_inserted_element_is_unmatched_not_a_huge_delta():
     result = compare_numeric(before, after)
     assert result.unmatched_before == 0
     assert result.unmatched_after == 2
+    assert result.compared == 2  # the matched path's M 1 1
+    assert result.changed == 0
     assert result.max_delta == 0.0
 ```
 
