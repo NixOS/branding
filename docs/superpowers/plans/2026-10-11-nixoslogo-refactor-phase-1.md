@@ -1537,7 +1537,7 @@ ______________________________________________________________________
 
 - Consumes: `compare_artifacts.collect.DiffSpec` (`before`, `after` line lists, `path`, `state`) and `parse.parse_node` output lines.
 
-- Produces: `numeric.compare_numeric(before: list[str], after: list[str]) -> NumericResult(matched, unmatched_before, unmatched_after, max_delta)`; `raster.render(svg_path, png_path, width=1024)`, `raster.compare_raster(png_before, png_after) -> RasterResult(size_before, size_after, differing_pixels, max_channel_delta)`; CLI flags `--numeric` and `--raster` that add `numeric` and `raster` objects to the `--summary` JSON, keyed by relative path, for modified files only.
+- Produces: `numeric.compare_numeric(before: list[str], after: list[str]) -> NumericResult(matched, unmatched_before, unmatched_after, compared, changed, max_delta)`; `raster.render(svg_path, png_path, width=1024)`, `raster.compare_raster(png_before, png_after) -> RasterResult(size_before, size_after, differing_pixels, max_channel_delta)`; CLI flags `--numeric` and `--raster` that add `numeric` and `raster` objects to the `--summary` JSON, keyed by relative path, for modified files only.
 
 - [ ] **Step 1: Write the failing numeric tests**
 
@@ -1565,7 +1565,7 @@ def test_shifted_depth_tags_are_not_deltas():
 def test_numeric_drift_is_measured_on_matched_lines():
     before = ["<path @0/1>", "  @d:", "    [0000] M 100.0 200.0"]
     after = ["<path @0/1>", "  @d:", "    [0000] M 100.5 199.0"]
-    assert compare_numeric(before, after) == NumericResult(3, 0, 0, 1.0)
+    assert compare_numeric(before, after) == NumericResult(3, 0, 0, 2, 2, 1.0)
 
 
 def test_inserted_element_is_unmatched_not_a_huge_delta():
@@ -1629,6 +1629,8 @@ class NumericResult:
     matched: int
     unmatched_before: int
     unmatched_after: int
+    compared: int  # numbers compared on matched lines
+    changed: int  # of those, how many differ
     max_delta: float
 
 
@@ -1641,6 +1643,8 @@ def compare_numeric(before: list[str], after: list[str]) -> NumericResult:
     matched = 0
     unmatched_before = 0
     unmatched_after = 0
+    compared = 0
+    changed = 0
     max_delta = 0.0
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag != "equal":
@@ -1649,9 +1653,14 @@ def compare_numeric(before: list[str], after: list[str]) -> NumericResult:
             continue
         for line_before, line_after in zip(before[i1:i2], after[j1:j2], strict=True):
             for x, y in zip(numbers(line_before), numbers(line_after), strict=True):
-                max_delta = max(max_delta, abs(x - y))
+                compared += 1
+                if x != y:
+                    changed += 1
+                    max_delta = max(max_delta, abs(x - y))
             matched += 1
-    return NumericResult(matched, unmatched_before, unmatched_after, max_delta)
+    return NumericResult(
+        matched, unmatched_before, unmatched_after, compared, changed, max_delta
+    )
 ```
 
 - [ ] **Step 4: Run the numeric tests**
@@ -1819,6 +1828,7 @@ with:
                     print(
                         f"numeric {path}: matched={result['matched']} "
                         f"unmatched={result['unmatched_before']}/{result['unmatched_after']} "
+                        f"changed={result['changed']}/{result['compared']} "
                         f"max_delta={result['max_delta']:.6g}"
                     )
             if args.raster:
@@ -1903,7 +1913,10 @@ python3Packages.buildPythonApplication {
 With `--numeric` the JSON gains a `numeric` object keyed by relative
 path, for modified files only: `matched`, `unmatched_before`,
 `unmatched_after` (line counts after aligning number-masked lines) and
-`max_delta` over the matched lines. Alignment is by number-masked text,
+`compared` and `changed` (numbers on the matched lines, and how many of
+them differ) and `max_delta` over them. Breadth and size together tell a
+whole-file drift (most numbers changed a little) from a single moved
+coordinate. Alignment is by number-masked text,
 so a numerically different file with the same structure is measured
 exactly, while an inserted element that masks identically to an existing
 one is paired with it; treat a surprising `max_delta` as a prompt to read
