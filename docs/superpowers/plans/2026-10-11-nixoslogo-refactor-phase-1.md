@@ -1676,10 +1676,7 @@ Run the same command as Step 2. Expected: 3 passed.
 Create `tests/test_raster.py`:
 
 ```python
-import shutil
 from pathlib import Path
-
-import pytest
 
 from compare_artifacts.raster import RasterResult, compare_raster, render
 
@@ -1687,17 +1684,12 @@ SQUARE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="0
 SQUARE_SHIFTED = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="1" y="0" width="5" height="10" fill="black"/></svg>'
 TALL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 20"><rect x="0" y="0" width="5" height="20" fill="black"/></svg>'
 
-needs_resvg = pytest.mark.skipif(
-    shutil.which("resvg") is None, reason="resvg not on PATH"
-)
-
 
 def write(path: Path, content: str) -> Path:
     path.write_text(content)
     return path
 
 
-@needs_resvg
 def test_identical_renders_have_no_differing_pixels(tmp_path):
     a = write(tmp_path / "a.svg", SQUARE)
     render(a, tmp_path / "a.png", width=100)
@@ -1707,7 +1699,6 @@ def test_identical_renders_have_no_differing_pixels(tmp_path):
     )
 
 
-@needs_resvg
 def test_shifted_shape_counts_differing_pixels(tmp_path):
     render(write(tmp_path / "a.svg", SQUARE), tmp_path / "a.png", width=100)
     render(write(tmp_path / "b.svg", SQUARE_SHIFTED), tmp_path / "b.png", width=100)
@@ -1716,7 +1707,6 @@ def test_shifted_shape_counts_differing_pixels(tmp_path):
     assert result.max_channel_delta == 255
 
 
-@needs_resvg
 def test_size_mismatch_is_reported(tmp_path):
     render(write(tmp_path / "a.svg", SQUARE), tmp_path / "a.png", width=100)
     render(write(tmp_path / "b.svg", TALL), tmp_path / "b.png", width=100)
@@ -1726,7 +1716,7 @@ def test_size_mismatch_is_reported(tmp_path):
     assert result.differing_pixels is None
 ```
 
-A 1-unit shift of a 5-by-10 rectangle in a 10-unit viewBox at 100 px wide moves 10 px by 100 px of black on each side: 2000 pixels.
+A 1-unit shift of a 5-by-10 rectangle in a 10-unit viewBox at 100 px wide moves 10 px by 100 px of black on each side: 2000 pixels. There is no skip guard for a missing `resvg`: the Nix build and the Step 2 shell both provide it, and a missing binary should fail loudly rather than skip three tests.
 
 - [ ] **Step 6: Run them to verify they fail**
 
