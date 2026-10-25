@@ -822,7 +822,7 @@ class DimensionedLogotype(Logotype):
         offsets = [
             self.cap_height / (point1 - point2).length() for point1, point2 in gaps
         ]
-        sides = ["left"] + ["right"] * (len(gaps) - 1)
+        sides = ["left" if index == 0 else "right" for index in range(len(gaps))]
         return tuple(
             self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
