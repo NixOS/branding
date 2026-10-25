@@ -7,6 +7,7 @@ Diff nixos-branding artifacts between two git refs.
 ```bash
 nix run .#nixos-branding.verification.compare-artifacts -- \
     <ref-a> <ref-b> [--attr ATTR] [--output PATH] [--summary PATH] \
+                    [--numeric] [--raster] \
                     [--full | --context N] [--hide-unchanged] [--keep]
 ```
 
@@ -28,7 +29,7 @@ the modified/added/deleted entries only.
 ## `--summary` output
 
 When `--summary PATH` is passed, the tool also writes a small JSON
-file at PATH alongside the HTML report. The JSON contains exactly
+file at PATH alongside the HTML report. By default the JSON contains exactly
 four integer count keys:
 
 ```json
@@ -39,6 +40,21 @@ four integer count keys:
   "unchanged": 21
 }
 ```
+
+With `--numeric` the JSON gains a `numeric` object keyed by relative
+path, for modified files only: `matched`, `unmatched_before`,
+`unmatched_after` (line counts after aligning number-masked lines) and
+`compared` and `changed` (numbers on the matched lines, and how many of
+them differ) and `max_delta` over them. Breadth and size together tell a
+whole-file drift (most numbers changed a little) from a single moved
+coordinate. Alignment is by number-masked text,
+so a numerically different file with the same structure is measured
+exactly, while an inserted element that masks identically to an existing
+one is paired with it; treat a surprising `max_delta` as a prompt to read
+the HTML diff. With `--raster` it gains a `raster`
+object with `size_before`, `size_after`, `differing_pixels` and
+`max_channel_delta` from resvg renders at 1024 px wide; the two pixel
+fields are null when the sizes differ.
 
 The HTML output (`--output`) is unchanged whether or not `--summary`
 is passed. The JSON is for consumers that need machine-readable counts
