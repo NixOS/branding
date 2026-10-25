@@ -3,11 +3,10 @@ from nixoslogo.artifacts.clearspace import LogoClearspace
 from nixoslogo.logotype import Glyph, Logotype
 
 annotations = Annotations.medium(overrides={"construction_lines": {"stroke": "grey"}})
-space_object = Glyph(character="N")
 ilc = LogoClearspace(
-    logo=Logotype,
+    logo=Logotype(),
     logo_name="logotype",
-    space_object=space_object,
+    space_object=Glyph(character="N"),
     annotations=annotations,
 )
 ilc.write_svg()
