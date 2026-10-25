@@ -4,7 +4,7 @@
 
 **Goal:** Restructure the `nixoslogo` package (lazy canvas, one clear-space rule, keyword-only dataclasses, composition where inheritance was wrong, immutable annotation presets) and extend `compare-artifacts` with numeric and raster modes, with every one of the 96 shipped SVG artifacts byte-identical after every task.
 
-**Architecture:** Seven commits on `djacu/architecture-refactor`, each independently mergeable. The oracle is the artifact build: the 96 fixed-output derivations pin the SVG bytes, so a byte change fails the build. A local harness runs the 96 scripts in seconds for fast feedback before the build. One package test and the comparison tool's own tests cover the two behaviours the artifacts cannot observe.
+**Architecture:** Seven commits on `djacu/architecture-refactor`, each independently mergeable. The oracle is the artifact build: the 96 fixed-output derivations pin the SVG bytes, so a byte change fails the build. A local harness runs the 96 scripts in seconds for fast feedback before the build. The comparison tool's own tests cover the one behaviour the artifacts cannot observe. The package gains no tests in this phase.
 
 **Tech Stack:** Python 3.12+ dataclasses and TypedDict, svg-py, fontforge (still, in this phase), basedpyright, ruff, treefmt via `nix fmt`, Nix flake builds; Pillow and resvg for the comparison tool.
 
@@ -29,51 +29,22 @@ The 96 artifacts are the test suite for this phase: every clear-space value, eve
 1. A subclass stops forwarding `clear_space` to the base, so every `NONE` and `MINIMAL` renderable comes out `RECOMMENDED`. The first implementation attempt of Task 1 did exactly this. Caught by the harness: 52 artifacts change filename and canvas.
 1. An unannotated default redeclaration (`clear_space = ClearSpace.MINIMAL` without the type) is not a dataclass field, so the base default silently wins. Caught by the five misuse artifacts' canvases.
 1. An override applied to the wrong group, or clobbering a sibling field, changes a stroke colour or width. Caught by the twelve annotation artifacts.
-1. `dimension_spacings` generalised wrongly for a length other than five. Not observable in any artifact; pinned by the one package test in Task 2.
+1. `dimension_spacings` generalised wrongly. Its only caller is the five-glyph `nixos-logotype-dimensioned` artifact, which pins the five-glyph case; no other length is shipped or tested, and the spec lists this class as NixOS-wordmark specific.
 1. The numeric comparison treats an inserted element as a huge positional delta, or measures the parser's own depth tags. Not observable in any artifact; pinned by the comparison-tool tests in Task 7.
 
 ______________________________________________________________________
 
-### Task 0: Fast harness and pytest in the devshell
+### Task 0: Fast harness
 
 **Files:**
 
-- Modify: `dev-shells/default.nix:36-40`
 - Create (outside the repo, not committed): `/tmp/nixoslogo-harness/run-artifacts.sh`
 
 **Interfaces:**
 
-- Produces: `run-artifacts.sh`, which every later task runs; `pytest` on the devshell `PATH`.
+- Produces: `run-artifacts.sh`, which every later task runs. No commit: this phase adds nothing to the package that the artifacts cannot check, so there is no pytest suite and the devshell is unchanged. The spec's Phase 2 adds pytest with the font pipeline tests.
 
-- [ ] **Step 1: Add pytest to the devshell**
-
-In `dev-shells/default.nix`, the `python3.withPackages` list currently reads:
-
-```nix
-        (python3.withPackages (ps: [
-          ps.nixoslogo-editable
-          ps.fontforge
-          ps.types-lxml
-        ]))
-```
-
-Change it to:
-
-```nix
-        (python3.withPackages (ps: [
-          ps.nixoslogo-editable
-          ps.fontforge
-          ps.pytest
-          ps.types-lxml
-        ]))
-```
-
-- [ ] **Step 2: Verify pytest is available**
-
-Run: `nix develop .#nixos-logo-dev --command pytest --version`
-Expected: a pytest version line.
-
-- [ ] **Step 3: Create the harness**
+- [ ] **Step 1: Create the harness**
 
 Create `/tmp/nixoslogo-harness/run-artifacts.sh`:
 
@@ -120,25 +91,10 @@ echo "identical=$identical different=$different baseline=$baseline"
 printf '%s\n' "${report[@]}"
 ```
 
-- [ ] **Step 4: Run the harness on the unmodified tree**
+- [ ] **Step 2: Run the harness on the unmodified tree**
 
 Run: `nix develop .#nixos-logo-dev --command bash /tmp/nixoslogo-harness/run-artifacts.sh`
 Expected: `identical=96 different=0` and no report lines. If a script crashes, the devshell environment is wrong; fix that before continuing.
-
-- [ ] **Step 5: Commit the devshell change**
-
-```bash
-git add dev-shells/default.nix
-git commit -F - <<'EOF'
-dev-shells: add pytest to the nixoslogo shell
-
-The refactor adds a pytest suite that runs in the devshell.
-
-Assisted-by: Claude Code (claude-fable-5-1)
-EOF
-```
-
-______________________________________________________________________
 
 ### Task 1: `Shape`, `ClearSpace.distance`, lazy canvas
 
@@ -460,7 +416,6 @@ ______________________________________________________________________
 - Modify: `package-sets/top-level/nixos-branding/artifacts/dimensioned/nixos-logomark-dimensioned-linear/script.py`
 - Modify: `package-sets/top-level/nixos-branding/artifacts/dimensioned/nixos-logomark-dimensioned-gradient-annotated/script.py`
 - Modify: `package-sets/top-level/nixos-branding/artifacts/dimensioned/nixos-logomark-dimensioned-gradient-background/script.py`
-- Test: `package-sets/python-packages/nixoslogo/tests/test_dimensioned.py`
 
 **Interfaces:**
 
@@ -468,30 +423,7 @@ ______________________________________________________________________
 
 - Produces: `logomark.hexagon_points(radius: float) -> Points`; in `dimensioned.py`: `diagonal_line(radius: float) -> Points`, `make_lambda_construction_lines(ilambda: Lambda, lines: LineGroup) -> tuple[svg.Element, ...]`, `make_lambda_main_diagonal(...)`, `make_lambda_off_diagonal(...)`, `make_lambda_polygons(...)` with the same signature. `DimensionedLogomark` and `DimensionedLogomarkGradient` no longer take `ilambda` explicitly; it reaches `Logomark` through `**kwargs` and defaults to `Lambda()`.
 
-- [ ] **Step 1: Write the failing tests**
-
-Create `package-sets/python-packages/nixoslogo/tests/test_dimensioned.py`:
-
-```python
-from nixoslogo.annotations import Annotations
-from nixoslogo.dimensioned import DimensionedLogotype
-
-
-def test_spacing_dimensions_follow_the_glyph_count():
-    diagram = DimensionedLogotype(
-        characters="Nix", spacings=(0, 90, 70), annotations=Annotations.small()
-    )
-    assert len(diagram.dimension_spacings()) == 2
-```
-
-This is the only test in the package for this phase. Every other behaviour the phase changes is pinned by the 96 artifacts; this one is not, because the artifacts only ever run the five-glyph case and the point of the change is other lengths.
-
-- [ ] **Step 2: Run the tests to verify they fail**
-
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests/test_dimensioned.py -q`
-Expected: FAIL with `IndexError: tuple index out of range`, because today's `dimension_spacings` indexes `self.glyphs[index + 1]` for `index` in `range(4)` and the logotype has three glyphs.
-
-- [ ] **Step 3: `hexagon_points` in `logomark.py`**
+- [ ] **Step 1: `hexagon_points` in `logomark.py`**
 
 Add after the `GradientEndPoints` TypedDict and before `class Lambda`:
 
@@ -513,7 +445,7 @@ def hexagon_points(radius: float) -> Points:
 
 Delete `Lambda.make_hexagon_points`. In `Lambda.make_lambda_points`, change `hexagon_points = self.make_hexagon_points(radius)` to `hexagon = hexagon_points(radius)` and the three following reads (`hexagon_points[2]`, `[4]`, `[5]`) to `hexagon[2]`, `hexagon[4]`, `hexagon[5]`, so the local does not shadow the function.
 
-- [ ] **Step 4: Module functions in `dimensioned.py`**
+- [ ] **Step 2: Module functions in `dimensioned.py`**
 
 Change the imports at the top of `dimensioned.py` to:
 
@@ -618,7 +550,7 @@ def make_lambda_polygons(ilambda: Lambda, lines: LineGroup) -> tuple[svg.Element
 
 These are the bodies of today's `DimensionedLambda.make_diagonal_line`, `make_lambda_construction_lines`, `make_lambda_main_diagonal`, `make_lambda_off_diagonal` and `make_lambda_polygons` with `self` replaced by `ilambda` and `self.annotations.<group>` by `lines`. Delete those five methods from `DimensionedLambda`.
 
-- [ ] **Step 5: Update the call sites in the `DimensionedLambda*` classes**
+- [ ] **Step 3: Update the call sites in the `DimensionedLambda*` classes**
 
 Everywhere in `DimensionedLambdaLinear`, `DimensionedLambdaAngular`, `DimensionedLambdaAnnotatedVertices` and `DimensionedLambdaAnnotatedParameters`:
 
@@ -632,7 +564,7 @@ Everywhere in `DimensionedLambdaLinear`, `DimensionedLambdaAngular`, `Dimensione
 
 Keep the order of the arguments to `flatten_svg_elements` exactly as it is in each `make_svg_elements`. The local must be renamed where the result is assigned: `hexagon_points = hexagon_points(...)` makes the name local to the whole method and raises `UnboundLocalError` on the call.
 
-- [ ] **Step 6: `DimensionedLogomark` and `DimensionedLogomarkGradient` take any `Lambda`**
+- [ ] **Step 4: `DimensionedLogomark` and `DimensionedLogomarkGradient` take any `Lambda`**
 
 In both classes delete the class-level annotation `ilambda: DimensionedLambda` and change `__init__` to:
 
@@ -663,7 +595,7 @@ In `DimensionedLogomarkGradient.make_svg_elements`:
 | `self.ilambda.make_lambda_construction_lines()` | `make_lambda_construction_lines(self.ilambda, self.annotations.construction_lines)` |
 | `self.ilambda.make_lambda_polygons()` | `make_lambda_polygons(self.ilambda, self.annotations.object_lines)` |
 
-- [ ] **Step 7: Generalise `DimensionedLogotype.dimension_spacings`**
+- [ ] **Step 5: Generalise `DimensionedLogotype.dimension_spacings`**
 
 Replace the method with:
 
@@ -695,7 +627,7 @@ Replace the method with:
         )
 ```
 
-- [ ] **Step 8: The three logomark diagram scripts**
+- [ ] **Step 6: The three logomark diagram scripts**
 
 `dimensioned/nixos-logomark-dimensioned-linear/script.py`:
 
@@ -750,16 +682,11 @@ logomark.write_svg()
 
 The dropped `DimensionedLambda(annotations=annotations)` had default radius, thickness and gap, so the `Lambda()` default inside `Logomark` draws the same geometry.
 
-- [ ] **Step 9: Run the tests**
+- [ ] **Step 7: Harness and gates**
 
-Run: `nix develop .#nixos-logo-dev --command pytest package-sets/python-packages/nixoslogo/tests -q`
-Expected: 1 passed.
+Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. A crash on `nixos-lambda-dimensioned-linear`, `nixos-lambda-dimensioned-annotated-parameters` or `nixos-logomark-dimensioned-linear` means one of the three `hexagon` renames in Steps 3 and 4 was missed.
 
-- [ ] **Step 10: Harness and gates**
-
-Run the harness, basedpyright, ruff, `nix fmt`, and the artifact build exactly as in Task 1 Step 7. Expected: `identical=96`, 0 errors, clean, clean, build succeeds. A crash on `nixos-lambda-dimensioned-linear`, `nixos-lambda-dimensioned-annotated-parameters` or `nixos-logomark-dimensioned-linear` means one of the three `hexagon` renames in Steps 5 and 6 was missed.
-
-- [ ] **Step 11: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add package-sets/python-packages/nixoslogo package-sets/top-level/nixos-branding/artifacts/dimensioned
@@ -2022,4 +1949,4 @@ ______________________________________________________________________
 
 **Type consistency.** `clearspace_unit` is a property returning `float` everywhere; `make_canvas(self, clear_space: ClearSpace) -> Canvas` on the base and all four overrides; `LineGroup` fields are `name, stroke, stroke_width, stroke_dasharray, fill` in Task 2's tests, Task 4's class and the overrides TypedDict; `NixosLogo.transform` is used by `logo.py` and nothing else in this phase; `Annotations.sized` returns `"Annotations"` and the presets delegate to it.
 
-**Review Focus.** Items 1 to 3 are pinned by named artifacts through the harness and build every task runs; item 4 by Task 2's test; item 5 by Task 7's tests. No test duplicates what the build already fails on.
+**Review Focus.** Items 1 to 4 are pinned by named artifacts through the harness and build every task runs; item 5 by Task 7's tests. No test duplicates what the build already fails on.
