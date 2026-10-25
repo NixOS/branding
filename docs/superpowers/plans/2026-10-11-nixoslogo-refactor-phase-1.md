@@ -726,7 +726,7 @@ ______________________________________________________________________
 
 - Consumes: Task 1's `BaseRenderable` surface; Task 2's `DimensionedLogomark` without an explicit `ilambda`.
 
-- Produces: every renderable constructed by keyword only; `Logomark.GRADIENT_STOP_OFFSETS` (class constant, replaces `_gradient_stop_offsets`); `NixosLogo.transform` (property, replaces reads of `logotype_transform`); `NixosLogo` no longer accepts `loader`; `NixosLogo.logotype.cap_height` replaces reads of `logotype_cap_height` outside `__post_init__`.
+- Produces: every renderable constructed by keyword only; `Logomark.GRADIENT_STOP_OFFSETS` (class constant, replaces `_gradient_stop_offsets`); `Logomark.colors_name`, `colors_value`, `css_color_names` and `Logotype.cap_height`, `scale` become properties with the same values; `NixosLogo.transform` (property, replaces reads of `logotype_transform`); `NixosLogo` no longer accepts `loader`; `NixosLogo.logotype.cap_height` replaces reads of `logotype_cap_height` outside `__post_init__`.
 
 - [ ] **Step 1: `BaseRenderable` in `core.py`**
 
@@ -766,21 +766,23 @@ class Logomark(BaseRenderable):
     ilambda: Lambda = field(default_factory=Lambda)
     color_style: ColorStyle = ColorStyle.GRADIENT
     colors: LogomarkColors | tuple[Color, ...] = LogomarkColors.DEFAULT
-    colors_name: str = field(init=False)
-    colors_value: tuple[Color, ...] = field(init=False)
-    css_color_names: tuple[str, ...] = field(init=False)
 
     GRADIENT_STOP_OFFSETS: ClassVar[tuple[int, int, int]] = (0, 25, 100)
 
-    def __post_init__(self) -> None:
-        self.colors_name = (
-            self.colors.name if isinstance(self.colors, LogomarkColors) else "custom"
-        )
-        self.colors_value = (
-            self.colors.value if isinstance(self.colors, LogomarkColors) else self.colors
-        )
-        self.css_color_names = self._make_css_color_names()
+    @property
+    def colors_name(self) -> str:
+        return self.colors.name if isinstance(self.colors, LogomarkColors) else "custom"
+
+    @property
+    def colors_value(self) -> tuple[Color, ...]:
+        return self.colors.value if isinstance(self.colors, LogomarkColors) else self.colors
+
+    @property
+    def css_color_names(self) -> tuple[str, ...]:
+        return self._make_css_color_names()
 ```
+
+The three were assigned once in `__init__`; as properties they are pure functions of `colors` and `color_style`, cannot go stale, and `Logomark` needs no `__post_init__`, so its subclasses have nothing to chain. The values are the same expressions, so output is unchanged.
 
 Replace the three reads of `self._gradient_stop_offsets[...]` in `make_flake_gradients_defs` with `self.GRADIENT_STOP_OFFSETS[...]`, and the two reads in `DimensionedLogomarkGradient.make_dimensioned_gradient_lines` (`dimensioned.py`) the same way. Remove `ClearSpace` from the `nixoslogo.core` import in `logomark.py`: the deleted `__init__` signatures were its last uses, and ruff reports the import as unused otherwise.
 
@@ -815,17 +817,21 @@ class Logotype(BaseRenderable):
     style: LogotypeStyle = LogotypeStyle.REGULAR
     spacings: tuple[int, ...] = DEFAULT_LOGOTYPE_SPACINGS
     glyphs: tuple[Glyph, ...] = field(init=False)
-    cap_height: float = field(init=False)
-    scale: float = field(init=False)
+
+    @property
+    def cap_height(self) -> float:
+        return self.loader.capHeight
+
+    @property
+    def scale(self) -> float:
+        return self.loader.scale
 
     def __post_init__(self) -> None:
         self._load_glyphs()
-        self.cap_height = self.glyphs[0].loader.capHeight
-        self.scale = self.glyphs[0].loader.scale
         self._set_spacings()
 ```
 
-In `_load_glyphs`, remove the `self.glyphs: tuple[Glyph, ...] =` annotation (the field is declared on the class now): `self.glyphs = tuple(...)`. Remove `ClearSpace` from the `nixoslogo.core` import in `logotype.py`; nothing in the module names it any more.
+`cap_height` and `scale` were copies of the loader's values, read through `glyphs[0].loader`, which is the same object as `self.loader`; as properties they read it directly. `glyphs` stays a field because `_load_glyphs` and `_set_spacings` transform fontforge layers and must run exactly once. In `_load_glyphs`, remove the `self.glyphs: tuple[Glyph, ...] =` annotation (the field is declared on the class now): `self.glyphs = tuple(...)`. Remove `ClearSpace` from the `nixoslogo.core` import in `logotype.py`; nothing in the module names it any more.
 
 - [ ] **Step 4: `TextAnnotations` and `FontConfig` in `annotations.py`**
 
@@ -1011,8 +1017,9 @@ git add package-sets/python-packages/nixoslogo
 git commit -F - <<'EOF'
 nixoslogo: make every renderable a keyword-only dataclass
 
-Fields are the constructor parameters and derived state is set in
-__post_init__. An unknown keyword raises TypeError instead of
+Fields are the constructor parameters; values that are pure functions
+of them are properties, and the glyph runs that must be built once are
+set in __post_init__. An unknown keyword raises TypeError instead of
 disappearing into **kwargs, every Logomark gets its own Lambda, and
 subclasses redeclare the defaults they change. NixosLogo loses the
 loader parameter that positioned the logotype with the wrong cap
