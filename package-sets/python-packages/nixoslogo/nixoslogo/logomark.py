@@ -24,6 +24,21 @@ class GradientEndPoints(TypedDict):
     y2: float
 
 
+def hexagon_points(radius: float) -> Points:
+    angles = [math.radians(angle) for angle in range(0, 360, 60)]
+    return Points(
+        [
+            Point(
+                (
+                    radius * math.cos(angle),
+                    radius * math.sin(angle),
+                )
+            )
+            for angle in angles
+        ]
+    )
+
+
 class Lambda(BaseRenderable):
     def __init__(
         self,
@@ -73,20 +88,6 @@ class Lambda(BaseRenderable):
             ),
         )
 
-    def make_hexagon_points(self, radius: float) -> Points:
-        angles = [math.radians(angle) for angle in range(0, 360, 60)]
-        return Points(
-            [
-                Point(
-                    (
-                        radius * math.cos(angle),
-                        radius * math.sin(angle),
-                    )
-                )
-                for angle in angles
-            ]
-        )
-
     def make_lambda_points(
         self,
         radius: float | None = None,
@@ -97,10 +98,10 @@ class Lambda(BaseRenderable):
         thickness = thickness if thickness is not None else self.thickness
         gap = gap if gap is not None else self.gap
 
-        hexagon_points = self.make_hexagon_points(radius)
-        hex_top_left = hexagon_points[2]
-        hex_bottom_left = hexagon_points[4]
-        hex_bottom_right = hexagon_points[5]
+        hexagon = hexagon_points(radius)
+        hex_top_left = hexagon[2]
+        hex_bottom_left = hexagon[4]
+        hex_bottom_right = hexagon[5]
 
         vector_0 = radius * thickness * Vector((cosd(0), sind(0)))
         vector_60 = radius * thickness * Vector((cosd(60), sind(60)))

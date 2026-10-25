@@ -1,15 +1,16 @@
+import itertools
 import math
 from collections.abc import Callable
 from typing import TypedDict, override
 
 import svg
 
-from nixoslogo.annotations import Annotations, TextAnnotations
+from nixoslogo.annotations import Annotations, LineGroup, TextAnnotations
 from nixoslogo.core import ClearSpace, flatten_svg_elements
 from nixoslogo.geometry import Point, Points
 from nixoslogo.layout import Canvas
 from nixoslogo.logo import NixosLogo
-from nixoslogo.logomark import Lambda, Logomark
+from nixoslogo.logomark import Lambda, Logomark, hexagon_points
 from nixoslogo.logotype import Logotype
 
 
@@ -24,6 +25,85 @@ class DimensionAngleOptions(TypedDict):
     large: bool
     ratio: float
     text: str
+
+
+def diagonal_line(radius: float) -> Points:
+    points = hexagon_points(radius)
+    return Points([points[1], points[4]])
+
+
+def make_lambda_construction_lines(
+    ilambda: Lambda, lines: LineGroup
+) -> tuple[svg.Element, ...]:
+    return (
+        svg.Circle(
+            cx=0,
+            cy=0,
+            r=ilambda.radius,
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            stroke_dasharray=lines.stroke_dasharray,
+            fill=lines.fill,
+        ),
+        svg.Polygon(
+            points=hexagon_points(radius=ilambda.radius).to_list(),
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            stroke_dasharray=lines.stroke_dasharray,
+            fill=lines.fill,
+        ),
+    )
+
+
+def make_lambda_main_diagonal(
+    ilambda: Lambda, lines: LineGroup
+) -> tuple[svg.Element, ...]:
+    return (
+        svg.Polyline(
+            points=diagonal_line(radius=ilambda.radius).to_list(),
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            stroke_dasharray=lines.stroke_dasharray,
+            fill=lines.fill,
+        ),
+    )
+
+
+def make_lambda_off_diagonal(
+    ilambda: Lambda, lines: LineGroup
+) -> tuple[svg.Element, ...]:
+    lambda_points_gap = ilambda.make_named_lambda_points()
+    return (
+        svg.Line(
+            x1=Point((0, 0)).x,
+            y1=Point((0, 0)).y,
+            x2=lambda_points_gap["rear_foot"].x,
+            y2=lambda_points_gap["rear_foot"].y,
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            stroke_dasharray=lines.stroke_dasharray,
+        ),
+    )
+
+
+def make_lambda_polygons(ilambda: Lambda, lines: LineGroup) -> tuple[svg.Element, ...]:
+    lambda_points_no_gap = ilambda.make_lambda_points(gap=0)
+    lambda_points_gap = ilambda.make_lambda_points()
+    return (
+        svg.Polygon(
+            points=lambda_points_no_gap.to_list(),
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            fill=lines.fill,
+            stroke_dasharray=[4],
+        ),
+        svg.Polygon(
+            points=lambda_points_gap.to_list(),
+            stroke=lines.stroke,
+            stroke_width=lines.stroke_width,
+            fill=lines.fill,
+        ),
+    )
 
 
 class DimensionedLambda(Lambda):
@@ -45,74 +125,6 @@ class DimensionedLambda(Lambda):
             height=4 * self.radius,
         )
 
-    def make_diagonal_line(self, radius: float) -> Points:
-        hexagon_points = self.make_hexagon_points(radius)
-        return Points([hexagon_points[1], hexagon_points[4]])
-
-    def make_lambda_construction_lines(self):
-        return (
-            svg.Circle(
-                cx=0,
-                cy=0,
-                r=self.radius,
-                stroke=self.annotations.construction_lines.stroke,
-                stroke_width=self.annotations.construction_lines.stroke_width,
-                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-                fill=self.annotations.construction_lines.fill,
-            ),
-            svg.Polygon(
-                points=self.make_hexagon_points(radius=self.radius).to_list(),
-                stroke=self.annotations.construction_lines.stroke,
-                stroke_width=self.annotations.construction_lines.stroke_width,
-                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-                fill=self.annotations.construction_lines.fill,
-            ),
-        )
-
-    def make_lambda_main_diagonal(self):
-        return (
-            svg.Polyline(
-                points=self.make_diagonal_line(radius=self.radius).to_list(),
-                stroke=self.annotations.construction_lines.stroke,
-                stroke_width=self.annotations.construction_lines.stroke_width,
-                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-                fill=self.annotations.construction_lines.fill,
-            ),
-        )
-
-    def make_lambda_off_diagonal(self):
-        lambda_points_gap = self.make_named_lambda_points()
-        return (
-            svg.Line(
-                x1=Point((0, 0)).x,
-                y1=Point((0, 0)).y,
-                x2=lambda_points_gap["rear_foot"].x,
-                y2=lambda_points_gap["rear_foot"].y,
-                stroke=self.annotations.construction_lines.stroke,
-                stroke_width=self.annotations.construction_lines.stroke_width,
-                stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
-            ),
-        )
-
-    def make_lambda_polygons(self):
-        lambda_points_no_gap = self.make_lambda_points(gap=0)
-        lambda_points_gap = self.make_lambda_points()
-        return (
-            svg.Polygon(
-                points=lambda_points_no_gap.to_list(),
-                stroke=self.annotations.object_lines.stroke,
-                stroke_width=self.annotations.object_lines.stroke_width,
-                fill=self.annotations.object_lines.fill,
-                stroke_dasharray=[4],
-            ),
-            svg.Polygon(
-                points=lambda_points_gap.to_list(),
-                stroke=self.annotations.object_lines.stroke,
-                stroke_width=self.annotations.object_lines.stroke_width,
-                fill=self.annotations.object_lines.fill,
-            ),
-        )
-
     @override
     def make_filename(self, extras: tuple[str, ...] = ()) -> str:
         return "-".join(
@@ -127,13 +139,13 @@ class DimensionedLambda(Lambda):
 
 class DimensionedLambdaLinear(DimensionedLambda):
     def make_lambda_linear_dimensions(self):
-        hexagon_points = self.make_hexagon_points(radius=self.radius)
+        hexagon = hexagon_points(radius=self.radius)
         lambda_points_no_gap = self.make_lambda_points(gap=0)
         lambda_points_gap = self.make_named_lambda_points()
 
         dim_main_diagonal = self.annotations.dimension_lines.make_dimension_line(
-            point1=hexagon_points[1],
-            point2=hexagon_points[4],
+            point1=hexagon[1],
+            point2=hexagon[4],
             flip=False,
             side="right",
             offset=1 / 2,
@@ -203,10 +215,10 @@ class DimensionedLambdaLinear(DimensionedLambda):
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
             self.annotations.dimension_lines.make_dimension_arrow_defs(),
-            self.make_lambda_construction_lines(),
-            self.make_lambda_main_diagonal(),
-            self.make_lambda_off_diagonal(),
-            self.make_lambda_polygons(),
+            make_lambda_construction_lines(self, self.annotations.construction_lines),
+            make_lambda_main_diagonal(self, self.annotations.construction_lines),
+            make_lambda_off_diagonal(self, self.annotations.construction_lines),
+            make_lambda_polygons(self, self.annotations.object_lines),
             self.make_lambda_linear_dimensions(),
         )
 
@@ -253,8 +265,8 @@ class DimensionedLambdaAngular(DimensionedLambda):
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
             self.annotations.dimension_lines.make_dimension_arrow_defs(),
-            self.make_lambda_construction_lines(),
-            self.make_lambda_polygons(),
+            make_lambda_construction_lines(self, self.annotations.construction_lines),
+            make_lambda_polygons(self, self.annotations.object_lines),
             self.make_lambda_angular_dimensions(),
         )
 
@@ -362,10 +374,10 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
     def make_svg_elements(self) -> list[svg.Element]:
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
-            self.make_lambda_construction_lines(),
-            self.make_lambda_main_diagonal(),
-            self.make_lambda_off_diagonal(),
-            self.make_lambda_polygons(),
+            make_lambda_construction_lines(self, self.annotations.construction_lines),
+            make_lambda_main_diagonal(self, self.annotations.construction_lines),
+            make_lambda_off_diagonal(self, self.annotations.construction_lines),
+            make_lambda_polygons(self, self.annotations.object_lines),
             self.make_dotted_lambda_vertices(),
             self.make_named_lambda_vertices(),
         )
@@ -384,13 +396,13 @@ class DimensionedLambdaAnnotatedVertices(DimensionedLambda):
 
 class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
     def make_parametric_annotations(self):
-        hexagon_points = self.make_hexagon_points(radius=self.radius)
+        hexagon = hexagon_points(radius=self.radius)
         lambda_points_no_gap = self.make_named_lambda_points(gap=0)
         lambda_points_gap = self.make_named_lambda_points()
 
         radius = self.annotations.dimension_lines.make_dimension_line(
             point1=Point((0, 0)),
-            point2=hexagon_points[5],
+            point2=hexagon[5],
             flip=False,
             side="left",
             offset=0,
@@ -457,10 +469,10 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
             self.annotations.dimension_lines.make_dimension_arrow_defs(),
-            self.make_lambda_construction_lines(),
-            self.make_lambda_main_diagonal(),
-            self.make_lambda_off_diagonal(),
-            self.make_lambda_polygons(),
+            make_lambda_construction_lines(self, self.annotations.construction_lines),
+            make_lambda_main_diagonal(self, self.annotations.construction_lines),
+            make_lambda_off_diagonal(self, self.annotations.construction_lines),
+            make_lambda_polygons(self, self.annotations.object_lines),
             self.make_parametric_annotations(),
         )
 
@@ -477,15 +489,12 @@ class DimensionedLambdaAnnotatedParameters(DimensionedLambda):
 
 
 class DimensionedLogomark(Logomark):
-    ilambda: DimensionedLambda
-
     def __init__(
         self,
         annotations: Annotations,
-        ilambda: DimensionedLambda,
         **kwargs,
     ):
-        super().__init__(ilambda=ilambda, **kwargs)
+        super().__init__(**kwargs)
         self.annotations: Annotations = annotations
 
     @override
@@ -509,18 +518,14 @@ class DimensionedLogomark(Logomark):
                 fill=self.annotations.construction_lines.fill,
             ),
             svg.Polygon(
-                points=self.ilambda.make_hexagon_points(
-                    radius=self.ilambda.radius * 2.25
-                ).to_list(),
+                points=hexagon_points(radius=self.ilambda.radius * 2.25).to_list(),
                 stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
                 fill=self.annotations.construction_lines.fill,
             ),
             svg.Polyline(
-                points=self.ilambda.make_diagonal_line(
-                    radius=self.ilambda.radius * 2.25
-                ).to_list(),
+                points=diagonal_line(radius=self.ilambda.radius * 2.25).to_list(),
                 stroke=self.annotations.construction_lines.stroke,
                 stroke_width=self.annotations.construction_lines.stroke_width,
                 stroke_dasharray=self.annotations.construction_lines.stroke_dasharray,
@@ -530,12 +535,12 @@ class DimensionedLogomark(Logomark):
 
     def make_flake_linear_dimensions(self):
         flake_points = self.make_flake_points()
-        hexagon_points = self.ilambda.make_hexagon_points(radius=self.ilambda.radius)
+        hexagon = hexagon_points(radius=self.ilambda.radius)
 
         lin_inner_hex_long_length = (
             self.annotations.dimension_lines.make_dimension_line(
-                point1=hexagon_points[1],
-                point2=hexagon_points[4],
+                point1=hexagon[1],
+                point2=hexagon[4],
                 flip=False,
                 side="right",
                 offset=1 / 8,
@@ -563,9 +568,9 @@ class DimensionedLogomark(Logomark):
         return tuple(
             svg.Polygon(
                 points=lambda_points.to_list(),
-                stroke=self.ilambda.annotations.object_lines.stroke,
-                stroke_width=self.ilambda.annotations.object_lines.stroke_width,
-                fill=self.ilambda.annotations.object_lines.fill,
+                stroke=self.annotations.object_lines.stroke,
+                stroke_width=self.annotations.object_lines.stroke_width,
+                fill=self.annotations.object_lines.fill,
             )
             for lambda_points in flake_points
         )
@@ -576,7 +581,9 @@ class DimensionedLogomark(Logomark):
             self.make_flake_polygons_for_dimensions(),
             self.canvas.make_axis_lines(),
             self.annotations.dimension_lines.make_dimension_arrow_defs(),
-            self.ilambda.make_lambda_construction_lines(),
+            make_lambda_construction_lines(
+                self.ilambda, self.annotations.construction_lines
+            ),
             self.make_flake_construction_lines(),
             self.make_flake_linear_dimensions(),
         )
@@ -595,15 +602,12 @@ class DimensionedLogomark(Logomark):
 
 
 class DimensionedLogomarkGradient(Logomark):
-    ilambda: DimensionedLambda
-
     def __init__(
         self,
         annotations: Annotations,
-        ilambda: DimensionedLambda,
         **kwargs,
     ):
-        super().__init__(ilambda=ilambda, **kwargs)
+        super().__init__(**kwargs)
         self.annotations: Annotations = annotations
 
     @override
@@ -668,8 +672,10 @@ class DimensionedLogomarkGradient(Logomark):
         return flatten_svg_elements(
             self.canvas.make_axis_lines(),
             self.annotations.dimension_lines.make_dimension_arrow_defs(),
-            self.ilambda.make_lambda_construction_lines(),
-            self.ilambda.make_lambda_polygons(),
+            make_lambda_construction_lines(
+                self.ilambda, self.annotations.construction_lines
+            ),
+            make_lambda_polygons(self.ilambda, self.annotations.object_lines),
             self.make_dimensioned_gradient_lines(),
         )
 
@@ -819,17 +825,17 @@ class DimensionedLogotype(Logotype):
         )
 
     def dimension_spacings(self):
-        points = [
+        gaps = [
             (
-                Point((self.glyphs[index + 0].elements_x_max, self.elements_y_min)),
-                Point((self.glyphs[index + 1].elements_x_min, self.elements_y_min)),
+                Point((left.elements_x_max, self.elements_y_min)),
+                Point((right.elements_x_min, self.elements_y_min)),
             )
-            for index in range(4)
+            for left, right in itertools.pairwise(self.glyphs)
         ]
         offsets = [
-            self.cap_height / (point1 - point2).length() for point1, point2 in points
+            self.cap_height / (point1 - point2).length() for point1, point2 in gaps
         ]
-        sides = ["left", "right", "right", "right"]
+        sides = ["left"] + ["right"] * (len(gaps) - 1)
         return tuple(
             self.annotations.dimension_lines.make_dimension_line(
                 point1=point1,
@@ -841,7 +847,7 @@ class DimensionedLogotype(Logotype):
                 text_offset=True,
                 fractional=False,
             )
-            for (point1, point2), offset, side in zip(points, offsets, sides)
+            for (point1, point2), offset, side in zip(gaps, offsets, sides, strict=True)
         )
 
     @override
