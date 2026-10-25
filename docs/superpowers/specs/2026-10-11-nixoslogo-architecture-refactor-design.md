@@ -328,7 +328,7 @@ class Annotations:
         return self.dimension_lines.make_annotation(text)
 
     @classmethod
-    def sized(cls, multiplier: int, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def sized(cls, multiplier: int, overrides: AnnotationsOverrides | None = None) -> Self:
         base = cls(
             object_lines=LineGroup(name="object", stroke="green",
                                    stroke_width=4 * multiplier, stroke_dasharray=[4 * multiplier]),
@@ -348,13 +348,13 @@ class Annotations:
         )
 
     @classmethod
-    def small(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def small(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(1, overrides)
     @classmethod
-    def medium(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def medium(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(2, overrides)
     @classmethod
-    def large(cls, overrides: AnnotationsOverrides | None = None) -> "Annotations":
+    def large(cls, overrides: AnnotationsOverrides | None = None) -> Self:
         return cls.sized(4, overrides)
 ```
 
