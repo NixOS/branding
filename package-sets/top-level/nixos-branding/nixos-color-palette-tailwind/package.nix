@@ -8,6 +8,7 @@ let
   # inherits
 
   inherit (builtins)
+    attrNames
     baseNameOf
     foldl'
     toString
@@ -20,6 +21,7 @@ let
     mapAttrs
     mapAttrs'
     nameValuePair
+    mapAttrsToList
     ;
 
   inherit (lib.lists)
@@ -30,6 +32,7 @@ let
     ;
 
   inherit (lib.strings)
+    concatMapStringsSep
     concatStringsSep
     match
     replaceStrings
@@ -218,7 +221,7 @@ let
 
     :::
   */
-  mapColorToTailwind =
+  mapColorToTailwindV3 =
     groupName: member:
     nameValuePair
       (toKebab [
@@ -283,7 +286,7 @@ let
     :::
   */
   mapPaletteGroup = mapAttrs (
-    groupName: groupValue: listToAttrs (map (mapColorToTailwind groupName) groupValue)
+    groupName: groupValue: listToAttrs (map (mapColorToTailwindV3 groupName) groupValue)
   );
 
   /**
@@ -302,12 +305,67 @@ let
   /**
     Convert the palette to a structure suitable for Tailwind.
   */
-  mapPalette =
+  mapPaletteV3 =
     colors: groups:
     let
       data = foldl' (acc: elem: acc // elem) { } (mapPaletteGroups colors groups);
     in
     "export default ${toJSON data}";
+
+  /**
+    Convert the palette to a `@theme` block for Tailwind CSS v4.
+
+    The `DEFAULT` shade of each color becomes a `--color-<name>` custom
+    property and every other shade a `--color-<name>-<shade>` custom
+    property, matching the Tailwind CSS v4 color variable convention. The
+    result is meant to be imported into a stylesheet that imports
+    `tailwindcss`.
+
+    # Type
+
+    mapPaletteV4 :: Attrset -> [String] -> String
+
+    # Examples
+    :::{.example}
+    ## `mapPaletteV4` usage example
+
+    ```nix
+    mapPaletteV4 {
+      logos = [
+        {
+          name = "red";
+          value = [ 0.51 0.21 29 ];
+        }
+      ];
+    } [ "logos" ]
+    => ''
+      @theme {
+        --color-logos-red: oklch(0.51 0.21 29);
+      }
+    ''
+    ```
+
+    :::
+  */
+  mapPaletteV4 =
+    colors: groups:
+    let
+      data = foldl' (acc: elem: acc // elem) { } (mapPaletteGroups colors groups);
+      declarations = concatMap (
+        groupName:
+        mapAttrsToList (
+          shadeName: shadeValue:
+          nameValuePair (
+            if shadeName == "DEFAULT" then "--color-${groupName}" else "--color-${groupName}-${shadeName}"
+          ) shadeValue
+        ) data.${groupName}
+      ) (attrNames data);
+    in
+    ''
+      @theme {
+        ${concatMapStringsSep "\n" (d: "  ${d.name}: ${d.value};") declarations}
+      }
+    '';
 
   # sources
 
@@ -315,11 +373,15 @@ let
   colorsFile = colorsPath + "/colors.toml";
   colorsData = importTOML colorsFile;
 
-  tailwindContent = mapPalette colorsData [
+  tailwindContentV3 = mapPaletteV3 colorsData [
     "logos"
     "palette"
   ];
 
+  tailwindContentV4 = mapPaletteV4 colorsData [
+    "logos"
+    "palette"
+  ];
 in
 
 stdenvNoCC.mkDerivation {
@@ -340,9 +402,14 @@ stdenvNoCC.mkDerivation {
     mkdir $out
 
     cat > $out/tailwind.js <<EOF
-    ${tailwindContent}
+    ${tailwindContentV3}
     EOF
-    ${nodePackages.prettier}/bin/prettier --write $out/tailwind.js
+
+    cat > $out/tailwind.css <<EOF
+    ${tailwindContentV4}
+    EOF
+
+    ${nodePackages.prettier}/bin/prettier --write $out/tailwind.js --write $out/tailwind.css
   '';
 
 }
