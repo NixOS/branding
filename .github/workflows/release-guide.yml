@@ -18,6 +18,7 @@ jobs:
     uses: ./.github/workflows/check.yml
     permissions:
       contents: read
+      pull-requests: write # check.yml declares it on a PR-only job; GitHub validates nested permissions even for skipped jobs
 
   release:
     name: Create GitHub release
