@@ -78,9 +78,17 @@ jobs:
           # fetch-depth: 0 already pulled base + all reachable refs.
           # Only the merge commit needs an explicit fetch because it
           # lives at refs/pull/<N>/merge and isn't on any branch.
-          if [ -n "$MERGE_SHA" ]; then
-            git fetch origin "$MERGE_SHA" --quiet || true
-            AFTER_SHA="$MERGE_SHA"
+          if [ -n "$MERGE_SHA" ] && git fetch origin "$MERGE_SHA" --quiet; then
+            # The merge commit in the event payload can be stale
+            # (computed from a previous head, e.g. right after a
+            # force push). Only use it if it actually merges the
+            # current head; otherwise compare against the head itself.
+            if git merge-base --is-ancestor "$HEAD_SHA" "$MERGE_SHA"; then
+              AFTER_SHA="$MERGE_SHA"
+            else
+              echo "::warning::merge commit $MERGE_SHA does not contain head $HEAD_SHA (stale payload); using head.sha"
+              AFTER_SHA="$HEAD_SHA"
+            fi
           else
             echo "::warning::PR has no merge commit (likely unmergeable, or GitHub still computing mergeability); using head.sha"
             AFTER_SHA="$HEAD_SHA"

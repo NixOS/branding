@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-lambda-dimensioned-angular";
-  outputHash = "sha256-0AM2MucU7L3zfx9bpvdB7xF+pjf3zgmcXxq306sgSHs=";
+  outputHash = "sha256-fIe3zL0L0iq34QXlioxvfObF7ffUheU63aWXspxNXt8=";
   script = ./script.py;
 }

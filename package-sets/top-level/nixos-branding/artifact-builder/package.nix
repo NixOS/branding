@@ -6,6 +6,9 @@
   runCommandLocal,
   testers,
 }:
+let
+  pythonEnv = python3.withPackages (ps: [ ps.nixoslogo ]);
+in
 testers.invalidateFetcherByDrvHash (
   {
     name,
@@ -17,7 +20,7 @@ testers.invalidateFetcherByDrvHash (
       inherit script;
 
       nativeBuildInputs = [
-        (python3.withPackages (ps: [ ps.nixoslogo ]))
+        pythonEnv
       ];
 
       outputHash = outputHash;
@@ -32,7 +35,7 @@ testers.invalidateFetcherByDrvHash (
 
     }
     ''
-      python $script
+      ${pythonEnv}/bin/python $script
       mkdir $out
       cp *.svg $out/
     ''
