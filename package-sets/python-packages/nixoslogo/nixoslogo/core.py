@@ -13,6 +13,7 @@ import tomllib
 from lxml import etree
 
 from nixoslogo.colors import Color
+from nixoslogo.helpers import quantize_numbers
 from nixoslogo.layout import Canvas
 
 # === Types ===
@@ -292,5 +293,6 @@ class BaseRenderable(Shape, ABC):
         if filename is None:
             filename = self.make_filename()
         filename = filename.replace("/", "_")
+        quantized = quantize_numbers(self.make_svg())
         with open(Path(filename + ".svg"), "w", encoding="utf-8") as file:
-            etree.canonicalize(str(self.make_svg()), out=file)
+            etree.canonicalize(str(quantized), out=file)

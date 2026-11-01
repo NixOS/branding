@@ -1,6 +1,6 @@
 { artifact-builder }:
 artifact-builder {
   name = "nixos-lambda-background";
-  outputHash = "sha256-C0/jGIbmVr+/0P2zwOart741jCDTf/8sBva5cVy0P3c=";
+  outputHash = "sha256-tlzpYdADqn1t9zQpbX1mkgCf/Y46x9htjTc2BgyFkaw=";
   script = ./script.py;
 }
