@@ -21,7 +21,7 @@ let
     main = "index.js";
     repository = {
       type = "git";
-      url = "https://github.com/NixOS/branding.git";
+      url = "git+https://github.com/NixOS/branding.git";
     };
     author = "NixOS Marketing Team";
     license = "CC-BY-4.0";
